@@ -102,23 +102,41 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
       description: "The quote PDF is being generated...",
     });
     
-    // Save original styles
+    // Save original styles and title
     const originalTitle = document.title;
     
-    // Change title for printing
-    document.title = `Quote #${quote.id} - ${project?.title || 'Project'}`;
+    // Update title for the PDF filename
+    document.title = `Dovalina_Painting_Quote_${quote.id}_${project?.title || 'Project'}`.replace(/\s+/g, '_');
     
-    // Configure print options to save as PDF
-    const printOptions = {
-      destination: 'save-as-pdf',
-    };
+    // Add print-specific classes to enhance print layout
+    const printableContent = document.getElementById('quote-detail-printable');
+    if (printableContent) {
+      printableContent.classList.add('print-content');
+    }
     
-    // Start printing
+    // Hide elements that shouldn't be in the PDF
+    const elementsToHide = document.querySelectorAll('.print-hidden');
+    elementsToHide.forEach(el => {
+      (el as HTMLElement).style.display = 'none';
+    });
+    
+    // Start print process
     window.print();
     
-    // Restore original title after a moment
+    // Restore everything after printing
     setTimeout(() => {
+      // Restore title
       document.title = originalTitle;
+      
+      // Remove print-specific classes
+      if (printableContent) {
+        printableContent.classList.remove('print-content');
+      }
+      
+      // Show hidden elements again
+      elementsToHide.forEach(el => {
+        (el as HTMLElement).style.display = '';
+      });
       
       toast({
         title: "PDF Generated",
@@ -141,15 +159,15 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
         
         <div className="p-4 print:p-6" id="quote-detail-printable">
           {/* Company information header */}
-          <div className="flex justify-between items-start border-b pb-4 mb-6">
+          <div className="flex justify-between items-start border-b pb-4 mb-6 company-header">
             <div>
-              <h1 className="text-2xl font-bold">DOVALINA PAINTING LLC</h1>
+              <h1 className="text-2xl font-bold company-name">DOVALINA PAINTING LLC</h1>
               <p>3731 Aster Drive</p>
               <p>Charlotte, N.C. 28227</p>
               <p>704-506-9741</p>
               <p>d-dovalina@hotmail.com</p>
             </div>
-            <div className="text-right">
+            <div className="text-right quote-info">
               <h2 className="text-xl font-semibold">Quote #{quote.id}</h2>
               <p>Date: {quote.createdAt ? format(new Date(quote.createdAt), "PPP", { locale: enUS }) : 'N/A'}</p>
               <p>Status: <span className="font-medium">{quote.status === 'draft' ? 'Draft' : 
@@ -162,8 +180,8 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
           </div>
           
           {/* Project and client information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 info-grid">
+            <Card className="info-card">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">Project Information</h3>
                 <p><span className="font-medium">Name:</span> {project?.title || 'N/A'}</p>
@@ -172,7 +190,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="info-card">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">Client Information</h3>
                 <p><span className="font-medium">Name:</span> {client?.name || 'N/A'}</p>
@@ -183,10 +201,10 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
           </div>
           
           {/* Cost breakdown */}
-          <h3 className="text-lg font-semibold mb-3">Cost Breakdown</h3>
+          <h3 className="text-lg font-semibold mb-3 cost-title">Cost Breakdown</h3>
           
           {/* Materials */}
-          <Card className="mb-4">
+          <Card className="mb-4 cost-section">
             <CardContent className="p-4">
               <h4 className="font-medium mb-2">Materials Cost</h4>
               <div className="border rounded-md overflow-hidden">
@@ -221,7 +239,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
           </Card>
           
           {/* Labor */}
-          <Card className="mb-4">
+          <Card className="mb-4 cost-section">
             <CardContent className="p-4">
               <h4 className="font-medium mb-2">Labor Cost</h4>
               <div className="border rounded-md overflow-hidden">
@@ -258,7 +276,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
           {/* Total */}
           <Card className="mb-6">
             <CardContent className="p-4">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center quote-total">
                 <h3 className="text-lg font-semibold">Quote Total</h3>
                 <p className="text-2xl font-bold">${(totalAmount).toFixed(2)}</p>
               </div>
