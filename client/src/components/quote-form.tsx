@@ -30,7 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, FileDown, Printer } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -59,6 +59,7 @@ const formSchema = insertQuoteSchema
         total: z.number(),
       })
     ).optional(),
+    profitMargin: z.number().optional(),
   });
 
 type QuoteFormValues = z.infer<typeof formSchema>;
@@ -96,11 +97,17 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
       { id: "1", description: "", hours: 0, hourlyRate: 0, total: 0 },
     ]
   );
+  const [profitMargin, setProfitMargin] = useState<number>(
+    initialData?.profitMargin || 25
+  );
+  const [additionalCosts, setAdditionalCosts] = useState<number>(0);
 
   // Calculate totals
   const materialsTotal = materialItems.reduce((sum, item) => sum + item.total, 0);
   const laborTotal = laborItems.reduce((sum, item) => sum + item.total, 0);
-  const totalEstimate = materialsTotal + laborTotal;
+  const subtotal = materialsTotal + laborTotal + additionalCosts;
+  const profitAmount = subtotal * (profitMargin / 100);
+  const totalEstimate = subtotal + profitAmount;
 
   // Fetch projects for the dropdown
   const { data: projects } = useQuery({
@@ -128,6 +135,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
         ...data,
         materialsEstimate: materialItems,
         laborEstimate: laborItems,
+        profitMargin,
         totalEstimate,
       };
 
@@ -238,352 +246,401 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
     mutation.mutate({
       ...data,
       totalEstimate,
+      profitMargin,
     });
+  };
+
+  // Función para generar el PDF de la cotización
+  const generateQuotePDF = () => {
+    // Esta función se implementará más adelante
+    toast({
+      title: "Generando PDF",
+      description: "El PDF de la cotización se está generando...",
+    });
+    // TODO: Implementar la generación de PDF usando una librería como jsPDF o React-PDF
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="projectId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Proyecto</FormLabel>
-              <Select
-                onValueChange={(value) => field.onChange(parseInt(value))}
-                defaultValue={field.value?.toString()}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un proyecto" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {projects?.map((project) => (
-                    <SelectItem key={project.id} value={project.id.toString()}>
-                      {project.title}
-                    </SelectItem>
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-xl font-semibold">
+                {initialData?.id ? "Editar Cotización" : "Crear Nueva Cotización"}
+              </h2>
+              <p className="text-gray-600 mt-1">
+                Completa los detalles para la cotización del cliente
+              </p>
+            </div>
+            {initialData?.id && (
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={generateQuotePDF} 
+                  className="flex items-center gap-2"
+                >
+                  <FileDown className="h-4 w-4" />
+                  Descargar PDF
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={generateQuotePDF} 
+                  className="flex items-center gap-2"
+                >
+                  <Printer className="h-4 w-4" />
+                  Imprimir
+                </Button>
+              </div>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <FormField
+              control={form.control}
+              name="projectId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Proyecto</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(parseInt(value))}
+                    defaultValue={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un proyecto" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {projects?.map((project: any) => (
+                        <SelectItem key={project.id} value={project.id.toString()}>
+                          {project.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione el estado" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="draft">Borrador</SelectItem>
+                      <SelectItem value="sent">Enviado</SelectItem>
+                      <SelectItem value="approved">Aprobado</SelectItem>
+                      <SelectItem value="rejected">Rechazado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <FormField
+              control={form.control}
+              name="sentDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Fecha de Envío</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP", { locale: es })
+                          ) : (
+                            <span>Seleccione una fecha</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="validUntil"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Válido Hasta</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP", { locale: es })
+                          ) : (
+                            <span>Seleccione una fecha</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-3">Desglose de Materiales</h3>
+                <div className="space-y-3">
+                  {materialItems.map((item) => (
+                    <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
+                      <div className="col-span-5">
+                        <Input
+                          placeholder="Descripción del material"
+                          value={item.name}
+                          onChange={(e) => updateMaterialItem(item.id, "name", e.target.value)}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Input
+                          type="number"
+                          placeholder="Cantidad"
+                          value={item.quantity}
+                          onChange={(e) => updateMaterialItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Input
+                          type="number"
+                          placeholder="Precio unitario"
+                          value={item.unitPrice}
+                          onChange={(e) => updateMaterialItem(item.id, "unitPrice", parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Input
+                          type="number"
+                          placeholder="Total"
+                          value={item.total}
+                          readOnly
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeMaterialItem(item.id)}
+                          disabled={materialItems.length <= 1}
+                          className="h-9 w-9 p-0"
+                        >
+                          ✕
+                        </Button>
+                      </div>
+                    </div>
                   ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addMaterialItem}
+                  className="mt-3"
+                >
+                  + Agregar Material
+                </Button>
+                <div className="flex justify-end mt-3">
+                  <div className="text-sm font-medium">
+                    Subtotal Materiales: ${materialsTotal.toFixed(2)}
+                  </div>
+                </div>
+              </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-3">Desglose de Mano de Obra</h3>
+                <div className="space-y-3">
+                  {laborItems.map((item) => (
+                    <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
+                      <div className="col-span-5">
+                        <Input
+                          placeholder="Descripción del trabajo"
+                          value={item.description}
+                          onChange={(e) => updateLaborItem(item.id, "description", e.target.value)}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Input
+                          type="number"
+                          placeholder="Horas"
+                          value={item.hours}
+                          onChange={(e) => updateLaborItem(item.id, "hours", parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Input
+                          type="number"
+                          placeholder="Tarifa por hora"
+                          value={item.hourlyRate}
+                          onChange={(e) => updateLaborItem(item.id, "hourlyRate", parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Input
+                          type="number"
+                          placeholder="Total"
+                          value={item.total}
+                          readOnly
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeLaborItem(item.id)}
+                          disabled={laborItems.length <= 1}
+                          className="h-9 w-9 p-0"
+                        >
+                          ✕
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addLaborItem}
+                  className="mt-3"
+                >
+                  + Agregar Mano de Obra
+                </Button>
+                <div className="flex justify-end mt-3">
+                  <div className="text-sm font-medium">
+                    Subtotal Mano de Obra: ${laborTotal.toFixed(2)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Costos Adicionales ($)</h4>
+                  <Input 
+                    type="number" 
+                    value={additionalCosts} 
+                    onChange={(e) => setAdditionalCosts(parseFloat(e.target.value) || 0)} 
+                  />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Margen de Ganancia (%) <span className="text-xs text-gray-500">(Solo visible internamente)</span></h4>
+                  <Input 
+                    type="number" 
+                    value={profitMargin} 
+                    onChange={(e) => setProfitMargin(parseFloat(e.target.value) || 0)} 
+                  />
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <div className="flex justify-between">
+                  <span>Subtotal:</span>
+                  <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between mt-2 text-lg font-bold">
+                  <span>Total Cotización:</span>
+                  <span>${totalEstimate.toFixed(2)}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
           <FormField
             control={form.control}
-            name="status"
+            name="notes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Estado</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione el estado" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="draft">Borrador</SelectItem>
-                    <SelectItem value="sent">Enviado</SelectItem>
-                    <SelectItem value="approved">Aprobado</SelectItem>
-                    <SelectItem value="rejected">Rechazado</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="sentDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Fecha de Envío</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: es })
-                        ) : (
-                          <span>Seleccione una fecha</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FormLabel>Notas y Condiciones</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Añade detalles adicionales o comentarios sobre la cotización"
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    className="min-h-[100px]"
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="validUntil"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Válido Hasta</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: es })
-                        ) : (
-                          <span>Seleccione una fecha</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notas</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Notas o condiciones adicionales del presupuesto"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="mb-4">
-              <h3 className="text-lg font-medium">Materiales</h3>
-              <div className="space-y-2 mt-3">
-                {materialItems.map((item, index) => (
-                  <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
-                    <div className="col-span-4">
-                      <Input
-                        placeholder="Descripción"
-                        value={item.name}
-                        onChange={(e) =>
-                          updateMaterialItem(item.id, "name", e.target.value)
-                        }
-                      />
-                    </div>
-                    <div className="col-span-2">
-                      <Input
-                        type="number"
-                        placeholder="Cantidad"
-                        value={item.quantity}
-                        onChange={(e) =>
-                          updateMaterialItem(
-                            item.id,
-                            "quantity",
-                            parseFloat(e.target.value) || 0
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-span-2">
-                      <Input
-                        type="number"
-                        placeholder="Precio unitario"
-                        value={item.unitPrice}
-                        onChange={(e) =>
-                          updateMaterialItem(
-                            item.id,
-                            "unitPrice",
-                            parseFloat(e.target.value) || 0
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-span-3">
-                      <Input
-                        type="number"
-                        placeholder="Total"
-                        value={item.total}
-                        readOnly
-                      />
-                    </div>
-                    <div className="col-span-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeMaterialItem(item.id)}
-                        disabled={materialItems.length <= 1}
-                      >
-                        ✕
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addMaterialItem}
-                className="mt-2"
-              >
-                + Agregar Material
-              </Button>
-              <div className="flex justify-end mt-2">
-                <div className="text-sm font-medium">
-                  Subtotal Materiales: ${materialsTotal.toFixed(2)}
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <h3 className="text-lg font-medium">Mano de Obra</h3>
-              <div className="space-y-2 mt-3">
-                {laborItems.map((item, index) => (
-                  <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
-                    <div className="col-span-4">
-                      <Input
-                        placeholder="Descripción"
-                        value={item.description}
-                        onChange={(e) =>
-                          updateLaborItem(item.id, "description", e.target.value)
-                        }
-                      />
-                    </div>
-                    <div className="col-span-2">
-                      <Input
-                        type="number"
-                        placeholder="Horas"
-                        value={item.hours}
-                        onChange={(e) =>
-                          updateLaborItem(
-                            item.id,
-                            "hours",
-                            parseFloat(e.target.value) || 0
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-span-2">
-                      <Input
-                        type="number"
-                        placeholder="Precio por hora"
-                        value={item.hourlyRate}
-                        onChange={(e) =>
-                          updateLaborItem(
-                            item.id,
-                            "hourlyRate",
-                            parseFloat(e.target.value) || 0
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-span-3">
-                      <Input
-                        type="number"
-                        placeholder="Total"
-                        value={item.total}
-                        readOnly
-                      />
-                    </div>
-                    <div className="col-span-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeLaborItem(item.id)}
-                        disabled={laborItems.length <= 1}
-                      >
-                        ✕
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addLaborItem}
-                className="mt-2"
-              >
-                + Agregar Mano de Obra
-              </Button>
-              <div className="flex justify-end mt-2">
-                <div className="text-sm font-medium">
-                  Subtotal Mano de Obra: ${laborTotal.toFixed(2)}
-                </div>
-              </div>
-            </div>
-
-            <div className="border-t pt-4 flex justify-between items-center">
-              <h3 className="text-lg font-bold">Total del Presupuesto</h3>
-              <div className="text-xl font-bold">${totalEstimate.toFixed(2)}</div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-end space-x-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onSuccess}
+        <div className="flex justify-end space-x-3">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => onSuccess()}
           >
             Cancelar
           </Button>
-          <Button
-            type="submit"
+          <Button 
+            type="submit" 
             disabled={mutation.isPending}
           >
-            {mutation.isPending
-              ? "Guardando..."
-              : initialData?.id
-              ? "Actualizar Presupuesto"
-              : "Crear Presupuesto"}
+            {mutation.isPending ? (
+              <>Guardando...</>
+            ) : initialData?.id ? (
+              <>Actualizar Cotización</>
+            ) : (
+              <>Crear Cotización</>
+            )}
           </Button>
         </div>
       </form>
