@@ -647,6 +647,7 @@ export class MemStorage implements IStorage {
   private serviceOrders: Map<number, ServiceOrder> = new Map();
   private staffMembers: Map<number, Staff> = new Map();
   private activitiesLog: Map<number, Activity> = new Map();
+  private subcontractors: Map<number, Subcontractor> = new Map();
   
   sessionStore: any;
   
@@ -657,14 +658,26 @@ export class MemStorage implements IStorage {
     });
   }
   
+  // Subcontractor methods
+  async getSubcontractors(): Promise<Subcontractor[]> { return []; }
+  async getSubcontractor(id: number): Promise<Subcontractor | undefined> { return undefined; }
+  async createSubcontractor(subcontractor: InsertSubcontractor): Promise<Subcontractor> { throw new Error("Not implemented"); }
+  async updateSubcontractor(id: number, subcontractor: Partial<InsertSubcontractor>): Promise<Subcontractor | undefined> { return undefined; }
+  async deleteSubcontractor(id: number): Promise<boolean> { return false; }
+  
+  // User methods
   async getUser(id: number): Promise<User | undefined> { return undefined; }
   async getUserByUsername(username: string): Promise<User | undefined> { return undefined; }
   async createUser(user: InsertUser): Promise<User> { throw new Error("Not implemented"); }
+  
+  // Client methods
   async getClients(): Promise<Client[]> { return []; }
   async getClient(id: number): Promise<Client | undefined> { return undefined; }
   async createClient(client: InsertClient): Promise<Client> { throw new Error("Not implemented"); }
   async updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined> { return undefined; }
   async deleteClient(id: number): Promise<boolean> { return false; }
+  
+  // Project methods
   async getProjects(): Promise<Project[]> { return []; }
   async getProject(id: number): Promise<Project | undefined> { return undefined; }
   async getProjectsByClient(clientId: number): Promise<Project[]> { return []; }
@@ -672,23 +685,31 @@ export class MemStorage implements IStorage {
   async createProject(project: InsertProject): Promise<Project> { throw new Error("Not implemented"); }
   async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> { return undefined; }
   async deleteProject(id: number): Promise<boolean> { return false; }
+  
+  // Quote methods
   async getQuotes(): Promise<Quote[]> { return []; }
   async getQuote(id: number): Promise<Quote | undefined> { return undefined; }
   async getQuoteByProject(projectId: number): Promise<Quote | undefined> { return undefined; }
   async createQuote(quote: InsertQuote): Promise<Quote> { throw new Error("Not implemented"); }
   async updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote | undefined> { return undefined; }
   async deleteQuote(id: number): Promise<boolean> { return false; }
+  
+  // Service Order methods
   async getServiceOrders(): Promise<ServiceOrder[]> { return []; }
   async getServiceOrder(id: number): Promise<ServiceOrder | undefined> { return undefined; }
   async getServiceOrdersByProject(projectId: number): Promise<ServiceOrder[]> { return []; }
   async createServiceOrder(serviceOrder: InsertServiceOrder): Promise<ServiceOrder> { throw new Error("Not implemented"); }
   async updateServiceOrder(id: number, serviceOrder: Partial<InsertServiceOrder>): Promise<ServiceOrder | undefined> { return undefined; }
   async deleteServiceOrder(id: number): Promise<boolean> { return false; }
+  
+  // Staff methods
   async getStaff(): Promise<Staff[]> { return []; }
   async getStaffMember(id: number): Promise<Staff | undefined> { return undefined; }
   async createStaffMember(staff: InsertStaff): Promise<Staff> { throw new Error("Not implemented"); }
   async updateStaffMember(id: number, staff: Partial<InsertStaff>): Promise<Staff | undefined> { return undefined; }
   async deleteStaffMember(id: number): Promise<boolean> { return false; }
+  
+  // Activity methods
   async getActivities(): Promise<Activity[]> { return []; }
   async getActivity(id: number): Promise<Activity | undefined> { return undefined; }
   async getActivitiesByProject(projectId: number): Promise<Activity[]> { return []; }
