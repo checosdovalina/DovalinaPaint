@@ -31,17 +31,22 @@ export function StaffAssignment({ selectedStaff, onChange }: StaffAssignmentProp
 
   // Update parent component when selection changes
   useEffect(() => {
-    onChange(selected);
-  }, [selected, onChange]);
+    // Sincronizar estado inicial con props
+    if (JSON.stringify(selectedStaff) !== JSON.stringify(selected)) {
+      setSelected(selectedStaff || []);
+    }
+  }, [selectedStaff]);
+  
+  // No necesitamos efecto para actualizar el padre en cada cambio
+  // En su lugar, actualizamos el padre directamente en toggleStaffSelection
 
   const toggleStaffSelection = (staffId: number) => {
-    setSelected((prevSelected) => {
-      if (prevSelected.includes(staffId)) {
-        return prevSelected.filter((id) => id !== staffId);
-      } else {
-        return [...prevSelected, staffId];
-      }
-    });
+    const newSelected = selected.includes(staffId)
+      ? selected.filter((id) => id !== staffId)
+      : [...selected, staffId];
+    
+    setSelected(newSelected);
+    onChange(newSelected); // Notificar al componente padre directamente
   };
 
   // Helper to get staff avatar image
