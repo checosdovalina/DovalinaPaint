@@ -62,7 +62,7 @@ const formSchema = insertQuoteSchema
       })
     ).optional().default([]),
     additionalCosts: z.number().min(0).default(0),
-    profitMargin: z.number().min(0).max(100).default(20),
+    profitMargin: z.number().min(0).max(100).default(25),
     subtotal: z.number().optional(),
   })
   .transform((data) => {
@@ -139,7 +139,9 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
   const [profitMargin, setProfitMargin] = useState<number>(
     initialData?.profitMargin || 25
   );
-  const [additionalCosts, setAdditionalCosts] = useState<number>(0);
+  const [additionalCosts, setAdditionalCosts] = useState<number>(
+    initialData?.additionalCosts || 0
+  );
 
   // Calculate totals
   const materialsTotal = materialItems.reduce((sum, item) => sum + item.total, 0);

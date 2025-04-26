@@ -90,13 +90,22 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
     quote.laborEstimate.reduce((sum: number, item: any) => sum + (item.total || 0), 0) : 0;
   
   // Calculate subtotal (materials + labor)
-  const subtotal = materialsTotal + laborTotal;
+  const baseSubtotal = materialsTotal + laborTotal;
   
-  // Get profit margin (if available) or use default 0
-  const profitMargin = (quote as any).profitMargin || 0;
+  // Calculate additional costs (if any)
+  const additionalCosts = (quote as any).additionalCosts || 0;
   
-  // Calculate profit amount based on subtotal
-  const profitAmount = subtotal * (profitMargin / 100);
+  // Full subtotal including additional costs
+  const subtotal = baseSubtotal + additionalCosts;
+  
+  // Get profit margin (if available) or use default 25%
+  const profitMargin = (quote as any).profitMargin || 25;
+  
+  // Calculate profit amount based on base subtotal (materials + labor only)
+  const profitAmount = baseSubtotal * (profitMargin / 100);
+  
+  // Recalculate total estimate (this is just for validation, we'll display the stored value)
+  const calculatedTotal = baseSubtotal + additionalCosts + profitAmount;
 
   // Function to generate PDF (using browser's print functionality)
   const generatePDF = () => {
@@ -197,8 +206,6 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                   <thead className="bg-muted">
                     <tr>
                       <th className="py-2 px-3 text-left">Description</th>
-                      <th className="py-2 px-3 text-right">Quantity</th>
-                      <th className="py-2 px-3 text-right">Unit Price</th>
                       <th className="py-2 px-3 text-right">Total</th>
                     </tr>
                   </thead>
@@ -207,14 +214,12 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                       quote.materialsEstimate.map((item: any, index: number) => (
                         <tr key={index} className="border-t">
                           <td className="py-2 px-3">{item.name}</td>
-                          <td className="py-2 px-3 text-right">{item.quantity}</td>
-                          <td className="py-2 px-3 text-right">${Number(item.unitPrice).toFixed(2)}</td>
                           <td className="py-2 px-3 text-right">${Number(item.total).toFixed(2)}</td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={4} className="py-2 px-3 text-center">No materials registered</td>
+                        <td colSpan={2} className="py-2 px-3 text-center">No materials registered</td>
                       </tr>
                     )}
                     <tr className="border-t bg-muted">
@@ -272,6 +277,12 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Quote Total</h3>
                 <p className="text-2xl font-bold">${quote.totalEstimate.toFixed(2)}</p>
+                {/* Debug info to verify calculations - only visible in development */}
+                {import.meta.env.DEV && Math.abs(calculatedTotal - quote.totalEstimate) > 0.01 && (
+                  <p className="text-xs text-orange-600 mt-1">
+                    Note: Calculated total (${calculatedTotal.toFixed(2)}) differs from stored total
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
