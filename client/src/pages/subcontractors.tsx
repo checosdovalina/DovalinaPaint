@@ -461,7 +461,7 @@ export default function Subcontractors() {
                     <FormLabel>Especialidad</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -590,7 +590,7 @@ export default function Subcontractors() {
                       <FormLabel>Tipo de Tarifa</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
