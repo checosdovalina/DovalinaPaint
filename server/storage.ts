@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity } from "@shared/schema";
+import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { db } from "./db";
