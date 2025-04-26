@@ -321,6 +321,28 @@ export default function ServiceOrders() {
                   {serviceOrder.details}
                 </div>
 
+                {/* Subcontratista asignado */}
+                {serviceOrder.assignedSubcontractorId && (
+                  <div className="flex items-center text-sm mt-3">
+                    <Briefcase className="h-4 w-4 mr-2 text-gray-400" />
+                    <span className="font-medium">Subcontratista:</span>
+                    <span className="ml-1">
+                      {getSubcontractorName(serviceOrder.assignedSubcontractorId)?.company || 'No asignado'}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Supervisor asignado */}
+                {serviceOrder.supervisorId && (
+                  <div className="flex items-center text-sm mt-2">
+                    <HardHat className="h-4 w-4 mr-2 text-gray-400" />
+                    <span className="font-medium">Supervisor:</span>
+                    <span className="ml-1">
+                      {getSupervisorName(serviceOrder.supervisorId)?.name || 'No asignado'}
+                    </span>
+                  </div>
+                )}
+
                 {/* Assigned staff */}
                 {serviceOrder.assignedStaff && (
                   <div className="mt-3">

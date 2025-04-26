@@ -262,7 +262,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">Ninguno</SelectItem>
+                    <SelectItem value="0">Ninguno</SelectItem>
                     {subcontractors?.map((subcontractor) => (
                       <SelectItem key={subcontractor.id} value={subcontractor.id.toString()}>
                         {subcontractor.company}
@@ -294,7 +294,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">Ninguno</SelectItem>
+                    <SelectItem value="0">Ninguno</SelectItem>
                     {staffMembers?.map((staff) => (
                       <SelectItem key={staff.id} value={staff.id.toString()}>
                         {staff.name}
