@@ -174,13 +174,14 @@ export const insertSubcontractorSchema = createInsertSchema(subcontractors).pick
   status: true,
 });
 
-// Service Order schema - actualizado con idioma y subcontratistas
+// Service Order schema - actualizado con idioma, subcontratistas y supervisor
 export const serviceOrders = pgTable("service_orders", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").notNull(),
   details: text("details").notNull(),
   assignedStaff: jsonb("assigned_staff"),
-  assignedSubcontractors: jsonb("assigned_subcontractors"), // Nuevo campo para subcontratistas
+  assignedSubcontractorId: integer("assigned_subcontractor_id"), // ID del subcontratista principal
+  supervisorId: integer("supervisor_id"), // ID del miembro del personal que supervisa
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   status: text("status").notNull().default("pending"), // pending, in_progress, completed
@@ -197,7 +198,8 @@ const baseServiceOrderSchema = createInsertSchema(serviceOrders).pick({
   projectId: true,
   details: true,
   assignedStaff: true,
-  assignedSubcontractors: true,
+  assignedSubcontractorId: true,
+  supervisorId: true,
   status: true,
   beforeImages: true,
   afterImages: true,
@@ -293,6 +295,14 @@ export const serviceOrdersRelations = relations(serviceOrders, ({ one }) => ({
   project: one(projects, {
     fields: [serviceOrders.projectId],
     references: [projects.id],
+  }),
+  subcontractor: one(subcontractors, {
+    fields: [serviceOrders.assignedSubcontractorId],
+    references: [subcontractors.id],
+  }),
+  supervisor: one(staff, {
+    fields: [serviceOrders.supervisorId],
+    references: [staff.id],
   }),
 }));
 
