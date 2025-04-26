@@ -49,14 +49,14 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
   });
 
   // Calcular totales
-  const materialsTotal = quote.materialsEstimate ? 
+  const materialsTotal = quote.materialsEstimate && Array.isArray(quote.materialsEstimate) ? 
     quote.materialsEstimate.reduce((sum: number, item: any) => sum + (item.total || 0), 0) : 0;
   
-  const laborTotal = quote.laborEstimate ? 
+  const laborTotal = quote.laborEstimate && Array.isArray(quote.laborEstimate) ? 
     quote.laborEstimate.reduce((sum: number, item: any) => sum + (item.total || 0), 0) : 0;
   
   // Si no hay margen de ganancia definido, usar 0
-  const profitMargin = quote.profitMargin || 0;
+  const profitMargin = (quote as any).profitMargin || 0;
   const subtotal = materialsTotal + laborTotal;
   const profitAmount = subtotal * (profitMargin / 100);
 
@@ -109,7 +109,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">Información del Proyecto</h3>
                 <p><span className="font-medium">Nombre:</span> {project?.title || 'N/A'}</p>
-                <p><span className="font-medium">Dirección:</span> {project?.location || 'N/A'}</p>
+                <p><span className="font-medium">Dirección:</span> {project?.address || 'N/A'}</p>
                 <p><span className="font-medium">Descripción:</span> {project?.description || 'N/A'}</p>
               </CardContent>
             </Card>
@@ -142,7 +142,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                     </tr>
                   </thead>
                   <tbody>
-                    {quote.materialsEstimate && quote.materialsEstimate.length > 0 ? (
+                    {quote.materialsEstimate && Array.isArray(quote.materialsEstimate) && quote.materialsEstimate.length > 0 ? (
                       quote.materialsEstimate.map((item: any, index: number) => (
                         <tr key={index} className="border-t">
                           <td className="py-2 px-3">{item.name}</td>

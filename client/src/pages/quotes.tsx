@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Quote, Project } from "@shared/schema";
+import { Quote, Project, Client } from "@shared/schema";
 import { Layout } from "@/components/layout";
 import { QuoteForm } from "@/components/quote-form";
+import { QuoteDetail } from "@/components/quote-detail";
 import {
   Card,
   CardContent,
@@ -24,6 +25,7 @@ import {
   Check,
   X,
   FileCheck,
+  Eye,
 } from "lucide-react";
 import {
   Dialog,
@@ -60,6 +62,7 @@ export default function Quotes() {
   const [showQuoteForm, setShowQuoteForm] = useState(false);
   const [quoteToEdit, setQuoteToEdit] = useState<Quote | null>(null);
   const [quoteToDelete, setQuoteToDelete] = useState<Quote | null>(null);
+  const [quoteToView, setQuoteToView] = useState<Quote | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const { toast } = useToast();
@@ -80,6 +83,16 @@ export default function Quotes() {
     queryFn: async () => {
       const res = await fetch("/api/projects");
       if (!res.ok) throw new Error("Failed to fetch projects");
+      return res.json();
+    },
+  });
+  
+  // Fetch clients
+  const { data: clients } = useQuery<Client[]>({
+    queryKey: ["/api/clients"],
+    queryFn: async () => {
+      const res = await fetch("/api/clients");
+      if (!res.ok) throw new Error("Failed to fetch clients");
       return res.json();
     },
   });
@@ -308,9 +321,10 @@ export default function Quotes() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-primary hover:text-primary/80 hover:bg-primary/10 h-8 w-8 p-0"
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 w-8 p-0"
+                    onClick={() => setQuoteToView(quote)}
                   >
-                    <Download className="h-4 w-4" />
+                    <Eye className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
@@ -377,6 +391,20 @@ export default function Quotes() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      {/* Quote Detail View */}
+      {quoteToView && (
+        <QuoteDetail
+          quote={quoteToView}
+          project={projects?.find(p => p.id === quoteToView.projectId)}
+          client={clients?.find(c => {
+            const project = projects?.find(p => p.id === quoteToView.projectId);
+            return project && c.id === project.clientId;
+          })}
+          open={!!quoteToView}
+          onClose={() => setQuoteToView(null)}
+        />
+      )}
     </Layout>
   );
 }
