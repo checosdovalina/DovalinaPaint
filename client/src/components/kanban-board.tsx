@@ -1,0 +1,189 @@
+import { useState, useEffect } from "react";
+import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
+import { ProjectCard } from "@/components/project-card";
+import { Project } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+
+interface KanbanBoardProps {
+  projects: Project[];
+  onProjectClick: (project: Project) => void;
+}
+
+interface KanbanColumn {
+  id: string;
+  title: string;
+  status: string;
+  projects: Project[];
+}
+
+export function KanbanBoard({ projects, onProjectClick }: KanbanBoardProps) {
+  const { toast } = useToast();
+  const [columns, setColumns] = useState<KanbanColumn[]>([]);
+  
+  // Initialize columns
+  useEffect(() => {
+    const statusColumns: KanbanColumn[] = [
+      { id: "pending", title: "Pendiente por visitar", status: "pending", projects: [] },
+      { id: "quoted", title: "Presupuesto enviado", status: "quoted", projects: [] },
+      { id: "approved", title: "Presupuesto aprobado", status: "approved", projects: [] },
+      { id: "preparing", title: "En preparación", status: "preparing", projects: [] },
+      { id: "in_progress", title: "En proceso", status: "in_progress", projects: [] },
+      { id: "reviewing", title: "En revisión final", status: "reviewing", projects: [] },
+      { id: "completed", title: "Finalizado", status: "completed", projects: [] },
+      { id: "archived", title: "Archivado", status: "archived", projects: [] },
+    ];
+    
+    // Distribute projects to their respective columns
+    if (projects) {
+      projects.forEach(project => {
+        const column = statusColumns.find(col => col.status === project.status);
+        if (column) {
+          column.projects.push(project);
+        }
+      });
+    }
+    
+    setColumns(statusColumns);
+  }, [projects]);
+  
+  const onDragEnd = async (result: DropResult) => {
+    const { source, destination } = result;
+    
+    // Dropped outside the list
+    if (!destination) return;
+    
+    // Same position
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) return;
+    
+    // Find source and destination columns
+    const sourceColumn = columns.find(col => col.id === source.droppableId);
+    const destColumn = columns.find(col => col.id === destination.droppableId);
+    
+    if (!sourceColumn || !destColumn) return;
+    
+    // Same column - reordering within column
+    if (source.droppableId === destination.droppableId) {
+      const newProjects = [...sourceColumn.projects];
+      const [removed] = newProjects.splice(source.index, 1);
+      newProjects.splice(destination.index, 0, removed);
+      
+      const newColumns = columns.map(col => 
+        col.id === source.droppableId
+          ? { ...col, projects: newProjects }
+          : col
+      );
+      
+      setColumns(newColumns);
+    } else {
+      // Moving between columns - change project status
+      const sourceProjects = [...sourceColumn.projects];
+      const destProjects = [...destColumn.projects];
+      const [movedProject] = sourceProjects.splice(source.index, 1);
+      
+      // Update project status
+      const updatedProject = { ...movedProject, status: destColumn.status };
+      destProjects.splice(destination.index, 0, updatedProject);
+      
+      const newColumns = columns.map(col => {
+        if (col.id === source.droppableId) {
+          return { ...col, projects: sourceProjects };
+        }
+        if (col.id === destination.droppableId) {
+          return { ...col, projects: destProjects };
+        }
+        return col;
+      });
+      
+      setColumns(newColumns);
+      
+      // Update project status in the database
+      try {
+        await apiRequest("PUT", `/api/projects/${movedProject.id}`, {
+          status: destColumn.status
+        });
+        
+        // Invalidate projects query to refresh data
+        queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+        
+        toast({
+          title: "Proyecto actualizado",
+          description: `El proyecto ${movedProject.title} ha sido movido a ${destColumn.title}`,
+        });
+      } catch (error) {
+        toast({
+          title: "Error al actualizar el proyecto",
+          description: "No se pudo actualizar el estado del proyecto",
+          variant: "destructive",
+        });
+        
+        // Revert the UI change
+        setColumns(columns);
+      }
+    }
+  };
+  
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className="overflow-x-auto pb-10">
+        <div className="inline-flex min-w-full">
+          {columns.map(column => (
+            <div 
+              key={column.id}
+              className="flex flex-col w-80 mx-2 bg-gray-100 rounded-md min-h-[70vh]"
+            >
+              <div className="p-3 border-b flex justify-between items-center bg-gray-200 rounded-t-md">
+                <h3 className="font-medium text-gray-900">{column.title}</h3>
+                <span className="bg-gray-300 text-gray-700 rounded-full px-2 py-1 text-xs">
+                  {column.projects.length}
+                </span>
+              </div>
+              
+              <Droppable droppableId={column.id}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={cn(
+                      "p-2 flex-1 overflow-y-auto",
+                      snapshot.isDraggingOver ? "bg-gray-200" : ""
+                    )}
+                  >
+                    {column.projects.map((project, index) => (
+                      <Draggable
+                        key={project.id.toString()}
+                        draggableId={project.id.toString()}
+                        index={index}
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={cn(
+                              snapshot.isDragging ? "opacity-50" : ""
+                            )}
+                          >
+                            <ProjectCard
+                              project={project}
+                              onClick={onProjectClick}
+                            />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          ))}
+        </div>
+      </div>
+    </DragDropContext>
+  );
+}
