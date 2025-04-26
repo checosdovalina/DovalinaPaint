@@ -277,11 +277,17 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
   };
 
   const onSubmit = (data: QuoteFormValues) => {
-    mutation.mutate({
+    // materialItems y laborItems se convierten en materialsEstimate y laborEstimate mediante la transformación de formSchema
+    const formData = {
       ...data,
-      totalEstimate,
-      profitMargin,
-    });
+      materialItems: materialItems, // Estos se convertirán a materialsEstimate
+      laborItems: laborItems,       // Estos se convertirán a laborEstimate
+      additionalCosts: additionalCosts,
+      profitMargin: profitMargin,
+      totalEstimate: totalEstimate,
+    };
+    
+    mutation.mutate(formData);
   };
 
   // Función para generar el PDF de la cotización
