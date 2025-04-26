@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
-import { insertClientSchema, insertProjectSchema, insertQuoteSchema, insertServiceOrderSchema, insertStaffSchema, insertActivitySchema } from "@shared/schema";
+import { insertClientSchema, insertProjectSchema, insertQuoteSchema, insertServiceOrderSchema, insertStaffSchema, insertActivitySchema, insertSubcontractorSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -527,6 +527,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid activity data", errors: error.errors });
       }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Subcontractor routes
+  app.get("/api/subcontractors", isAuthenticated, async (req, res) => {
+    try {
+      const subcontractors = await storage.getSubcontractors();
+      res.json(subcontractors);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/subcontractors/:id", isAuthenticated, async (req, res) => {
+    try {
+      const subcontractor = await storage.getSubcontractor(parseInt(req.params.id));
+      if (!subcontractor) {
+        return res.status(404).json({ message: "Subcontractor not found" });
+      }
+      res.json(subcontractor);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/subcontractors", isAuthenticated, async (req, res) => {
+    try {
+      const subcontractorData = insertSubcontractorSchema.parse(req.body);
+      const subcontractor = await storage.createSubcontractor(subcontractorData);
+      
+      // Create activity for subcontractor creation
+      await storage.createActivity({
+        type: "subcontractor_created",
+        description: `New subcontractor ${subcontractor.name} added`,
+        userId: req.user.id,
+        projectId: null,
+        clientId: null
+      });
+      
+      res.status(201).json(subcontractor);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid subcontractor data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/subcontractors/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const subcontractorData = insertSubcontractorSchema.partial().parse(req.body);
+      const updatedSubcontractor = await storage.updateSubcontractor(id, subcontractorData);
+      
+      if (!updatedSubcontractor) {
+        return res.status(404).json({ message: "Subcontractor not found" });
+      }
+      
+      // Create activity for subcontractor update
+      await storage.createActivity({
+        type: "subcontractor_updated",
+        description: `Subcontractor ${updatedSubcontractor.name} updated`,
+        userId: req.user.id,
+        projectId: null,
+        clientId: null
+      });
+      
+      res.json(updatedSubcontractor);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid subcontractor data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/subcontractors/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // First get the subcontractor info
+      const subcontractor = await storage.getSubcontractor(id);
+      
+      if (!subcontractor) {
+        return res.status(404).json({ message: "Subcontractor not found" });
+      }
+      
+      // Delete the subcontractor
+      const deleted = await storage.deleteSubcontractor(id);
+      
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to delete subcontractor" });
+      }
+      
+      // Create activity for subcontractor deletion
+      await storage.createActivity({
+        type: "subcontractor_deleted",
+        description: `Subcontractor ${subcontractor.name} deleted`,
+        userId: req.user.id,
+        projectId: null,
+        clientId: null
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
       res.status(500).json({ message: error.message });
     }
   });
