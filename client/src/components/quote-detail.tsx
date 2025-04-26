@@ -82,12 +82,10 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
     },
   });
 
-  // Calculate totals
-  const materialsTotal = quote.materialsEstimate && Array.isArray(quote.materialsEstimate) ? 
-    quote.materialsEstimate.reduce((sum: number, item: any) => sum + (item.total || 0), 0) : 0;
+  // Calculate totals (hardcoded as per request)
+  const materialsTotal = 5322; // Sum of 1980 + 2832 + 510
   
-  const laborTotal = quote.laborEstimate && Array.isArray(quote.laborEstimate) ? 
-    quote.laborEstimate.reduce((sum: number, item: any) => sum + (item.total || 0), 0) : 0;
+  const laborTotal = 7533; // Sum of 2640 + 2193 + 2700
   
   // Calculate subtotal (materials + labor)
   const baseSubtotal = materialsTotal + laborTotal;
@@ -214,18 +212,18 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                     </tr>
                   </thead>
                   <tbody>
-                    {quote.materialsEstimate && Array.isArray(quote.materialsEstimate) && quote.materialsEstimate.length > 0 ? (
-                      quote.materialsEstimate.map((item: any, index: number) => (
-                        <tr key={index} className="border-t">
-                          <td className="py-2 px-3">{item.name}</td>
-                          <td className="py-2 px-3 text-right">${Number(item.total).toFixed(2)}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={2} className="py-2 px-3 text-center">No materials registered</td>
-                      </tr>
-                    )}
+                    <tr className="border-t">
+                      <td className="py-2 px-3">Shewin Williams #DF0034</td>
+                      <td className="py-2 px-3 text-right">$1980.00</td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="py-2 px-3">Shewin Williams #CCC034</td>
+                      <td className="py-2 px-3 text-right">$2832.00</td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="py-2 px-3">Shewin Williams #RRR034</td>
+                      <td className="py-2 px-3 text-right">$510.00</td>
+                    </tr>
                     <tr className="border-t">
                       <td className="py-2 px-3 font-medium text-right">Materials Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${materialsTotal.toFixed(2)}</td>
@@ -257,18 +255,18 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                     </tr>
                   </thead>
                   <tbody>
-                    {quote.laborEstimate && Array.isArray(quote.laborEstimate) && quote.laborEstimate.length > 0 ? (
-                      quote.laborEstimate.map((item: any, index: number) => (
-                        <tr key={index} className="border-t">
-                          <td className="py-2 px-3">{item.description}</td>
-                          <td className="py-2 px-3 text-right">${Number(item.total).toFixed(2)}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={2} className="py-2 px-3 text-center">No labor registered</td>
-                      </tr>
-                    )}
+                    <tr className="border-t">
+                      <td className="py-2 px-3">Paint in walls room 1</td>
+                      <td className="py-2 px-3 text-right">$2640.00</td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="py-2 px-3">Paint in walls room 2</td>
+                      <td className="py-2 px-3 text-right">$2193.00</td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="py-2 px-3">Paint in ceiling rooms</td>
+                      <td className="py-2 px-3 text-right">$2700.00</td>
+                    </tr>
                     <tr className="border-t">
                       <td className="py-2 px-3 font-medium text-right">Labor Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${laborTotal.toFixed(2)}</td>
@@ -292,7 +290,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
             <CardContent className="p-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Quote Total</h3>
-                <p className="text-2xl font-bold">${quote.totalEstimate.toFixed(2)}</p>
+                <p className="text-2xl font-bold">${(baseSubtotal + additionalCosts + profitAmount).toFixed(2)}</p>
               </div>
             </CardContent>
           </Card>
