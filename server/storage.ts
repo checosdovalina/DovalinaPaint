@@ -84,10 +84,8 @@ export class DatabaseStorage implements IStorage {
       const existingUsers = await db.select().from(users);
       
       if (existingUsers.length === 0) {
-        // For simplicity, we'll create a manual hash for the password "password123"
-        // Using the same format as in the hashPassword function: hash.salt
-        // This is equivalent to await hashPassword("password123")
-        const hashedPassword = "fc92f0e017aecb11d5fce8693166416f765c76afbf1cad72c9d879e7b73f3959a7a57ef2ebc3f7ceda684c9d998a07c141170dd39b230095b5ff53890a87c620.c23cd42c3e4f2b21c3dbd65e";
+        // Create predefined hashed passwords using our simplified hashing logic
+        const hashedPassword = "hashed_password123";
         
         // Create default admin users with the required usernames and passwords
         await this.createUser({

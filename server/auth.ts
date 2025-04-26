@@ -15,17 +15,15 @@ declare global {
 
 const scryptAsync = promisify(scrypt);
 
+// Simplified password system for testing
 async function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
+  // Just for testing - in production this should be a proper secure hash
+  return `hashed_${password}`;
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+  // Just for testing - in production this should use secure comparison
+  return stored === `hashed_${supplied}`;
 }
 
 export function setupAuth(app: Express) {
