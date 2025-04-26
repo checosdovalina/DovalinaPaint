@@ -289,6 +289,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           clientId: project?.clientId
         });
         
+        // Si la cotización se crea con estado "sent", actualizar estado del proyecto
+        if (quote.status === "sent") {
+          await storage.updateProject(quote.projectId, {
+            status: "quoted"
+          });
+          
+          // Crear actividad para envío de cotización
+          await storage.createActivity({
+            type: "quote_sent",
+            description: `Quote for project "${project?.title || 'Unknown'}" has been sent to client`,
+            userId: req.user.id,
+            projectId: quote.projectId,
+            clientId: project?.clientId
+          });
+        }
+        
         res.status(201).json(quote);
       } catch (validationError) {
         if (validationError instanceof z.ZodError) {
@@ -316,10 +332,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the project for the activity
       const project = await storage.getProject(updatedQuote.projectId);
       
-      // Si la cotización fue aprobada, actualizamos el estado del proyecto a "Quote Approved"
+      // Actualizamos el estado del proyecto según el estado de la cotización
       if (quoteData.status === "approved") {
         await storage.updateProject(updatedQuote.projectId, {
-          status: "Quote Approved",
+          status: "approved",
         });
         
         // Registramos actividad específica de aprobación
@@ -335,6 +351,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createActivity({
           type: "quote_rejected",
           description: `Quote for project "${project?.title || 'Unknown'}" has been rejected`,
+          userId: req.user.id,
+          projectId: updatedQuote.projectId,
+          clientId: project?.clientId
+        });
+      } else if (quoteData.status === "sent") {
+        // Si la cotización fue enviada, actualizamos el estado del proyecto a "quoted"
+        await storage.updateProject(updatedQuote.projectId, {
+          status: "quoted",
+        });
+        
+        // Registramos actividad específica de envío de cotización
+        await storage.createActivity({
+          type: "quote_sent",
+          description: `Quote for project "${project?.title || 'Unknown'}" has been sent to client`,
           userId: req.user.id,
           projectId: updatedQuote.projectId,
           clientId: project?.clientId
