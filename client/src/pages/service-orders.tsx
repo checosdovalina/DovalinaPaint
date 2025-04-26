@@ -134,15 +134,15 @@ export default function ServiceOrders() {
       await apiRequest("DELETE", `/api/service-orders/${serviceOrderToDelete.id}`, undefined);
       
       toast({
-        title: "Orden de servicio eliminada",
-        description: "La orden de servicio ha sido eliminada exitosamente",
+        title: "Service Order Deleted",
+        description: "The service order has been successfully deleted",
       });
       
       queryClient.invalidateQueries({ queryKey: ["/api/service-orders"] });
     } catch (error) {
       toast({
         title: "Error",
-        description: `No se pudo eliminar la orden de servicio: ${error.message}`,
+        description: `Could not delete the service order: ${error.message}`,
         variant: "destructive",
       });
     } finally {
@@ -157,15 +157,15 @@ export default function ServiceOrders() {
       });
       
       toast({
-        title: "Estado actualizado",
-        description: `La orden de servicio ha sido ${newStatus === "completed" ? "completada" : "actualizada"} exitosamente`,
+        title: "Status Updated",
+        description: `The service order has been successfully ${newStatus === "completed" ? "completed" : "updated"}`,
       });
       
       queryClient.invalidateQueries({ queryKey: ["/api/service-orders"] });
     } catch (error) {
       toast({
         title: "Error",
-        description: `No se pudo actualizar el estado de la orden de servicio: ${error.message}`,
+        description: `Could not update the service order status: ${error.message}`,
         variant: "destructive",
       });
     }
