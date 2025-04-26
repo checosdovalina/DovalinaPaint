@@ -256,3 +256,10 @@ export type InsertStaff = z.infer<typeof insertStaffSchema>;
 
 export type Activity = typeof activities.$inferSelect;
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
+
+// Session schema (para manejar las sesiones de connect-pg-simple)
+export const session = pgTable("session", {
+  sid: varchar("sid").primaryKey(),
+  sess: jsonb("sess").notNull(),
+  expire: timestamp("expire").notNull(),
+});
