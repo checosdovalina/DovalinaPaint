@@ -10,6 +10,9 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+// Importar estilos de impresión
+import "./quote-print.css";
+
 interface QuoteDetailProps {
   quote: Quote;
   project?: Project;
@@ -21,13 +24,15 @@ interface QuoteDetailProps {
 export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDetailProps) {
   const { toast } = useToast();
   const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
 
   // Mutation para aprobar la cotización
   const approvalMutation = useMutation({
     mutationFn: async () => {
       return apiRequest("PUT", `/api/quotes/${quote.id}`, {
         ...quote,
-        status: "approved"
+        status: "approved",
+        approvedDate: new Date()
       });
     },
     onSuccess: () => {
@@ -40,9 +45,38 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
       onClose();
     },
     onError: (error) => {
+      setIsApproving(false);
       toast({
         title: "Error",
         description: `No se pudo aprobar la cotización: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Mutation para rechazar la cotización
+  const rejectionMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("PUT", `/api/quotes/${quote.id}`, {
+        ...quote,
+        status: "rejected",
+        rejectedDate: new Date()
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Cotización rechazada",
+        description: "La cotización ha sido rechazada.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      onClose();
+    },
+    onError: (error) => {
+      setIsRejecting(false);
+      toast({
+        title: "Error",
+        description: `No se pudo rechazar la cotización: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -60,13 +94,36 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
   const subtotal = materialsTotal + laborTotal;
   const profitAmount = subtotal * (profitMargin / 100);
 
-  // Función para generar PDF
+  // Función para generar PDF (usando la funcionalidad de impresión del navegador)
   const generatePDF = () => {
     toast({
       title: "Generando PDF",
       description: "El PDF de la cotización se está generando...",
     });
-    // TODO: Implementar generación de PDF
+    
+    // Guardar estilos originales
+    const originalTitle = document.title;
+    
+    // Cambiar título para la impresión
+    document.title = `Cotización #${quote.id} - ${project?.title || 'Proyecto'}`;
+    
+    // Configurar opciones de impresión para guardar como PDF
+    const printOptions = {
+      destination: 'save-as-pdf',
+    };
+    
+    // Iniciar impresión
+    window.print();
+    
+    // Restaurar título original después de un momento
+    setTimeout(() => {
+      document.title = originalTitle;
+      
+      toast({
+        title: "PDF Generado",
+        description: "La cotización ha sido preparada para guardar como PDF",
+      });
+    }, 1000);
   };
 
   // Función para imprimir
@@ -181,7 +238,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                     </tr>
                   </thead>
                   <tbody>
-                    {quote.laborEstimate && quote.laborEstimate.length > 0 ? (
+                    {quote.laborEstimate && Array.isArray(quote.laborEstimate) && quote.laborEstimate.length > 0 ? (
                       quote.laborEstimate.map((item: any, index: number) => (
                         <tr key={index} className="border-t">
                           <td className="py-2 px-3">{item.description}</td>

@@ -308,14 +308,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the project for the activity
       const project = await storage.getProject(updatedQuote.projectId);
       
-      // Create activity for quote update
-      await storage.createActivity({
-        type: "quote_updated",
-        description: `Quote updated for project "${project?.title || 'Unknown'}"`,
-        userId: req.user.id,
-        projectId: updatedQuote.projectId,
-        clientId: project?.clientId
-      });
+      // Si la cotización fue aprobada, actualizamos el estado del proyecto a "Quote Approved"
+      if (quoteData.status === "approved") {
+        await storage.updateProject(updatedQuote.projectId, {
+          status: "Quote Approved",
+        });
+        
+        // Registramos actividad específica de aprobación
+        await storage.createActivity({
+          type: "quote_approved",
+          description: `Quote for project "${project?.title || 'Unknown'}" has been approved`,
+          userId: req.user.id,
+          projectId: updatedQuote.projectId,
+          clientId: project?.clientId
+        });
+      } else if (quoteData.status === "rejected") {
+        // Registramos actividad específica de rechazo
+        await storage.createActivity({
+          type: "quote_rejected",
+          description: `Quote for project "${project?.title || 'Unknown'}" has been rejected`,
+          userId: req.user.id,
+          projectId: updatedQuote.projectId,
+          clientId: project?.clientId
+        });
+      } else {
+        // Create general activity for quote update
+        await storage.createActivity({
+          type: "quote_updated",
+          description: `Quote updated for project "${project?.title || 'Unknown'}"`,
+          userId: req.user.id,
+          projectId: updatedQuote.projectId,
+          clientId: project?.clientId
+        });
+      }
       
       res.json(updatedQuote);
     } catch (error) {
