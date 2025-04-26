@@ -101,8 +101,12 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
   // Get profit margin (if available) or use default 25%
   const profitMargin = (quote as any).profitMargin || 25;
   
-  // Calculate profit amount based on base subtotal (materials + labor only)
-  const profitAmount = baseSubtotal * (profitMargin / 100);
+  // Calculate profit amount for materials and labor separately
+  const materialsProfitAmount = materialsTotal * (profitMargin / 100);
+  const laborProfitAmount = laborTotal * (profitMargin / 100);
+  
+  // Total profit amount is the sum of both
+  const profitAmount = materialsProfitAmount + laborProfitAmount;
   
   // Recalculate total estimate (this is just for validation, we'll display the stored value)
   const calculatedTotal = baseSubtotal + additionalCosts + profitAmount;
@@ -222,9 +226,17 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                         <td colSpan={2} className="py-2 px-3 text-center">No materials registered</td>
                       </tr>
                     )}
-                    <tr className="border-t bg-muted">
+                    <tr className="border-t">
                       <td className="py-2 px-3 font-medium text-right">Materials Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${materialsTotal.toFixed(2)}</td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="py-2 px-3 text-right">Profit Margin ({profitMargin}%):</td>
+                      <td className="py-2 px-3 text-right">${materialsProfitAmount.toFixed(2)}</td>
+                    </tr>
+                    <tr className="border-t bg-muted">
+                      <td className="py-2 px-3 font-medium text-right">Materials Total with Profit:</td>
+                      <td className="py-2 px-3 font-medium text-right">${(materialsTotal + materialsProfitAmount).toFixed(2)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -257,9 +269,17 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                         <td colSpan={2} className="py-2 px-3 text-center">No labor registered</td>
                       </tr>
                     )}
-                    <tr className="border-t bg-muted">
+                    <tr className="border-t">
                       <td className="py-2 px-3 font-medium text-right">Labor Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${laborTotal.toFixed(2)}</td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="py-2 px-3 text-right">Profit Margin ({profitMargin}%):</td>
+                      <td className="py-2 px-3 text-right">${laborProfitAmount.toFixed(2)}</td>
+                    </tr>
+                    <tr className="border-t bg-muted">
+                      <td className="py-2 px-3 font-medium text-right">Labor Total with Profit:</td>
+                      <td className="py-2 px-3 font-medium text-right">${(laborTotal + laborProfitAmount).toFixed(2)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -273,12 +293,6 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Quote Total</h3>
                 <p className="text-2xl font-bold">${quote.totalEstimate.toFixed(2)}</p>
-                {/* Debug info to verify calculations - only visible in development */}
-                {import.meta.env.DEV && Math.abs(calculatedTotal - quote.totalEstimate) > 0.01 && (
-                  <p className="text-xs text-orange-600 mt-1">
-                    Note: Calculated total (${calculatedTotal.toFixed(2)}) differs from stored total
-                  </p>
-                )}
               </div>
             </CardContent>
           </Card>
