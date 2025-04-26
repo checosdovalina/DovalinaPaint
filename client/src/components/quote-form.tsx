@@ -513,7 +513,10 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                           step="0.01"
                           placeholder="Cantidad"
                           value={item.quantity}
-                          onChange={(e) => updateMaterialItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
+                          onChange={(e) => {
+                            const numValue = e.target.value === '' ? 0 : Number(e.target.value);
+                            updateMaterialItem(item.id, "quantity", numValue);
+                          }}
                         />
                       </div>
                       <div className="col-span-2">
@@ -523,7 +526,10 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                           step="0.01"
                           placeholder="Precio unitario"
                           value={item.unitPrice}
-                          onChange={(e) => updateMaterialItem(item.id, "unitPrice", parseFloat(e.target.value) || 0)}
+                          onChange={(e) => {
+                            const numValue = e.target.value === '' ? 0 : Number(e.target.value);
+                            updateMaterialItem(item.id, "unitPrice", numValue);
+                          }}
                         />
                       </div>
                       <div className="col-span-2">
@@ -582,10 +588,14 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                         <Input
                           type="number"
                           min="0.1"
-                          step="0.5"
+                          step="0.1"
                           placeholder="Horas"
                           value={item.hours}
-                          onChange={(e) => updateLaborItem(item.id, "hours", parseFloat(e.target.value) || 0)}
+                          onChange={(e) => {
+                            // Validar y convertir el valor a número
+                            const numValue = e.target.value === '' ? 0 : Number(e.target.value);
+                            updateLaborItem(item.id, "hours", numValue);
+                          }}
                         />
                       </div>
                       <div className="col-span-2">
@@ -595,7 +605,10 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                           step="0.01"
                           placeholder="Tarifa por hora"
                           value={item.hourlyRate}
-                          onChange={(e) => updateLaborItem(item.id, "hourlyRate", parseFloat(e.target.value) || 0)}
+                          onChange={(e) => {
+                            const numValue = e.target.value === '' ? 0 : Number(e.target.value);
+                            updateLaborItem(item.id, "hourlyRate", numValue);
+                          }}
                         />
                       </div>
                       <div className="col-span-2">
@@ -646,7 +659,10 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                     min="0"
                     step="0.01"
                     value={additionalCosts} 
-                    onChange={(e) => setAdditionalCosts(parseFloat(e.target.value) || 0)} 
+                    onChange={(e) => {
+                      const numValue = e.target.value === '' ? 0 : Number(e.target.value);
+                      setAdditionalCosts(numValue);
+                    }} 
                   />
                 </div>
                 <div>
@@ -660,7 +676,10 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                     max="100"
                     step="1"
                     value={profitMargin} 
-                    onChange={(e) => setProfitMargin(parseFloat(e.target.value) || 0)} 
+                    onChange={(e) => {
+                      const numValue = e.target.value === '' ? 0 : Number(e.target.value);
+                      setProfitMargin(numValue);
+                    }} 
                   />
                 </div>
               </div>
