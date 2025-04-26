@@ -45,21 +45,55 @@ const formSchema = insertQuoteSchema
     // For materials and labor estimates
     materialItems: z.array(
       z.object({
-        name: z.string(),
-        quantity: z.number(),
-        unitPrice: z.number(),
-        total: z.number(),
+        id: z.string().optional(), // Unique ID for each material item
+        name: z.string().min(1, "El nombre del material es requerido"),
+        quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
+        unitPrice: z.number().min(0.01, "El precio unitario debe ser mayor a 0"),
+        total: z.number().optional(),
       })
-    ).optional(),
+    ).optional().default([]),
     laborItems: z.array(
       z.object({
-        description: z.string(),
-        hours: z.number(),
-        hourlyRate: z.number(),
-        total: z.number(),
+        id: z.string().optional(), // Unique ID for each labor item
+        description: z.string().min(1, "La descripción es requerida"),
+        hours: z.number().min(0.1, "Las horas deben ser mayores a 0"),
+        hourlyRate: z.number().min(0.01, "La tarifa por hora debe ser mayor a 0"),
+        total: z.number().optional(),
       })
-    ).optional(),
-    profitMargin: z.number().optional(),
+    ).optional().default([]),
+    additionalCosts: z.number().min(0).default(0),
+    profitMargin: z.number().min(0).max(100).default(20),
+    subtotal: z.number().optional(),
+  })
+  .transform((data) => {
+    // Transform the nested structures to JSON compatible types
+    const materialItems = Array.isArray(data.materialItems) ? data.materialItems.map(item => ({
+      ...item,
+      total: item.total ?? (item.quantity * item.unitPrice)
+    })) : [];
+    
+    const laborItems = Array.isArray(data.laborItems) ? data.laborItems.map(item => ({
+      ...item,
+      total: item.total ?? (item.hours * item.hourlyRate)
+    })) : [];
+    
+    // Calculate subtotals
+    const materialsSubtotal = materialItems.reduce((sum, item) => sum + (item.total || 0), 0);
+    const laborSubtotal = laborItems.reduce((sum, item) => sum + (item.total || 0), 0);
+    
+    // Calculate the raw subtotal
+    const subtotal = materialsSubtotal + laborSubtotal + (data.additionalCosts || 0);
+    
+    // Apply profit margin
+    const profitAmount = subtotal * (data.profitMargin / 100);
+    const totalEstimate = subtotal + profitAmount;
+    
+    return {
+      ...data,
+      materialsEstimate: materialItems,
+      laborEstimate: laborItems,
+      totalEstimate: Math.round(totalEstimate * 100) / 100, // Round to 2 decimal places
+    };
   });
 
 type QuoteFormValues = z.infer<typeof formSchema>;
@@ -575,14 +609,22 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                   <h4 className="text-sm font-medium mb-2">Costos Adicionales ($)</h4>
                   <Input 
                     type="number" 
+                    min="0"
+                    step="0.01"
                     value={additionalCosts} 
                     onChange={(e) => setAdditionalCosts(parseFloat(e.target.value) || 0)} 
                   />
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Margen de Ganancia (%) <span className="text-xs text-gray-500">(Solo visible internamente)</span></h4>
+                  <h4 className="text-sm font-medium mb-2">
+                    Margen de Ganancia (%) 
+                    <span className="text-xs text-gray-500 ml-2">(Solo visible internamente)</span>
+                  </h4>
                   <Input 
                     type="number" 
+                    min="0"
+                    max="100"
+                    step="1"
                     value={profitMargin} 
                     onChange={(e) => setProfitMargin(parseFloat(e.target.value) || 0)} 
                   />
