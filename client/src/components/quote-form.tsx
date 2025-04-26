@@ -485,6 +485,8 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                       <div className="col-span-2">
                         <Input
                           type="number"
+                          min="0.01"
+                          step="0.01"
                           placeholder="Cantidad"
                           value={item.quantity}
                           onChange={(e) => updateMaterialItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
@@ -493,6 +495,8 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                       <div className="col-span-2">
                         <Input
                           type="number"
+                          min="0.01"
+                          step="0.01"
                           placeholder="Precio unitario"
                           value={item.unitPrice}
                           onChange={(e) => updateMaterialItem(item.id, "unitPrice", parseFloat(e.target.value) || 0)}
@@ -502,18 +506,19 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                         <Input
                           type="number"
                           placeholder="Total"
-                          value={item.total}
+                          value={item.total.toFixed(2)}
                           readOnly
+                          className="bg-gray-50"
                         />
                       </div>
-                      <div className="col-span-1">
+                      <div className="col-span-1 flex justify-center">
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => removeMaterialItem(item.id)}
                           disabled={materialItems.length <= 1}
-                          className="h-9 w-9 p-0"
+                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
                         >
                           ✕
                         </Button>
@@ -552,6 +557,8 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                       <div className="col-span-2">
                         <Input
                           type="number"
+                          min="0.1"
+                          step="0.5"
                           placeholder="Horas"
                           value={item.hours}
                           onChange={(e) => updateLaborItem(item.id, "hours", parseFloat(e.target.value) || 0)}
@@ -560,6 +567,8 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                       <div className="col-span-2">
                         <Input
                           type="number"
+                          min="0.01"
+                          step="0.01"
                           placeholder="Tarifa por hora"
                           value={item.hourlyRate}
                           onChange={(e) => updateLaborItem(item.id, "hourlyRate", parseFloat(e.target.value) || 0)}
@@ -569,18 +578,19 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                         <Input
                           type="number"
                           placeholder="Total"
-                          value={item.total}
+                          value={item.total.toFixed(2)}
                           readOnly
+                          className="bg-gray-50"
                         />
                       </div>
-                      <div className="col-span-1">
+                      <div className="col-span-1 flex justify-center">
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => removeLaborItem(item.id)}
                           disabled={laborItems.length <= 1}
-                          className="h-9 w-9 p-0"
+                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
                         >
                           ✕
                         </Button>
@@ -593,7 +603,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                   variant="outline"
                   size="sm"
                   onClick={addLaborItem}
-                  className="mt-3"
+                  className="mt-3 text-xs"
                 >
                   + Agregar Mano de Obra
                 </Button>
