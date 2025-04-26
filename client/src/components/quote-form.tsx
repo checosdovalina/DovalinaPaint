@@ -84,9 +84,14 @@ const formSchema = insertQuoteSchema
     // Calculate the raw subtotal
     const subtotal = materialsSubtotal + laborSubtotal + (data.additionalCosts || 0);
     
-    // Apply profit margin
-    const profitAmount = subtotal * (data.profitMargin / 100);
-    const totalEstimate = subtotal + profitAmount;
+    // Calculate the subtotal without additional costs for profit margin calculation
+    const baseSubtotal = materialsSubtotal + laborSubtotal;
+    
+    // Apply profit margin to base subtotal (materials + labor only)
+    const profitAmount = baseSubtotal * (data.profitMargin / 100);
+    
+    // Calculate total with additional costs and profit margin
+    const totalEstimate = baseSubtotal + (data.additionalCosts || 0) + profitAmount;
     
     return {
       ...data,
@@ -139,9 +144,18 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
   // Calculate totals
   const materialsTotal = materialItems.reduce((sum, item) => sum + item.total, 0);
   const laborTotal = laborItems.reduce((sum, item) => sum + item.total, 0);
-  const subtotal = materialsTotal + laborTotal + additionalCosts;
-  const profitAmount = subtotal * (profitMargin / 100);
-  const totalEstimate = subtotal + profitAmount;
+  
+  // Base subtotal for profit margin calculation (materials + labor only)
+  const baseSubtotal = materialsTotal + laborTotal;
+  
+  // Full subtotal including additional costs
+  const subtotal = baseSubtotal + additionalCosts;
+  
+  // Calculate profit amount based on materials and labor only
+  const profitAmount = baseSubtotal * (profitMargin / 100);
+  
+  // Total estimate includes materials, labor, additional costs, and profit
+  const totalEstimate = baseSubtotal + additionalCosts + profitAmount;
 
   // Fetch projects for the dropdown
   const { data: projects } = useQuery({

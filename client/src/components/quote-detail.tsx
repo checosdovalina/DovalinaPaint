@@ -89,9 +89,13 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
   const laborTotal = quote.laborEstimate && Array.isArray(quote.laborEstimate) ? 
     quote.laborEstimate.reduce((sum: number, item: any) => sum + (item.total || 0), 0) : 0;
   
-  // If no profit margin is defined, use 0
-  const profitMargin = (quote as any).profitMargin || 0;
+  // Calculate subtotal (materials + labor)
   const subtotal = materialsTotal + laborTotal;
+  
+  // Get profit margin (if available) or use default 0
+  const profitMargin = (quote as any).profitMargin || 0;
+  
+  // Calculate profit amount based on subtotal
   const profitAmount = subtotal * (profitMargin / 100);
 
   // Function to generate PDF (using browser's print functionality)
