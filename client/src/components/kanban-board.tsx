@@ -25,14 +25,14 @@ export function KanbanBoard({ projects, onProjectClick }: KanbanBoardProps) {
   // Initialize columns
   useEffect(() => {
     const statusColumns: KanbanColumn[] = [
-      { id: "pending", title: "Pendiente por visitar", status: "pending", projects: [] },
-      { id: "quoted", title: "Presupuesto enviado", status: "quoted", projects: [] },
-      { id: "approved", title: "Presupuesto aprobado", status: "approved", projects: [] },
-      { id: "preparing", title: "En preparación", status: "preparing", projects: [] },
-      { id: "in_progress", title: "En proceso", status: "in_progress", projects: [] },
-      { id: "reviewing", title: "En revisión final", status: "reviewing", projects: [] },
-      { id: "completed", title: "Finalizado", status: "completed", projects: [] },
-      { id: "archived", title: "Archivado", status: "archived", projects: [] },
+      { id: "pending", title: "Pending Visit", status: "pending", projects: [] },
+      { id: "quoted", title: "Quote Sent", status: "quoted", projects: [] },
+      { id: "approved", title: "Quote Approved", status: "approved", projects: [] },
+      { id: "preparing", title: "In Preparation", status: "preparing", projects: [] },
+      { id: "in_progress", title: "In Progress", status: "in_progress", projects: [] },
+      { id: "reviewing", title: "Final Review", status: "reviewing", projects: [] },
+      { id: "completed", title: "Completed", status: "completed", projects: [] },
+      { id: "archived", title: "Archived", status: "archived", projects: [] },
     ];
     
     // Distribute projects to their respective columns
@@ -111,13 +111,13 @@ export function KanbanBoard({ projects, onProjectClick }: KanbanBoardProps) {
         queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
         
         toast({
-          title: "Proyecto actualizado",
-          description: `El proyecto ${movedProject.title} ha sido movido a ${destColumn.title}`,
+          title: "Project Updated",
+          description: `Project ${movedProject.title} has been moved to ${destColumn.title}`,
         });
       } catch (error) {
         toast({
-          title: "Error al actualizar el proyecto",
-          description: "No se pudo actualizar el estado del proyecto",
+          title: "Error updating project",
+          description: "Could not update project status",
           variant: "destructive",
         });
         

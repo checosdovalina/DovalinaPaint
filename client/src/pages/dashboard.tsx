@@ -130,7 +130,7 @@ export default function Dashboard() {
       <div className="mt-8 flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Pipeline de Avance de Trabajos
+            Project Progress Pipeline
           </h3>
           <div className="flex space-x-3">
             <div className="relative">
@@ -139,28 +139,28 @@ export default function Dashboard() {
                 onValueChange={setProjectFilter}
               >
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Todos los tipos" />
+                  <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  <SelectItem value="pending">Pendiente por visitar</SelectItem>
-                  <SelectItem value="quoted">Presupuesto enviado</SelectItem>
-                  <SelectItem value="approved">Presupuesto aprobado</SelectItem>
-                  <SelectItem value="preparing">En preparación</SelectItem>
-                  <SelectItem value="in_progress">En proceso</SelectItem>
-                  <SelectItem value="reviewing">En revisión final</SelectItem>
-                  <SelectItem value="completed">Finalizado</SelectItem>
-                  <SelectItem value="archived">Archivado</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="pending">Pending Visit</SelectItem>
+                  <SelectItem value="quoted">Quote Sent</SelectItem>
+                  <SelectItem value="approved">Quote Approved</SelectItem>
+                  <SelectItem value="preparing">In Preparation</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="reviewing">Final Review</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <Button variant="outline" size="sm">
               <Filter className="h-4 w-4 mr-2" />
-              Filtros
+              Filters
             </Button>
             <Button size="sm" onClick={handleNewProject}>
               <Plus className="h-4 w-4 mr-2" />
-              Nuevo Proyecto
+              New Project
             </Button>
           </div>
         </div>
@@ -202,12 +202,12 @@ export default function Dashboard() {
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>
-              {projectToEdit ? "Editar Proyecto" : "Nuevo Proyecto"}
+              {projectToEdit ? "Edit Project" : "New Project"}
             </DialogTitle>
             <DialogDescription>
               {projectToEdit
-                ? "Modifique los detalles del proyecto según sea necesario"
-                : "Complete los detalles para crear un nuevo proyecto"}
+                ? "Modify the project details as needed"
+                : "Fill out the details to create a new project"}
             </DialogDescription>
           </DialogHeader>
           <ProjectForm
