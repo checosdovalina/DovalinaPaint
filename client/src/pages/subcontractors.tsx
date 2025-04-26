@@ -222,7 +222,7 @@ export default function Subcontractors() {
 
   // Get unique specialties for filter
   const uniqueSpecialties = subcontractors 
-    ? [...new Set(subcontractors.map(s => s.specialty))] 
+    ? Array.from(new Set(subcontractors.map(s => s.specialty)))
     : [];
 
   // Filter subcontractors

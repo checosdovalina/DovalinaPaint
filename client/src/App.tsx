@@ -14,6 +14,7 @@ import ServiceOrders from "@/pages/service-orders";
 import Projects from "@/pages/projects";
 import Personnel from "@/pages/personnel";
 import Reports from "@/pages/reports";
+import Subcontractors from "@/pages/subcontractors";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
       <ProtectedRoute path="/service-orders" component={ServiceOrders} />
       <ProtectedRoute path="/projects" component={Projects} />
       <ProtectedRoute path="/personnel" component={Personnel} />
+      <ProtectedRoute path="/subcontractors" component={Subcontractors} />
       <ProtectedRoute path="/reports" component={Reports} />
       <Route component={NotFound} />
     </Switch>
