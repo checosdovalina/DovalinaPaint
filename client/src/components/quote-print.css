@@ -1,8 +1,20 @@
 /* Estilos para impresión de cotizaciones */
 @media print {
   /* Ocultar elementos que no queremos imprimir */
-  body > *:not(.printing-container) {
+  body > *:not(#root) {
     display: none !important;
+  }
+  
+  /* Asegurarnos de que el diálogo modal se muestre */
+  #root [role="dialog"],
+  #quote-detail-printable {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
   }
   
   /* Resetear márgenes y configurar página */
@@ -32,7 +44,10 @@
   }
   
   /* Forzar página completa y evitar cortes */
-  .Dialog, .DialogContent {
+  .Dialog, 
+  .DialogContent,
+  [role="dialog"],
+  [data-state="open"] {
     position: relative !important;
     overflow: visible !important;
     max-height: none !important;
@@ -44,6 +59,19 @@
     margin: 0 !important;
     padding: 0 !important;
     max-width: none !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Ocultar elementos de UI que no deberían imprimirse */
+  button,
+  [role="button"],
+  .DialogOverlay,
+  .DialogHeader,
+  .DialogTitle,
+  .DialogClose,
+  .DialogFooter,
+  .print\\:hidden {
+    display: none !important;
   }
   
   /* Arreglar estilos para las tarjetas */

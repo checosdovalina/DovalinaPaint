@@ -134,11 +134,11 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl overflow-y-auto max-h-[90vh]">
-        <DialogHeader>
+        <DialogHeader className="print:hidden">
           <DialogTitle>Detalles de Cotización #{quote.id}</DialogTitle>
         </DialogHeader>
         
-        <div className="p-4 print:p-0" id="quote-detail-printable">
+        <div className="p-4 print:p-6" id="quote-detail-printable">
           {/* Cabecera con información de la empresa */}
           <div className="flex justify-between items-start border-b pb-4 mb-6">
             <div>
