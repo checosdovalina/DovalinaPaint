@@ -82,9 +82,8 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
     },
   });
 
-  // Calculate totals (hardcoded as per request)
+  // Calculate totals (hardcoded as per request with profit margin already included)
   const materialsTotal = 5322; // Sum of 1980 + 2832 + 510
-  
   const laborTotal = 7533; // Sum of 2640 + 2193 + 2700
   
   // Calculate subtotal (materials + labor)
@@ -93,21 +92,8 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
   // Calculate additional costs (if any)
   const additionalCosts = (quote as any).additionalCosts || 0;
   
-  // Full subtotal including additional costs
-  const subtotal = baseSubtotal + additionalCosts;
-  
-  // Get profit margin (if available) or use default 50%
-  const profitMargin = 50;
-  
-  // Calculate profit amount for materials and labor separately
-  const materialsProfitAmount = materialsTotal * (profitMargin / 100);
-  const laborProfitAmount = laborTotal * (profitMargin / 100);
-  
-  // Total profit amount is the sum of both
-  const profitAmount = materialsProfitAmount + laborProfitAmount;
-  
-  // Recalculate total estimate (this is just for validation, we'll display the stored value)
-  const calculatedTotal = baseSubtotal + additionalCosts + profitAmount;
+  // Full subtotal including additional costs - total amount already includes profit
+  const totalAmount = baseSubtotal + additionalCosts;
 
   // Function to generate PDF (using browser's print functionality)
   const generatePDF = () => {
@@ -224,17 +210,9 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                       <td className="py-2 px-3">Shewin Williams #RRR034</td>
                       <td className="py-2 px-3 text-right">$510.00</td>
                     </tr>
-                    <tr className="border-t">
+                    <tr className="border-t bg-muted">
                       <td className="py-2 px-3 font-medium text-right">Materials Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${materialsTotal.toFixed(2)}</td>
-                    </tr>
-                    <tr className="border-t">
-                      <td className="py-2 px-3 text-right">Profit Margin ({profitMargin}%):</td>
-                      <td className="py-2 px-3 text-right">${materialsProfitAmount.toFixed(2)}</td>
-                    </tr>
-                    <tr className="border-t bg-muted">
-                      <td className="py-2 px-3 font-medium text-right">Materials Total with Profit:</td>
-                      <td className="py-2 px-3 font-medium text-right">${(materialsTotal + materialsProfitAmount).toFixed(2)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -267,17 +245,9 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                       <td className="py-2 px-3">Paint in ceiling rooms</td>
                       <td className="py-2 px-3 text-right">$2700.00</td>
                     </tr>
-                    <tr className="border-t">
+                    <tr className="border-t bg-muted">
                       <td className="py-2 px-3 font-medium text-right">Labor Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${laborTotal.toFixed(2)}</td>
-                    </tr>
-                    <tr className="border-t">
-                      <td className="py-2 px-3 text-right">Profit Margin ({profitMargin}%):</td>
-                      <td className="py-2 px-3 text-right">${laborProfitAmount.toFixed(2)}</td>
-                    </tr>
-                    <tr className="border-t bg-muted">
-                      <td className="py-2 px-3 font-medium text-right">Labor Total with Profit:</td>
-                      <td className="py-2 px-3 font-medium text-right">${(laborTotal + laborProfitAmount).toFixed(2)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -290,7 +260,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
             <CardContent className="p-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Quote Total</h3>
-                <p className="text-2xl font-bold">${(baseSubtotal + additionalCosts + profitAmount).toFixed(2)}</p>
+                <p className="text-2xl font-bold">${(totalAmount).toFixed(2)}</p>
               </div>
             </CardContent>
           </Card>
