@@ -172,6 +172,8 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
         profitMargin,
         totalEstimate,
       };
+      
+      console.log("Enviando datos al servidor:", quoteData);
 
       if (initialData?.id) {
         // Update
@@ -193,10 +195,26 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
       onSuccess();
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Error details:", error);
+      
+      // Intenta analizar la respuesta del error para obtener los detalles del servidor
+      let errorMessage = error.message;
+      try {
+        if (error.response) {
+          const data = error.response.json();
+          if (data && data.errors) {
+            console.error("Validation errors:", data.errors);
+            errorMessage += " - " + JSON.stringify(data.errors);
+          }
+        }
+      } catch (parseError) {
+        console.error("Error parsing error response:", parseError);
+      }
+      
       toast({
         title: "Error",
-        description: `No se pudo ${initialData?.id ? "actualizar" : "crear"} el presupuesto: ${error.message}`,
+        description: `No se pudo ${initialData?.id ? "actualizar" : "crear"} el presupuesto: ${errorMessage}`,
         variant: "destructive",
       });
     },
