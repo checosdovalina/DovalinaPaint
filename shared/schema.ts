@@ -60,7 +60,8 @@ export const projects = pgTable("projects", {
   images: jsonb("images"),
 });
 
-export const insertProjectSchema = createInsertSchema(projects).pick({
+// Esquema base para proyectos
+const baseProjectSchema = createInsertSchema(projects).pick({
   clientId: true,
   title: true,
   description: true,
@@ -69,11 +70,29 @@ export const insertProjectSchema = createInsertSchema(projects).pick({
   status: true,
   priority: true,
   progress: true,
-  startDate: true,
-  dueDate: true,
   totalCost: true,
   assignedStaff: true,
   images: true,
+});
+
+// Añadir validación personalizada para fechas
+export const insertProjectSchema = baseProjectSchema.extend({
+  startDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "La fecha de inicio debe ser válida"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  dueDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "La fecha de entrega debe ser válida"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
 });
 
 // Quote schema
@@ -92,15 +111,34 @@ export const quotes = pgTable("quotes", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertQuoteSchema = createInsertSchema(quotes).pick({
+// Esquema base para cotizaciones
+const baseQuoteSchema = createInsertSchema(quotes).pick({
   projectId: true,
   materialsEstimate: true,
   laborEstimate: true,
   totalEstimate: true,
   status: true,
-  sentDate: true,
-  validUntil: true,
   notes: true,
+});
+
+// Añadir validación personalizada para fechas
+export const insertQuoteSchema = baseQuoteSchema.extend({
+  sentDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "La fecha de envío debe ser válida"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  validUntil: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "La fecha de validez debe ser válida"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
 });
 
 // Subcontractor schema
@@ -154,19 +192,45 @@ export const serviceOrders = pgTable("service_orders", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertServiceOrderSchema = createInsertSchema(serviceOrders).pick({
+// Esquema base para órdenes de servicio
+const baseServiceOrderSchema = createInsertSchema(serviceOrders).pick({
   projectId: true,
   details: true,
   assignedStaff: true,
-  assignedSubcontractors: true, // Incluimos el nuevo campo
-  startDate: true,
-  endDate: true,
+  assignedSubcontractors: true,
   status: true,
   beforeImages: true,
   afterImages: true,
   clientSignature: true,
-  signatureDate: true,
-  language: true, // Incluimos el nuevo campo
+  language: true,
+});
+
+// Añadir validación personalizada para fechas
+export const insertServiceOrderSchema = baseServiceOrderSchema.extend({
+  startDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "La fecha de inicio debe ser válida"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  endDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "La fecha de finalización debe ser válida"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  signatureDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "La fecha de firma debe ser válida"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
 });
 
 // Staff schema

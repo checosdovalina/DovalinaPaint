@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
-import { Route } from "wouter";
-import { useLocation } from "wouter";
+import { Route, useLocation } from "wouter";
+import { useEffect } from "react";
 
 export function ProtectedRoute({
   path,
@@ -12,6 +12,13 @@ export function ProtectedRoute({
 }) {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
+  
+  // Usar useEffect para redirigir después del renderizado
+  useEffect(() => {
+    if (!isLoading && !user) {
+      setLocation("/auth");
+    }
+  }, [user, isLoading, setLocation]);
 
   return (
     <Route path={path}>
@@ -25,7 +32,7 @@ export function ProtectedRoute({
         }
 
         if (!user) {
-          setLocation("/auth");
+          // No renderizamos nada mientras se ejecuta la redirección
           return null;
         }
 
