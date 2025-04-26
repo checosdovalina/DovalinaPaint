@@ -271,26 +271,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/quotes", isAuthenticated, async (req, res) => {
     try {
-      const quoteData = insertQuoteSchema.parse(req.body);
-      const quote = await storage.createQuote(quoteData);
+      console.log("Request body:", JSON.stringify(req.body, null, 2));
       
-      // Get the project for the activity
-      const project = await storage.getProject(quote.projectId);
-      
-      // Create activity for quote creation
-      await storage.createActivity({
-        type: "quote_created",
-        description: `New quote created for project "${project?.title || 'Unknown'}"`,
-        userId: req.user.id,
-        projectId: quote.projectId,
-        clientId: project?.clientId
-      });
-      
-      res.status(201).json(quote);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid quote data", errors: error.errors });
+      try {
+        const quoteData = insertQuoteSchema.parse(req.body);
+        const quote = await storage.createQuote(quoteData);
+        
+        // Get the project for the activity
+        const project = await storage.getProject(quote.projectId);
+        
+        // Create activity for quote creation
+        await storage.createActivity({
+          type: "quote_created",
+          description: `New quote created for project "${project?.title || 'Unknown'}"`,
+          userId: req.user.id,
+          projectId: quote.projectId,
+          clientId: project?.clientId
+        });
+        
+        res.status(201).json(quote);
+      } catch (validationError) {
+        if (validationError instanceof z.ZodError) {
+          console.error("Validation error:", JSON.stringify(validationError.errors, null, 2));
+          return res.status(400).json({ message: "Invalid quote data", errors: validationError.errors });
+        }
+        throw validationError; // Re-throw if it's not a ZodError
       }
+    } catch (error) {
+      console.error("Server error:", error);
       res.status(500).json({ message: error.message });
     }
   });
