@@ -146,7 +146,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
                 <FormLabel>Cliente</FormLabel>
                 <Select
                   onValueChange={(value) => field.onChange(parseInt(value))}
-                  defaultValue={field.value?.toString()}
+                  value={field.value?.toString()}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -210,7 +210,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
                 <FormLabel>Tipo de Servicio</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -239,7 +239,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
                 <FormLabel>Prioridad</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -267,7 +267,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
                 <FormLabel>Estado</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
