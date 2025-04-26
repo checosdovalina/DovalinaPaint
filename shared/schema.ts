@@ -1,6 +1,7 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, jsonb, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // User schema
 export const users = pgTable("users", {
@@ -102,12 +103,46 @@ export const insertQuoteSchema = createInsertSchema(quotes).pick({
   notes: true,
 });
 
-// Service Order schema
+// Subcontractor schema
+export const subcontractors = pgTable("subcontractors", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  company: text("company"),
+  specialty: text("specialty").notNull(),
+  email: text("email"),
+  phone: text("phone").notNull(),
+  address: text("address"),
+  taxId: text("tax_id"),
+  insuranceInfo: text("insurance_info"),
+  rate: real("rate"),
+  rateType: text("rate_type").default("hourly"), // hourly, daily, fixed
+  notes: text("notes"),
+  status: text("status").default("active").notNull(), // active, inactive, blacklisted
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertSubcontractorSchema = createInsertSchema(subcontractors).pick({
+  name: true,
+  company: true,
+  specialty: true,
+  email: true,
+  phone: true,
+  address: true,
+  taxId: true,
+  insuranceInfo: true,
+  rate: true,
+  rateType: true,
+  notes: true,
+  status: true,
+});
+
+// Service Order schema - actualizado con idioma y subcontratistas
 export const serviceOrders = pgTable("service_orders", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").notNull(),
   details: text("details").notNull(),
   assignedStaff: jsonb("assigned_staff"),
+  assignedSubcontractors: jsonb("assigned_subcontractors"), // Nuevo campo para subcontratistas
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   status: text("status").notNull().default("pending"), // pending, in_progress, completed
@@ -115,6 +150,7 @@ export const serviceOrders = pgTable("service_orders", {
   afterImages: jsonb("after_images"),
   clientSignature: text("client_signature"),
   signatureDate: timestamp("signature_date"),
+  language: text("language").default("english").notNull(), // Nuevo campo para idioma: english, spanish
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -122,6 +158,7 @@ export const insertServiceOrderSchema = createInsertSchema(serviceOrders).pick({
   projectId: true,
   details: true,
   assignedStaff: true,
+  assignedSubcontractors: true, // Incluimos el nuevo campo
   startDate: true,
   endDate: true,
   status: true,
@@ -129,6 +166,7 @@ export const insertServiceOrderSchema = createInsertSchema(serviceOrders).pick({
   afterImages: true,
   clientSignature: true,
   signatureDate: true,
+  language: true, // Incluimos el nuevo campo
 });
 
 // Staff schema
@@ -173,6 +211,27 @@ export const insertActivitySchema = createInsertSchema(activities).pick({
   clientId: true,
 });
 
+// Definir relaciones entre tablas
+export const clientsRelations = relations(clients, ({ many }) => ({
+  projects: many(projects),
+}));
+
+export const projectsRelations = relations(projects, ({ one, many }) => ({
+  client: one(clients, {
+    fields: [projects.clientId],
+    references: [clients.id],
+  }),
+  serviceOrders: many(serviceOrders),
+  quotes: many(quotes),
+}));
+
+export const serviceOrdersRelations = relations(serviceOrders, ({ one }) => ({
+  project: one(projects, {
+    fields: [serviceOrders.projectId],
+    references: [projects.id],
+  }),
+}));
+
 // Export types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -185,6 +244,9 @@ export type InsertProject = z.infer<typeof insertProjectSchema>;
 
 export type Quote = typeof quotes.$inferSelect;
 export type InsertQuote = z.infer<typeof insertQuoteSchema>;
+
+export type Subcontractor = typeof subcontractors.$inferSelect;
+export type InsertSubcontractor = z.infer<typeof insertSubcontractorSchema>;
 
 export type ServiceOrder = typeof serviceOrders.$inferSelect;
 export type InsertServiceOrder = z.infer<typeof insertServiceOrderSchema>;
