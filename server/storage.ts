@@ -37,6 +37,13 @@ export interface IStorage {
   updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote | undefined>;
   deleteQuote(id: number): Promise<boolean>;
   
+  // Subcontractor methods
+  getSubcontractors(): Promise<Subcontractor[]>;
+  getSubcontractor(id: number): Promise<Subcontractor | undefined>;
+  createSubcontractor(subcontractor: InsertSubcontractor): Promise<Subcontractor>;
+  updateSubcontractor(id: number, subcontractor: Partial<InsertSubcontractor>): Promise<Subcontractor | undefined>;
+  deleteSubcontractor(id: number): Promise<boolean>;
+  
   // Service Order methods
   getServiceOrders(): Promise<ServiceOrder[]>;
   getServiceOrder(id: number): Promise<ServiceOrder | undefined>;
@@ -76,6 +83,60 @@ export class DatabaseStorage implements IStorage {
     
     // Initialize admin user if needed (will run on startup)
     this.initializeAdminUser();
+  }
+  
+  // Subcontractor methods
+  async getSubcontractors(): Promise<Subcontractor[]> {
+    try {
+      return await db.select().from(subcontractors);
+    } catch (error) {
+      console.error("Error fetching subcontractors:", error);
+      return [];
+    }
+  }
+  
+  async getSubcontractor(id: number): Promise<Subcontractor | undefined> {
+    try {
+      const [subcontractor] = await db.select().from(subcontractors).where(eq(subcontractors.id, id));
+      return subcontractor;
+    } catch (error) {
+      console.error("Error fetching subcontractor:", error);
+      return undefined;
+    }
+  }
+  
+  async createSubcontractor(subcontractor: InsertSubcontractor): Promise<Subcontractor> {
+    try {
+      const [newSubcontractor] = await db.insert(subcontractors).values(subcontractor).returning();
+      return newSubcontractor;
+    } catch (error) {
+      console.error("Error creating subcontractor:", error);
+      throw error;
+    }
+  }
+  
+  async updateSubcontractor(id: number, subcontractor: Partial<InsertSubcontractor>): Promise<Subcontractor | undefined> {
+    try {
+      const [updatedSubcontractor] = await db
+        .update(subcontractors)
+        .set(subcontractor)
+        .where(eq(subcontractors.id, id))
+        .returning();
+      return updatedSubcontractor;
+    } catch (error) {
+      console.error("Error updating subcontractor:", error);
+      return undefined;
+    }
+  }
+  
+  async deleteSubcontractor(id: number): Promise<boolean> {
+    try {
+      await db.delete(subcontractors).where(eq(subcontractors.id, id));
+      return true;
+    } catch (error) {
+      console.error("Error deleting subcontractor:", error);
+      return false;
+    }
   }
   
   private async initializeAdminUser() {
