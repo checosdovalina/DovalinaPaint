@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Staff } from "@shared/schema";
 import { Layout } from "@/components/layout";
@@ -108,7 +108,7 @@ export default function Personnel() {
   });
 
   // Reset form when staffToEdit changes
-  useState(() => {
+  useEffect(() => {
     if (staffToEdit) {
       form.reset({
         name: staffToEdit.name,
