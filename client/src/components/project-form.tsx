@@ -114,8 +114,12 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
   });
 
   const onSubmit = (data: ProjectFormValues) => {
+    // Asegurarse de que las fechas sean instancias de Date antes de enviarlas
+    // El backend espera objetos Date, no strings
     mutation.mutate({
       ...data,
+      startDate: data.startDate instanceof Date ? data.startDate : undefined,
+      dueDate: data.dueDate instanceof Date ? data.dueDate : undefined,
       assignedStaff,
     });
   };
