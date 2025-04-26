@@ -98,8 +98,8 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
   // Full subtotal including additional costs
   const subtotal = baseSubtotal + additionalCosts;
   
-  // Get profit margin (if available) or use default 25%
-  const profitMargin = (quote as any).profitMargin || 25;
+  // Get profit margin (if available) or use default 50%
+  const profitMargin = 50;
   
   // Calculate profit amount for materials and labor separately
   const materialsProfitAmount = materialsTotal * (profitMargin / 100);
