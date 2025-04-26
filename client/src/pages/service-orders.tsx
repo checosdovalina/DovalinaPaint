@@ -194,24 +194,24 @@ export default function ServiceOrders() {
   // Helper to get project name
   const getProjectName = (projectId: number) => {
     const project = projects?.find(p => p.id === projectId);
-    return project ? project.title : `Proyecto #${projectId}`;
+    return project ? project.title : `Project #${projectId}`;
   };
 
   // Helper to format date
   const formatDate = (date: Date | undefined | null) => {
-    if (!date) return "No definida";
-    return format(new Date(date), "d MMM yyyy", { locale: es });
+    if (!date) return "Not defined";
+    return format(new Date(date), "d MMM yyyy", { locale: enUS });
   };
 
   // Helper to get status badge
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
-        return <Badge variant="outline">Pendiente</Badge>;
+        return <Badge variant="outline">Pending</Badge>;
       case "in_progress":
-        return <Badge className="bg-blue-100 text-blue-800">En Progreso</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800">In Progress</Badge>;
       case "completed":
-        return <Badge className="bg-green-100 text-green-800">Completado</Badge>;
+        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -257,13 +257,13 @@ export default function ServiceOrders() {
   };
 
   return (
-    <Layout title="Órdenes de Servicio">
+    <Layout title="Service Orders">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-2 w-full max-w-md">
           <div className="relative w-full">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Buscar órdenes de servicio..."
+              placeholder="Search service orders..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8"
@@ -274,19 +274,19 @@ export default function ServiceOrders() {
             onValueChange={setStatusFilter}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filtrar por estado" />
+              <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="pending">Pendiente</SelectItem>
-              <SelectItem value="in_progress">En Progreso</SelectItem>
-              <SelectItem value="completed">Completado</SelectItem>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <Button onClick={handleNewServiceOrder}>
           <Plus className="h-4 w-4 mr-2" />
-          Nueva Orden de Servicio
+          New Service Order
         </Button>
       </div>
 
@@ -309,36 +309,36 @@ export default function ServiceOrders() {
               <CardContent className="pb-2 space-y-3">
                 <div className="flex items-center text-sm">
                   <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>Inicio: {formatDate(serviceOrder.startDate)}</span>
+                  <span>Start: {formatDate(serviceOrder.startDate)}</span>
                 </div>
                 {serviceOrder.endDate && (
                   <div className="flex items-center text-sm">
                     <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                    <span>Finalización: {formatDate(serviceOrder.endDate)}</span>
+                    <span>Completion: {formatDate(serviceOrder.endDate)}</span>
                   </div>
                 )}
                 <div className="text-sm line-clamp-2 mt-1">
                   {serviceOrder.details}
                 </div>
 
-                {/* Subcontratista asignado */}
+                {/* Assigned subcontractor */}
                 {serviceOrder.assignedSubcontractorId && (
                   <div className="flex items-center text-sm mt-3">
                     <Briefcase className="h-4 w-4 mr-2 text-gray-400" />
-                    <span className="font-medium">Subcontratista:</span>
+                    <span className="font-medium">Subcontractor:</span>
                     <span className="ml-1">
-                      {getSubcontractorName(serviceOrder.assignedSubcontractorId)?.company || 'No asignado'}
+                      {getSubcontractorName(serviceOrder.assignedSubcontractorId)?.company || 'Not assigned'}
                     </span>
                   </div>
                 )}
                 
-                {/* Supervisor asignado */}
+                {/* Assigned supervisor */}
                 {serviceOrder.supervisorId && (
                   <div className="flex items-center text-sm mt-2">
                     <HardHat className="h-4 w-4 mr-2 text-gray-400" />
                     <span className="font-medium">Supervisor:</span>
                     <span className="ml-1">
-                      {getSupervisorName(serviceOrder.supervisorId)?.name || 'No asignado'}
+                      {getSupervisorName(serviceOrder.supervisorId)?.name || 'Not assigned'}
                     </span>
                   </div>
                 )}
@@ -348,7 +348,7 @@ export default function ServiceOrders() {
                   <div className="mt-3">
                     <div className="flex items-center text-sm mb-2">
                       <Users className="h-4 w-4 mr-2 text-gray-400" />
-                      <span>Personal Asignado:</span>
+                      <span>Assigned Staff:</span>
                     </div>
                     <div className="flex -space-x-2">
                       {getAssignedStaff(serviceOrder.assignedStaff as number[]).map(staff => (
@@ -367,7 +367,7 @@ export default function ServiceOrders() {
                 {(serviceOrder.beforeImages || serviceOrder.afterImages) && (
                   <div className="flex items-center text-sm text-primary">
                     <Image className="h-4 w-4 mr-2" />
-                    <span>Contiene imágenes adjuntas</span>
+                    <span>Contains attached images</span>
                   </div>
                 )}
               </CardContent>
@@ -381,7 +381,7 @@ export default function ServiceOrders() {
                       onClick={() => handleUpdateStatus(serviceOrder, "completed")}
                     >
                       <CheckCircle className="h-4 w-4 mr-1" />
-                      Marcar Completado
+                      Mark as Completed
                     </Button>
                   </div>
                 )}
@@ -401,7 +401,7 @@ export default function ServiceOrders() {
                     onClick={() => handleEditServiceOrder(serviceOrder)}
                   >
                     <Edit className="h-4 w-4 mr-1" />
-                    Editar
+                    Edit
                   </Button>
                 </div>
               </CardFooter>
@@ -411,8 +411,8 @@ export default function ServiceOrders() {
       ) : (
         <div className="text-center py-20 text-gray-500">
           {searchTerm || statusFilter !== "all"
-            ? "No se encontraron órdenes de servicio con los filtros aplicados"
-            : "No hay órdenes de servicio registradas. Cree una nueva haciendo clic en 'Nueva Orden de Servicio'"}
+            ? "No service orders found with the applied filters"
+            : "No service orders registered. Create a new one by clicking on 'New Service Order'"}
         </div>
       )}
 
@@ -421,12 +421,12 @@ export default function ServiceOrders() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {serviceOrderToEdit ? "Editar Orden de Servicio" : "Nueva Orden de Servicio"}
+              {serviceOrderToEdit ? "Edit Service Order" : "New Service Order"}
             </DialogTitle>
             <DialogDescription>
               {serviceOrderToEdit
-                ? "Modifique los detalles de la orden de servicio según sea necesario"
-                : "Complete el formulario para crear una nueva orden de servicio"}
+                ? "Modify the service order details as needed"
+                : "Fill out the form to create a new service order"}
             </DialogDescription>
           </DialogHeader>
           <ServiceOrderForm
@@ -443,18 +443,18 @@ export default function ServiceOrders() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar Orden de Servicio?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Service Order?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. La orden de servicio será eliminada permanentemente del sistema.
+              This action cannot be undone. The service order will be permanently deleted from the system.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Eliminar
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
