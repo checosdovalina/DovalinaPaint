@@ -304,19 +304,33 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
           </div>
           
           <div>
-            {quote.status !== 'approved' && (
-              <Button 
-                variant="default" 
-                onClick={() => {
-                  setIsApproving(true);
-                  approvalMutation.mutate();
-                }}
-                disabled={isApproving}
-                className="mr-2 bg-green-600 hover:bg-green-700"
-              >
-                <Check className="mr-2 h-4 w-4" />
-                {isApproving ? "Aprobando..." : "Aprobar Cotización"}
-              </Button>
+            {quote.status !== 'approved' && quote.status !== 'rejected' && (
+              <>
+                <Button 
+                  variant="default" 
+                  onClick={() => {
+                    setIsApproving(true);
+                    approvalMutation.mutate();
+                  }}
+                  disabled={isApproving || isRejecting}
+                  className="mr-2 bg-green-600 hover:bg-green-700"
+                >
+                  <Check className="mr-2 h-4 w-4" />
+                  {isApproving ? "Aprobando..." : "Aprobar Cotización"}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsRejecting(true);
+                    rejectionMutation.mutate();
+                  }}
+                  disabled={isRejecting || isApproving}
+                  className="mr-2 text-red-600 border-red-600 hover:bg-red-50"
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  {isRejecting ? "Rechazando..." : "Rechazar Cotización"}
+                </Button>
+              </>
             )}
             <Button 
               variant="outline" 
