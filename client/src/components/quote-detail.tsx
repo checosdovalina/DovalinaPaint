@@ -223,7 +223,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                       </tr>
                     )}
                     <tr className="border-t bg-muted">
-                      <td colSpan={3} className="py-2 px-3 font-medium text-right">Materials Subtotal:</td>
+                      <td className="py-2 px-3 font-medium text-right">Materials Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${materialsTotal.toFixed(2)}</td>
                     </tr>
                   </tbody>
@@ -241,8 +241,6 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                   <thead className="bg-muted">
                     <tr>
                       <th className="py-2 px-3 text-left">Description</th>
-                      <th className="py-2 px-3 text-right">Hours</th>
-                      <th className="py-2 px-3 text-right">Hourly Rate</th>
                       <th className="py-2 px-3 text-right">Total</th>
                     </tr>
                   </thead>
@@ -251,18 +249,16 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                       quote.laborEstimate.map((item: any, index: number) => (
                         <tr key={index} className="border-t">
                           <td className="py-2 px-3">{item.description}</td>
-                          <td className="py-2 px-3 text-right">{item.hours}</td>
-                          <td className="py-2 px-3 text-right">${Number(item.hourlyRate).toFixed(2)}</td>
                           <td className="py-2 px-3 text-right">${Number(item.total).toFixed(2)}</td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={4} className="py-2 px-3 text-center">No labor registered</td>
+                        <td colSpan={2} className="py-2 px-3 text-center">No labor registered</td>
                       </tr>
                     )}
                     <tr className="border-t bg-muted">
-                      <td colSpan={3} className="py-2 px-3 font-medium text-right">Labor Subtotal:</td>
+                      <td className="py-2 px-3 font-medium text-right">Labor Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${laborTotal.toFixed(2)}</td>
                     </tr>
                   </tbody>
