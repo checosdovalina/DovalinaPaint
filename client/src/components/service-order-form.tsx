@@ -30,7 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, HardHat, Briefcase } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -67,6 +67,26 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
       return res.json();
     },
   });
+  
+  // Fetch subcontractors for the dropdown
+  const { data: subcontractors } = useQuery({
+    queryKey: ["/api/subcontractors"],
+    queryFn: async () => {
+      const res = await fetch("/api/subcontractors");
+      if (!res.ok) throw new Error("Failed to fetch subcontractors");
+      return res.json();
+    },
+  });
+  
+  // Fetch staff for the supervisor dropdown
+  const { data: staffMembers } = useQuery({
+    queryKey: ["/api/staff"],
+    queryFn: async () => {
+      const res = await fetch("/api/staff");
+      if (!res.ok) throw new Error("Failed to fetch staff members");
+      return res.json();
+    },
+  });
 
   const form = useForm<ServiceOrderFormValues>({
     resolver: zodResolver(formSchema),
@@ -79,10 +99,12 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
   // Create or update mutation
   const mutation = useMutation({
     mutationFn: async (data: ServiceOrderFormValues) => {
-      // Prepare the data
+      // Prepare the data - parse empty strings as null
       const serviceOrderData = {
         ...data,
         assignedStaff,
+        assignedSubcontractorId: data.assignedSubcontractorId ? data.assignedSubcontractorId : null,
+        supervisorId: data.supervisorId ? data.supervisorId : null,
       };
 
       if (initialData?.id) {
@@ -187,6 +209,97 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                     <SelectItem value="pending">Pendiente</SelectItem>
                     <SelectItem value="in_progress">En Progreso</SelectItem>
                     <SelectItem value="completed">Completado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="language"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Idioma</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value || "english"}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione el idioma" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="english">English</SelectItem>
+                    <SelectItem value="spanish">Español</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="assignedSubcontractorId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-1.5">
+                  <Briefcase className="h-4 w-4" />
+                  Subcontratista
+                </FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(parseInt(value))}
+                  defaultValue={field.value?.toString()}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un subcontratista" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="">Ninguno</SelectItem>
+                    {subcontractors?.map((subcontractor) => (
+                      <SelectItem key={subcontractor.id} value={subcontractor.id.toString()}>
+                        {subcontractor.company}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="supervisorId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-1.5">
+                  <HardHat className="h-4 w-4" />
+                  Supervisor
+                </FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(parseInt(value))}
+                  defaultValue={field.value?.toString()}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un supervisor" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="">Ninguno</SelectItem>
+                    {staffMembers?.map((staff) => (
+                      <SelectItem key={staff.id} value={staff.id.toString()}>
+                        {staff.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ServiceOrder, Project, Staff } from "@shared/schema";
+import { ServiceOrder, Project, Staff, Subcontractor } from "@shared/schema";
 import { Layout } from "@/components/layout";
 import { ServiceOrderForm } from "@/components/service-order-form";
 import {
@@ -21,6 +21,8 @@ import {
   Search,
   Image,
   CheckCircle,
+  Briefcase,
+  HardHat,
 } from "lucide-react";
 import {
   Dialog,
@@ -92,6 +94,16 @@ export default function ServiceOrders() {
     queryFn: async () => {
       const res = await fetch("/api/staff");
       if (!res.ok) throw new Error("Failed to fetch staff");
+      return res.json();
+    },
+  });
+  
+  // Fetch subcontractors
+  const { data: subcontractors } = useQuery<Subcontractor[]>({
+    queryKey: ["/api/subcontractors"],
+    queryFn: async () => {
+      const res = await fetch("/api/subcontractors");
+      if (!res.ok) throw new Error("Failed to fetch subcontractors");
       return res.json();
     },
   });
@@ -228,6 +240,20 @@ export default function ServiceOrders() {
       case 3: return worker4;
       default: return worker1;
     }
+  };
+  
+  // Helper to get supervisor name
+  const getSupervisorName = (supervisorId: number | null | undefined) => {
+    if (!supervisorId || !staffMembers) return null;
+    const supervisor = staffMembers.find(staff => staff.id === supervisorId);
+    return supervisor;
+  };
+  
+  // Helper to get subcontractor name
+  const getSubcontractorName = (subcontractorId: number | null | undefined) => {
+    if (!subcontractorId || !subcontractors) return null;
+    const subcontractor = subcontractors.find(sub => sub.id === subcontractorId);
+    return subcontractor;
   };
 
   return (
