@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileDown, Printer, Eye, X, Check } from "lucide-react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-// Importar estilos de impresión
+// Import print styles
 import "./quote-print.css";
 
 interface QuoteDetailProps {
@@ -26,7 +26,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
 
-  // Mutation para aprobar la cotización
+  // Mutation to approve the quote
   const approvalMutation = useMutation({
     mutationFn: async () => {
       return apiRequest("PUT", `/api/quotes/${quote.id}`, {
@@ -37,8 +37,8 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
     },
     onSuccess: () => {
       toast({
-        title: "Cotización aprobada",
-        description: "La cotización ha sido aprobada exitosamente.",
+        title: "Quote Approved",
+        description: "The quote has been successfully approved.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -48,13 +48,13 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
       setIsApproving(false);
       toast({
         title: "Error",
-        description: `No se pudo aprobar la cotización: ${error.message}`,
+        description: `Could not approve the quote: ${error.message}`,
         variant: "destructive",
       });
     },
   });
   
-  // Mutation para rechazar la cotización
+  // Mutation to reject the quote
   const rejectionMutation = useMutation({
     mutationFn: async () => {
       return apiRequest("PUT", `/api/quotes/${quote.id}`, {
@@ -65,8 +65,8 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
     },
     onSuccess: () => {
       toast({
-        title: "Cotización rechazada",
-        description: "La cotización ha sido rechazada.",
+        title: "Quote Rejected",
+        description: "The quote has been rejected.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -76,57 +76,57 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
       setIsRejecting(false);
       toast({
         title: "Error",
-        description: `No se pudo rechazar la cotización: ${error.message}`,
+        description: `Could not reject the quote: ${error.message}`,
         variant: "destructive",
       });
     },
   });
 
-  // Calcular totales
+  // Calculate totals
   const materialsTotal = quote.materialsEstimate && Array.isArray(quote.materialsEstimate) ? 
     quote.materialsEstimate.reduce((sum: number, item: any) => sum + (item.total || 0), 0) : 0;
   
   const laborTotal = quote.laborEstimate && Array.isArray(quote.laborEstimate) ? 
     quote.laborEstimate.reduce((sum: number, item: any) => sum + (item.total || 0), 0) : 0;
   
-  // Si no hay margen de ganancia definido, usar 0
+  // If no profit margin is defined, use 0
   const profitMargin = (quote as any).profitMargin || 0;
   const subtotal = materialsTotal + laborTotal;
   const profitAmount = subtotal * (profitMargin / 100);
 
-  // Función para generar PDF (usando la funcionalidad de impresión del navegador)
+  // Function to generate PDF (using browser's print functionality)
   const generatePDF = () => {
     toast({
-      title: "Generando PDF",
-      description: "El PDF de la cotización se está generando...",
+      title: "Generating PDF",
+      description: "The quote PDF is being generated...",
     });
     
-    // Guardar estilos originales
+    // Save original styles
     const originalTitle = document.title;
     
-    // Cambiar título para la impresión
-    document.title = `Cotización #${quote.id} - ${project?.title || 'Proyecto'}`;
+    // Change title for printing
+    document.title = `Quote #${quote.id} - ${project?.title || 'Project'}`;
     
-    // Configurar opciones de impresión para guardar como PDF
+    // Configure print options to save as PDF
     const printOptions = {
       destination: 'save-as-pdf',
     };
     
-    // Iniciar impresión
+    // Start printing
     window.print();
     
-    // Restaurar título original después de un momento
+    // Restore original title after a moment
     setTimeout(() => {
       document.title = originalTitle;
       
       toast({
-        title: "PDF Generado",
-        description: "La cotización ha sido preparada para guardar como PDF",
+        title: "PDF Generated",
+        description: "The quote has been prepared to save as PDF",
       });
     }, 1000);
   };
 
-  // Función para imprimir
+  // Function to print
   const printQuote = () => {
     window.print();
   };
@@ -135,11 +135,11 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl overflow-y-auto max-h-[90vh]">
         <DialogHeader className="print:hidden">
-          <DialogTitle>Detalles de Cotización #{quote.id}</DialogTitle>
+          <DialogTitle>Quote Details #{quote.id}</DialogTitle>
         </DialogHeader>
         
         <div className="p-4 print:p-6" id="quote-detail-printable">
-          {/* Cabecera con información de la empresa */}
+          {/* Company information header */}
           <div className="flex justify-between items-start border-b pb-4 mb-6">
             <div>
               <h1 className="text-2xl font-bold">DOVALINA PAINTING LLC</h1>
@@ -149,52 +149,52 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
               <p>d-dovalina@hotmail.com</p>
             </div>
             <div className="text-right">
-              <h2 className="text-xl font-semibold">Cotización #{quote.id}</h2>
-              <p>Fecha: {quote.createdAt ? format(new Date(quote.createdAt), "PPP", { locale: es }) : 'N/A'}</p>
-              <p>Estado: <span className="font-medium">{quote.status === 'draft' ? 'Borrador' : 
-                quote.status === 'sent' ? 'Enviada' : 
-                quote.status === 'approved' ? 'Aprobada' : 
-                quote.status === 'rejected' ? 'Rechazada' : 'Desconocido'}</span>
+              <h2 className="text-xl font-semibold">Quote #{quote.id}</h2>
+              <p>Date: {quote.createdAt ? format(new Date(quote.createdAt), "PPP", { locale: enUS }) : 'N/A'}</p>
+              <p>Status: <span className="font-medium">{quote.status === 'draft' ? 'Draft' : 
+                quote.status === 'sent' ? 'Sent' : 
+                quote.status === 'approved' ? 'Approved' : 
+                quote.status === 'rejected' ? 'Rejected' : 'Unknown'}</span>
               </p>
-              <p>Válida hasta: {quote.validUntil ? format(new Date(quote.validUntil), "PPP", { locale: es }) : 'N/A'}</p>
+              <p>Valid until: {quote.validUntil ? format(new Date(quote.validUntil), "PPP", { locale: enUS }) : 'N/A'}</p>
             </div>
           </div>
           
-          {/* Información del proyecto y cliente */}
+          {/* Project and client information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <Card>
               <CardContent className="p-4">
-                <h3 className="text-lg font-semibold mb-2">Información del Proyecto</h3>
-                <p><span className="font-medium">Nombre:</span> {project?.title || 'N/A'}</p>
-                <p><span className="font-medium">Dirección:</span> {project?.address || 'N/A'}</p>
-                <p><span className="font-medium">Descripción:</span> {project?.description || 'N/A'}</p>
+                <h3 className="text-lg font-semibold mb-2">Project Information</h3>
+                <p><span className="font-medium">Name:</span> {project?.title || 'N/A'}</p>
+                <p><span className="font-medium">Address:</span> {project?.address || 'N/A'}</p>
+                <p><span className="font-medium">Description:</span> {project?.description || 'N/A'}</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardContent className="p-4">
-                <h3 className="text-lg font-semibold mb-2">Información del Cliente</h3>
-                <p><span className="font-medium">Nombre:</span> {client?.name || 'N/A'}</p>
+                <h3 className="text-lg font-semibold mb-2">Client Information</h3>
+                <p><span className="font-medium">Name:</span> {client?.name || 'N/A'}</p>
                 <p><span className="font-medium">Email:</span> {client?.email || 'N/A'}</p>
-                <p><span className="font-medium">Teléfono:</span> {client?.phone || 'N/A'}</p>
+                <p><span className="font-medium">Phone:</span> {client?.phone || 'N/A'}</p>
               </CardContent>
             </Card>
           </div>
           
-          {/* Desglose de costos */}
-          <h3 className="text-lg font-semibold mb-3">Desglose de Costos</h3>
+          {/* Cost breakdown */}
+          <h3 className="text-lg font-semibold mb-3">Cost Breakdown</h3>
           
-          {/* Materiales */}
+          {/* Materials */}
           <Card className="mb-4">
             <CardContent className="p-4">
-              <h4 className="font-medium mb-2">Costo de Materiales</h4>
+              <h4 className="font-medium mb-2">Materials Cost</h4>
               <div className="border rounded-md overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-muted">
                     <tr>
-                      <th className="py-2 px-3 text-left">Descripción</th>
-                      <th className="py-2 px-3 text-right">Cantidad</th>
-                      <th className="py-2 px-3 text-right">Precio Unitario</th>
+                      <th className="py-2 px-3 text-left">Description</th>
+                      <th className="py-2 px-3 text-right">Quantity</th>
+                      <th className="py-2 px-3 text-right">Unit Price</th>
                       <th className="py-2 px-3 text-right">Total</th>
                     </tr>
                   </thead>
@@ -210,11 +210,11 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={4} className="py-2 px-3 text-center">No hay materiales registrados</td>
+                        <td colSpan={4} className="py-2 px-3 text-center">No materials registered</td>
                       </tr>
                     )}
                     <tr className="border-t bg-muted">
-                      <td colSpan={3} className="py-2 px-3 font-medium text-right">Subtotal Materiales:</td>
+                      <td colSpan={3} className="py-2 px-3 font-medium text-right">Materials Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${materialsTotal.toFixed(2)}</td>
                     </tr>
                   </tbody>
@@ -223,17 +223,17 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
             </CardContent>
           </Card>
           
-          {/* Mano de obra */}
+          {/* Labor */}
           <Card className="mb-4">
             <CardContent className="p-4">
-              <h4 className="font-medium mb-2">Costo de Mano de Obra</h4>
+              <h4 className="font-medium mb-2">Labor Cost</h4>
               <div className="border rounded-md overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-muted">
                     <tr>
-                      <th className="py-2 px-3 text-left">Descripción</th>
-                      <th className="py-2 px-3 text-right">Horas</th>
-                      <th className="py-2 px-3 text-right">Tarifa/Hora</th>
+                      <th className="py-2 px-3 text-left">Description</th>
+                      <th className="py-2 px-3 text-right">Hours</th>
+                      <th className="py-2 px-3 text-right">Hourly Rate</th>
                       <th className="py-2 px-3 text-right">Total</th>
                     </tr>
                   </thead>
@@ -249,11 +249,11 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={4} className="py-2 px-3 text-center">No hay mano de obra registrada</td>
+                        <td colSpan={4} className="py-2 px-3 text-center">No labor registered</td>
                       </tr>
                     )}
                     <tr className="border-t bg-muted">
-                      <td colSpan={3} className="py-2 px-3 font-medium text-right">Subtotal Mano de Obra:</td>
+                      <td colSpan={3} className="py-2 px-3 font-medium text-right">Labor Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${laborTotal.toFixed(2)}</td>
                     </tr>
                   </tbody>
@@ -266,24 +266,24 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
           <Card className="mb-6">
             <CardContent className="p-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Total de la Cotización</h3>
+                <h3 className="text-lg font-semibold">Quote Total</h3>
                 <p className="text-2xl font-bold">${quote.totalEstimate.toFixed(2)}</p>
               </div>
             </CardContent>
           </Card>
           
-          {/* Notas */}
+          {/* Notes */}
           {quote.notes && (
             <Card className="mb-6">
               <CardContent className="p-4">
-                <h3 className="text-lg font-semibold mb-2">Notas y Condiciones</h3>
+                <h3 className="text-lg font-semibold mb-2">Notes and Conditions</h3>
                 <p className="whitespace-pre-line">{quote.notes}</p>
               </CardContent>
             </Card>
           )}
         </div>
         
-        {/* Botones de acción - no se imprimen */}
+        {/* Action buttons - not printed */}
         <div className="flex justify-between items-center print:hidden">
           <div>
             <Button 
@@ -292,14 +292,14 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
               className="mr-2"
             >
               <Printer className="mr-2 h-4 w-4" />
-              Imprimir
+              Print
             </Button>
             <Button 
               variant="outline" 
               onClick={generatePDF}
             >
               <FileDown className="mr-2 h-4 w-4" />
-              Descargar PDF
+              Download PDF
             </Button>
           </div>
           
@@ -316,7 +316,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                   className="mr-2 bg-green-600 hover:bg-green-700"
                 >
                   <Check className="mr-2 h-4 w-4" />
-                  {isApproving ? "Aprobando..." : "Aprobar Cotización"}
+                  {isApproving ? "Approving..." : "Approve Quote"}
                 </Button>
                 <Button 
                   variant="outline" 
@@ -328,7 +328,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                   className="mr-2 text-red-600 border-red-600 hover:bg-red-50"
                 >
                   <X className="mr-2 h-4 w-4" />
-                  {isRejecting ? "Rechazando..." : "Rechazar Cotización"}
+                  {isRejecting ? "Rejecting..." : "Reject Quote"}
                 </Button>
               </>
             )}
@@ -337,7 +337,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
               onClick={onClose}
             >
               <X className="mr-2 h-4 w-4" />
-              Cerrar
+              Close
             </Button>
           </div>
         </div>

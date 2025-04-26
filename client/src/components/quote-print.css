@@ -1,11 +1,11 @@
-/* Estilos para impresión de cotizaciones */
+/* Print styles for quotes */
 @media print {
-  /* Ocultar elementos que no queremos imprimir */
+  /* Hide elements we don't want to print */
   body > *:not(#root) {
     display: none !important;
   }
   
-  /* Asegurarnos de que el diálogo modal se muestre */
+  /* Make sure the modal dialog is visible */
   #root [role="dialog"],
   #quote-detail-printable {
     display: block !important;
@@ -15,9 +15,10 @@
     width: 100% !important;
     height: auto !important;
     overflow: visible !important;
+    background: white !important;
   }
   
-  /* Resetear márgenes y configurar página */
+  /* Reset margins and configure page */
   @page {
     size: letter;
     margin: 1cm;
@@ -32,7 +33,7 @@
     padding: 0 !important;
   }
   
-  /* Estilos para el contenido imprimible */
+  /* Styles for printable content */
   #quote-detail-printable {
     display: block !important;
     width: 100% !important;
@@ -43,12 +44,12 @@
     overflow: visible !important;
   }
   
-  /* Forzar página completa y evitar cortes */
+  /* Force full page and prevent cuts */
   .Dialog, 
   .DialogContent,
   [role="dialog"],
   [data-state="open"] {
-    position: relative !important;
+    position: static !important;
     overflow: visible !important;
     max-height: none !important;
     height: auto !important;
@@ -60,9 +61,10 @@
     padding: 0 !important;
     max-width: none !important;
     z-index: 9999 !important;
+    background: white !important;
   }
   
-  /* Ocultar elementos de UI que no deberían imprimirse */
+  /* Hide UI elements that shouldn't be printed */
   button,
   [role="button"],
   .DialogOverlay,
@@ -74,8 +76,8 @@
     display: none !important;
   }
   
-  /* Arreglar estilos para las tarjetas */
-  .Card {
+  /* Fix styles for cards */
+  .Card, .card {
     border: 1px solid #ddd !important;
     border-radius: 4px !important;
     margin-bottom: 16px !important;
@@ -84,7 +86,7 @@
     page-break-inside: avoid !important;
   }
   
-  /* Estilos para tablas */
+  /* Styles for tables */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -101,19 +103,19 @@
     font-weight: bold !important;
   }
   
-  /* Asegurar que las tablas no se dividan entre páginas */
-  tr, .Card, .CardContent {
+  /* Ensure tables don't split between pages */
+  tr, .Card, .CardContent, .card, .card-content {
     page-break-inside: avoid !important;
   }
   
-  /* Logo e información de la empresa */
+  /* Company logo and information */
   .company-header {
     display: flex !important;
     justify-content: space-between !important;
     margin-bottom: 20px !important;
   }
   
-  /* Formato para totales */
+  /* Format for totals */
   .total-section {
     font-size: 14pt !important;
     font-weight: bold !important;
@@ -121,8 +123,15 @@
     margin-top: 20px !important;
   }
   
-  /* Ocultar botones de acción */
+  /* Hide action buttons */
   .action-buttons {
     display: none !important;
+  }
+  
+  /* Force background colors */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
