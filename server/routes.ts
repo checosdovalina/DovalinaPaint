@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
+import { google } from 'googleapis';
 import { insertClientSchema, insertProjectSchema, insertQuoteSchema, insertServiceOrderSchema, insertStaffSchema, insertActivitySchema, insertSubcontractorSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -697,6 +698,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Google Calendar routes
+  app.post("/api/google/auth", isAuthenticated, async (req, res) => {
+    try {
+      // In a real application, this would initiate the OAuth 2.0 flow
+      // For demonstration purposes, we'll simulate a successful authentication
+      
+      // Get Google credentials and create an OAuth2 client
+      const oauth2Client = new google.auth.OAuth2(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+        process.env.GOOGLE_REDIRECT_URI
+      );
+      
+      // Generate a URL for the user to authorize the app
+      const authUrl = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: ['https://www.googleapis.com/auth/calendar'],
+      });
+      
+      // In a real application, you would redirect the user to the authUrl
+      // For our simulation, we'll just return the URL
+      res.json({ success: true, url: authUrl });
+    } catch (error) {
+      console.error('Google Auth Error:', error);
+      res.status(500).json({ message: "Google Calendar authentication failed" });
+    }
+  });
+  
+  app.get("/api/google/callback", isAuthenticated, async (req, res) => {
+    try {
+      // This would be the callback endpoint for the OAuth flow
+      // The code would be exchanged for tokens here
+      
+      // In a real application, store the tokens in the user's session or database
+      res.redirect('/calendar');
+    } catch (error) {
+      console.error('Google Callback Error:', error);
+      res.status(500).json({ message: "Google Calendar authorization failed" });
+    }
+  });
+  
+  app.get("/api/google/events", isAuthenticated, async (req, res) => {
+    try {
+      // In a real application, retrieve the user's tokens and create a new auth client
+      // For our simulation, we'll return sample events
+      
+      // Example of how to use the Google Calendar API
+      /*
+      const oauth2Client = new google.auth.OAuth2();
+      oauth2Client.setCredentials(tokens);
+      
+      const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+      const response = await calendar.events.list({
+        calendarId: 'primary',
+        timeMin: new Date().toISOString(),
+        maxResults: 10,
+        singleEvents: true,
+        orderBy: 'startTime',
+      });
+      
+      const events = response.data.items;
+      res.json(events);
+      */
+      
+      // For simulation, return sample events
+      const sampleEvents = [
+        {
+          id: 'google-event-1',
+          summary: 'Client Meeting',
+          start: { dateTime: new Date().toISOString() },
+          end: { dateTime: new Date(Date.now() + 3600000).toISOString() },
+          location: 'Client Office',
+          description: 'Discuss project requirements',
+        },
+        {
+          id: 'google-event-2',
+          summary: 'Site Visit',
+          start: { dateTime: new Date(Date.now() + 86400000).toISOString() },
+          end: { dateTime: new Date(Date.now() + 86400000 + 7200000).toISOString() },
+          location: 'Project Site',
+          description: 'Inspect the site and take measurements',
+        }
+      ];
+      
+      res.json(sampleEvents);
+    } catch (error) {
+      console.error('Google Events Error:', error);
+      res.status(500).json({ message: "Failed to fetch Google Calendar events" });
+    }
+  });
+  
+  app.post("/api/google/events", isAuthenticated, async (req, res) => {
+    try {
+      // In a real application, this would create an event in Google Calendar
+      // For our simulation, we'll just return the event data
+      
+      // Example of creating an event
+      /*
+      const oauth2Client = new google.auth.OAuth2();
+      oauth2Client.setCredentials(tokens);
+      
+      const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+      const event = {
+        summary: req.body.title,
+        description: req.body.description,
+        start: {
+          dateTime: req.body.start,
+          timeZone: 'America/Los_Angeles',
+        },
+        end: {
+          dateTime: req.body.end,
+          timeZone: 'America/Los_Angeles',
+        },
+        location: req.body.location,
+      };
+      
+      const response = await calendar.events.insert({
+        calendarId: 'primary',
+        resource: event,
+      });
+      
+      res.json(response.data);
+      */
+      
+      // For simulation
+      const event = {
+        id: `google-event-${Date.now()}`,
+        summary: req.body.title,
+        description: req.body.description,
+        start: { dateTime: req.body.start },
+        end: { dateTime: req.body.end },
+        location: req.body.location,
+        status: 'confirmed'
+      };
+      
+      // Create activity log
+      await storage.createActivity({
+        type: "google_event_created",
+        description: `Google Calendar event "${req.body.title}" created`,
+        userId: req.user.id,
+        projectId: req.body.projectId || null,
+        clientId: null
+      });
+      
+      res.status(201).json(event);
+    } catch (error) {
+      console.error('Google Create Event Error:', error);
+      res.status(500).json({ message: "Failed to create Google Calendar event" });
     }
   });
 

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, jsonb, real } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, jsonb, real, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -277,6 +277,73 @@ export const insertActivitySchema = createInsertSchema(activities).pick({
   clientId: true,
 });
 
+// Invoice schema
+export const invoices = pgTable("invoices", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  clientId: integer("client_id").notNull(),
+  invoiceNumber: text("invoice_number").notNull().unique(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  tax: decimal("tax", { precision: 10, scale: 2 }).notNull().default("0"),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull().default("draft"), // draft, sent, paid, overdue, cancelled
+  items: jsonb("items").notNull(), // Array of items with descriptions and amounts
+  issueDate: timestamp("issue_date"),
+  dueDate: timestamp("due_date"),
+  paidDate: timestamp("paid_date"),
+  paymentMethod: text("payment_method"), // cash, check, credit_card, bank_transfer, stripe
+  transactionId: text("transaction_id"), // For electronic payments
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  stripePaymentIntentId: text("stripe_payment_intent_id"), // For Stripe integration
+  stripeInvoiceId: text("stripe_invoice_id"), // For Stripe integration
+});
+
+// Esquema base para facturas
+const baseInvoiceSchema = createInsertSchema(invoices).pick({
+  projectId: true,
+  clientId: true,
+  invoiceNumber: true,
+  amount: true,
+  tax: true,
+  totalAmount: true,
+  status: true,
+  items: true,
+  paymentMethod: true,
+  transactionId: true,
+  notes: true,
+  stripePaymentIntentId: true,
+  stripeInvoiceId: true,
+});
+
+// Añadir validación personalizada para fechas
+export const insertInvoiceSchema = baseInvoiceSchema.extend({
+  issueDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "Issue date must be valid"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  dueDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "Due date must be valid"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  paidDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "Paid date must be valid"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+});
+
 // Definir relaciones entre tablas
 export const clientsRelations = relations(clients, ({ many }) => ({
   projects: many(projects),
@@ -289,6 +356,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   }),
   serviceOrders: many(serviceOrders),
   quotes: many(quotes),
+  invoices: many(invoices),
 }));
 
 export const serviceOrdersRelations = relations(serviceOrders, ({ one }) => ({
@@ -303,6 +371,17 @@ export const serviceOrdersRelations = relations(serviceOrders, ({ one }) => ({
   supervisor: one(staff, {
     fields: [serviceOrders.supervisorId],
     references: [staff.id],
+  }),
+}));
+
+export const invoicesRelations = relations(invoices, ({ one }) => ({
+  project: one(projects, {
+    fields: [invoices.projectId],
+    references: [projects.id],
+  }),
+  client: one(clients, {
+    fields: [invoices.clientId],
+    references: [clients.id],
   }),
 }));
 
