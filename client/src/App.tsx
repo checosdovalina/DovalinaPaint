@@ -16,6 +16,7 @@ import Personnel from "@/pages/personnel";
 import Reports from "@/pages/reports";
 import Subcontractors from "@/pages/subcontractors";
 import Calendar from "@/pages/calendar";
+import Invoices from "@/pages/invoices";
 
 function Router() {
   return (
@@ -29,6 +30,7 @@ function Router() {
       <ProtectedRoute path="/calendar" component={Calendar} />
       <ProtectedRoute path="/personnel" component={Personnel} />
       <ProtectedRoute path="/subcontractors" component={Subcontractors} />
+      <ProtectedRoute path="/invoices" component={Invoices} />
       <ProtectedRoute path="/reports" component={Reports} />
       <Route component={NotFound} />
     </Switch>

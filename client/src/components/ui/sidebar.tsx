@@ -58,7 +58,7 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Calendar", path: "/calendar", icon: <Calendar className="w-5 h-5" /> },
     { name: "Staff Management", path: "/personnel", icon: <UserCog className="w-5 h-5" /> },
     { name: "Subcontractors", path: "/subcontractors", icon: <Briefcase className="w-5 h-5" /> },
-    { name: "Billing & Payments", path: "/billing", icon: <File className="w-5 h-5" /> },
+    { name: "Invoices", path: "/invoices", icon: <File className="w-5 h-5" /> },
     { name: "Reports & Analytics", path: "/reports", icon: <BarChart className="w-5 h-5" /> },
     { name: "Settings", path: "/settings", icon: <Settings className="w-5 h-5" /> },
   ];
