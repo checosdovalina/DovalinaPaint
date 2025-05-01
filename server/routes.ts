@@ -701,6 +701,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Invoice routes
+  app.get("/api/invoices", isAuthenticated, async (req, res) => {
+    try {
+      let invoices;
+      
+      if (req.query.status) {
+        invoices = await storage.getInvoicesByStatus(req.query.status as string);
+      } else if (req.query.clientId) {
+        invoices = await storage.getInvoicesByClient(parseInt(req.query.clientId as string));
+      } else if (req.query.projectId) {
+        invoices = await storage.getInvoicesByProject(parseInt(req.query.projectId as string));
+      } else {
+        invoices = await storage.getInvoices();
+      }
+      
+      res.json(invoices);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/invoices/:id", isAuthenticated, async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(parseInt(req.params.id));
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      res.json(invoice);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/invoices", isAuthenticated, async (req, res) => {
+    try {
+      // Create a unique invoice number
+      const formattedDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const invoiceNumber = `INV-${formattedDate}-${randomStr}`;
+      
+      const invoiceData = insertInvoiceSchema.parse({
+        ...req.body,
+        invoiceNumber
+      });
+      
+      const invoice = await storage.createInvoice(invoiceData);
+      
+      // Get the project and client for the activity
+      const project = await storage.getProject(invoice.projectId);
+      const client = await storage.getClient(invoice.clientId);
+      
+      // Create activity for invoice creation
+      await storage.createActivity({
+        type: "invoice_created",
+        description: `New invoice ${invoice.invoiceNumber} created for project "${project?.title || 'Unknown'}"`,
+        userId: req.user.id,
+        projectId: invoice.projectId,
+        clientId: invoice.clientId
+      });
+      
+      res.status(201).json(invoice);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid invoice data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/invoices/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoiceData = insertInvoiceSchema.partial().parse(req.body);
+      const updatedInvoice = await storage.updateInvoice(id, invoiceData);
+      
+      if (!updatedInvoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      
+      // Create activity for invoice update
+      await storage.createActivity({
+        type: "invoice_updated",
+        description: `Invoice ${updatedInvoice.invoiceNumber} updated`,
+        userId: req.user.id,
+        projectId: updatedInvoice.projectId,
+        clientId: updatedInvoice.clientId
+      });
+      
+      res.json(updatedInvoice);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid invoice data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/invoices/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(id);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      
+      const deleted = await storage.deleteInvoice(id);
+      
+      if (deleted) {
+        // Create activity for invoice deletion
+        await storage.createActivity({
+          type: "invoice_deleted",
+          description: `Invoice ${invoice.invoiceNumber} deleted`,
+          userId: req.user.id,
+          projectId: invoice.projectId,
+          clientId: invoice.clientId
+        });
+        
+        res.sendStatus(204);
+      } else {
+        res.status(500).json({ message: "Failed to delete invoice" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Create Stripe payment intent for invoices
+  app.post("/api/create-payment-intent", isAuthenticated, async (req, res) => {
+    try {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(500).json({ message: "Stripe secret key not configured" });
+      }
+
+      const Stripe = require('stripe');
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+      
+      const { amount, invoiceId } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+      
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents for Stripe
+        currency: "usd",
+        metadata: {
+          invoiceId: invoiceId || null,
+        },
+      });
+      
+      // If we have an invoice ID, update the invoice with the payment intent ID
+      if (invoiceId) {
+        const invoice = await storage.getInvoice(parseInt(invoiceId));
+        if (invoice) {
+          await storage.updateInvoice(invoice.id, {
+            stripePaymentIntentId: paymentIntent.id
+          });
+        }
+      }
+      
+      // Create activity
+      await storage.createActivity({
+        type: "payment_intent_created",
+        description: `Payment intent created for $${(amount).toFixed(2)}`,
+        userId: req.user.id,
+        projectId: null,
+        clientId: null
+      });
+      
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Google Calendar routes
   app.post("/api/google/auth", isAuthenticated, async (req, res) => {
     try {

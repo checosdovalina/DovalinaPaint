@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor } from "@shared/schema";
+import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { db } from "./db";
@@ -66,6 +66,16 @@ export interface IStorage {
   getActivitiesByClient(clientId: number): Promise<Activity[]>;
   getActivitiesByUser(userId: number): Promise<Activity[]>;
   createActivity(activity: InsertActivity): Promise<Activity>;
+  
+  // Invoice methods
+  getInvoices(): Promise<Invoice[]>;
+  getInvoice(id: number): Promise<Invoice | undefined>;
+  getInvoicesByProject(projectId: number): Promise<Invoice[]>;
+  getInvoicesByClient(clientId: number): Promise<Invoice[]>;
+  getInvoicesByStatus(status: string): Promise<Invoice[]>;
+  createInvoice(invoice: InsertInvoice): Promise<Invoice>;
+  updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined>;
+  deleteInvoice(id: number): Promise<boolean>;
   
   // Session store
   sessionStore: any;
@@ -636,6 +646,87 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
+
+  // Invoice methods
+  async getInvoices(): Promise<Invoice[]> {
+    try {
+      return await db.select().from(invoices).orderBy(desc(invoices.createdAt));
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      return [];
+    }
+  }
+  
+  async getInvoice(id: number): Promise<Invoice | undefined> {
+    try {
+      const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+      return invoice;
+    } catch (error) {
+      console.error("Error fetching invoice:", error);
+      return undefined;
+    }
+  }
+  
+  async getInvoicesByProject(projectId: number): Promise<Invoice[]> {
+    try {
+      return await db.select().from(invoices).where(eq(invoices.projectId, projectId));
+    } catch (error) {
+      console.error("Error fetching invoices by project:", error);
+      return [];
+    }
+  }
+  
+  async getInvoicesByClient(clientId: number): Promise<Invoice[]> {
+    try {
+      return await db.select().from(invoices).where(eq(invoices.clientId, clientId));
+    } catch (error) {
+      console.error("Error fetching invoices by client:", error);
+      return [];
+    }
+  }
+  
+  async getInvoicesByStatus(status: string): Promise<Invoice[]> {
+    try {
+      return await db.select().from(invoices).where(eq(invoices.status, status));
+    } catch (error) {
+      console.error("Error fetching invoices by status:", error);
+      return [];
+    }
+  }
+  
+  async createInvoice(invoice: InsertInvoice): Promise<Invoice> {
+    try {
+      const [newInvoice] = await db.insert(invoices).values(invoice).returning();
+      return newInvoice;
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      throw error;
+    }
+  }
+  
+  async updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined> {
+    try {
+      const [updatedInvoice] = await db
+        .update(invoices)
+        .set(invoice)
+        .where(eq(invoices.id, id))
+        .returning();
+      return updatedInvoice;
+    } catch (error) {
+      console.error("Error updating invoice:", error);
+      return undefined;
+    }
+  }
+  
+  async deleteInvoice(id: number): Promise<boolean> {
+    try {
+      await db.delete(invoices).where(eq(invoices.id, id));
+      return true;
+    } catch (error) {
+      console.error("Error deleting invoice:", error);
+      return false;
+    }
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -716,6 +807,16 @@ export class MemStorage implements IStorage {
   async getActivitiesByClient(clientId: number): Promise<Activity[]> { return []; }
   async getActivitiesByUser(userId: number): Promise<Activity[]> { return []; }
   async createActivity(activity: InsertActivity): Promise<Activity> { throw new Error("Not implemented"); }
+  
+  // Invoice methods
+  async getInvoices(): Promise<Invoice[]> { return []; }
+  async getInvoice(id: number): Promise<Invoice | undefined> { return undefined; }
+  async getInvoicesByProject(projectId: number): Promise<Invoice[]> { return []; }
+  async getInvoicesByClient(clientId: number): Promise<Invoice[]> { return []; }
+  async getInvoicesByStatus(status: string): Promise<Invoice[]> { return []; }
+  async createInvoice(invoice: InsertInvoice): Promise<Invoice> { throw new Error("Not implemented"); }
+  async updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined> { return undefined; }
+  async deleteInvoice(id: number): Promise<boolean> { return false; }
 }
 
 // Use database storage instead of memory storage
