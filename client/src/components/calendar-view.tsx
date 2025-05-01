@@ -22,9 +22,9 @@ import {
   CalendarIcon, 
   RefreshCcw, 
   Plus, 
-  Calendar as CalendarLucide,
-  Google
+  Calendar as CalendarLucide
 } from 'lucide-react';
+import { SiGoogle } from 'react-icons/si';
 
 interface CalendarEvent {
   id: string;
@@ -279,7 +279,7 @@ export function CalendarView({
               onClick={handleGoogleAuth}
               disabled={isLoading}
             >
-              <Google className="mr-2 h-4 w-4" />
+              <SiGoogle className="mr-2 h-4 w-4" />
               Conectar con Google
             </Button>
           ) : (

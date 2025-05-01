@@ -15,6 +15,7 @@ import Projects from "@/pages/projects";
 import Personnel from "@/pages/personnel";
 import Reports from "@/pages/reports";
 import Subcontractors from "@/pages/subcontractors";
+import Calendar from "@/pages/calendar";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
       <ProtectedRoute path="/quotes" component={Quotes} />
       <ProtectedRoute path="/service-orders" component={ServiceOrders} />
       <ProtectedRoute path="/projects" component={Projects} />
+      <ProtectedRoute path="/calendar" component={Calendar} />
       <ProtectedRoute path="/personnel" component={Personnel} />
       <ProtectedRoute path="/subcontractors" component={Subcontractors} />
       <ProtectedRoute path="/reports" component={Reports} />
