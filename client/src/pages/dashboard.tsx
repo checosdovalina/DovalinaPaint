@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Project, Activity } from "@shared/schema";
+import { Project, Activity, Quote } from "@shared/schema";
 import { Layout } from "@/components/layout";
 import { KanbanBoard } from "@/components/kanban-board";
 import { ProjectModal } from "@/components/project-modal";
@@ -57,6 +57,16 @@ export default function Dashboard() {
       return res.json();
     },
   });
+  
+  // Fetch quotes for income calculation
+  const { data: quotes, isLoading: isLoadingQuotes } = useQuery<Quote[]>({
+    queryKey: ["/api/quotes"],
+    queryFn: async () => {
+      const res = await fetch("/api/quotes");
+      if (!res.ok) throw new Error("Failed to fetch quotes");
+      return res.json();
+    },
+  });
 
   const handleProjectClick = (project: Project) => {
     setSelectedProject(project);
@@ -92,7 +102,86 @@ export default function Dashboard() {
   
   const pendingQuotes = projects?.filter(p => p.status === "quoted").length || 0;
   
-  const currentMonthIncome = 124835; // This would come from an API call in a real app
+  // Calculate current month income from quotes
+  const [currentMonthIncome, setCurrentMonthIncome] = useState(0);
+  
+  useEffect(() => {
+    if (quotes) {
+      // Get current month and year
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      
+      // Filter quotes that were approved in the current month
+      const approvedQuotesThisMonth = quotes.filter(quote => {
+        if (quote.status !== 'approved' || !quote.approvedDate) return false;
+        const approvedDate = new Date(quote.approvedDate);
+        return approvedDate.getMonth() === currentMonth && 
+               approvedDate.getFullYear() === currentYear;
+      });
+      
+      // Calculate total profit from approved quotes
+      let totalProfit = 0;
+      
+      approvedQuotesThisMonth.forEach(quote => {
+        // Parse and calculate based on materialsEstimate and laborEstimate
+        try {
+          let materialsTotal = 0;
+          let laborTotal = 0;
+          
+          // Check if materialsEstimate has data
+          if (quote.materialsEstimate && typeof quote.materialsEstimate === 'object') {
+            // Try to parse if it's a string
+            const materials = Array.isArray(quote.materialsEstimate) 
+              ? quote.materialsEstimate 
+              : JSON.parse(typeof quote.materialsEstimate === 'string' 
+                ? quote.materialsEstimate 
+                : JSON.stringify(quote.materialsEstimate));
+                
+            if (Array.isArray(materials)) {
+              materials.forEach(item => {
+                if (item && typeof item === 'object' && 'total' in item) {
+                  materialsTotal += Number(item.total) || 0;
+                }
+              });
+            }
+          }
+          
+          // Check if laborEstimate has data
+          if (quote.laborEstimate && typeof quote.laborEstimate === 'object') {
+            // Try to parse if it's a string
+            const labor = Array.isArray(quote.laborEstimate) 
+              ? quote.laborEstimate 
+              : JSON.parse(typeof quote.laborEstimate === 'string' 
+                ? quote.laborEstimate 
+                : JSON.stringify(quote.laborEstimate));
+                
+            if (Array.isArray(labor)) {
+              labor.forEach(item => {
+                if (item && typeof item === 'object' && 'total' in item) {
+                  laborTotal += Number(item.total) || 0;
+                }
+              });
+            }
+          }
+          
+          // Use quote.totalEstimate if available, otherwise use calculated total
+          const quoteTotal = quote.totalEstimate || (materialsTotal + laborTotal);
+          
+          // Calculate profit margin (assuming 25% profit margin)
+          // In a real implementation, use the actual profit margin from each quote
+          const profitMargin = 0.25; // Default 25% profit margin
+          const profit = quoteTotal * profitMargin;
+          
+          totalProfit += profit;
+        } catch (e) {
+          console.error("Error calculating profit for quote", quote.id, e);
+        }
+      });
+      
+      setCurrentMonthIncome(totalProfit);
+    }
+  }, [quotes]);
   
   const newClients = 8; // This would come from an API call in a real app
 

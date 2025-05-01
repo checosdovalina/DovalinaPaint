@@ -15,7 +15,8 @@ import {
   Menu, 
   X, 
   PaintbrushVertical,
-  Briefcase
+  Briefcase,
+  Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -54,6 +55,7 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Quotes", path: "/quotes", icon: <FileText className="w-5 h-5" /> },
     { name: "Service Orders", path: "/service-orders", icon: <Clipboard className="w-5 h-5" /> },
     { name: "Project Management", path: "/projects", icon: <Network className="w-5 h-5" /> },
+    { name: "Calendar", path: "/calendar", icon: <Calendar className="w-5 h-5" /> },
     { name: "Staff Management", path: "/personnel", icon: <UserCog className="w-5 h-5" /> },
     { name: "Subcontractors", path: "/subcontractors", icon: <Briefcase className="w-5 h-5" /> },
     { name: "Billing & Payments", path: "/billing", icon: <File className="w-5 h-5" /> },
