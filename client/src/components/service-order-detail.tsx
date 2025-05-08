@@ -389,26 +389,27 @@ export function ServiceOrderDetail({
       
       // Handle details text with potential wrapping
       if (serviceOrder.details) {
-        // Use monospaced font for bulleted code-like content
-        pdf.setFontSize(10); // Slightly larger and more readable
-        pdf.setFont('courier', 'normal'); // Use monospaced font for code-like details
+        // Usar fuente monoespaciada para que coincida exactamente con la imagen
+        pdf.setFontSize(10); // Tamaño de letra similar al resto del PDF
+        pdf.setFont('courier', 'normal'); // Fuente monoespaciada tipo máquina de escribir
         
         // Calculate maximum width for text - provide enough margin
         const maxDetailsWidth = pageWidth - 20; // Wider margin for monospaced font
         
-        // Format the details - reproduce the bullet point style
+        // Espaciar manualmente cada caracter como en la imagen para simular el estilo de máquina de escribir
         const formattedDetails = serviceOrder.details
           .split('\n')
           .map(line => line.trim()) // Clean up each line
           .filter(line => line.length > 0) // Remove empty lines
           .map(line => {
-            // If it starts with a bullet point or number, keep it as is
-            if (line.startsWith('•') || line.startsWith('*') || /^\d+\./.test(line)) {
+            // If it already starts with quote marks like in the image, keep it
+            if (line.startsWith("' ") || line.startsWith("''") || line.startsWith("'  ")) {
               return line;
             }
-            // Otherwise add a bullet point for each line like in the image
-            return line.startsWith("'") ? line : "' " + line;
+            // Add single quote and space exactly like in the image
+            return "' " + line;
           })
+          // No "spacear" el texto ya que la fuente courier ya lo hace naturalmente
           .join('\n');
           
         // Split formatted text into lines that fit the width
@@ -512,8 +513,8 @@ export function ServiceOrderDetail({
         pdf.setFont('helvetica', 'normal');
         pdf.text(
           `Signed by client on: ${serviceOrder.signedDate 
-            ? format(new Date(serviceOrder.signedDate), "MMMM do, yyyy", { locale: enUS }) 
-            : format(new Date(), "MMMM do, yyyy", { locale: enUS })}`, 
+            ? format(new Date(serviceOrder.signedDate), "MMMM d'th', yyyy", { locale: enUS }) 
+            : format(new Date(), "MMMM d'th', yyyy", { locale: enUS })}`, 
           leftMargin + 5, 
           yPos + 15
         );
@@ -550,7 +551,7 @@ export function ServiceOrderDetail({
       pdf.setFontSize(8);
       pdf.setFont('helvetica', 'normal');
       pdf.text(
-        `Generated on ${format(new Date(), "MMMM do, yyyy", { locale: enUS })}`,
+        `Generated on ${format(new Date(), "MMMM d'th', yyyy", { locale: enUS })}`,
         105,
         285,
         { align: "center" }
@@ -598,9 +599,9 @@ export function ServiceOrderDetail({
             </div>
             <div className="text-right service-order-info">
               <h2 className="text-xl font-semibold">Service Order #{serviceOrder.id}</h2>
-              <p>Date: {serviceOrder.createdAt ? format(new Date(serviceOrder.createdAt), "PPP", { locale: enUS }) : 'N/A'}</p>
+              <p>Date: {serviceOrder.createdAt ? format(new Date(serviceOrder.createdAt), "MMMM d'th', yyyy", { locale: enUS }) : 'N/A'}</p>
               <p>Status: <span className="font-medium">{serviceOrder.status || 'Pending'}</span></p>
-              <p>Due Date: {serviceOrder.dueDate ? format(new Date(serviceOrder.dueDate), "PPP", { locale: enUS }) : 'N/A'}</p>
+              <p>Due Date: {serviceOrder.dueDate ? format(new Date(serviceOrder.dueDate), "MMMM d'th', yyyy", { locale: enUS }) : 'N/A'}</p>
             </div>
           </div>
           
@@ -630,7 +631,7 @@ export function ServiceOrderDetail({
             <CardContent className="p-4">
               <h3 className="text-lg font-semibold mb-2">Service Details</h3>
               <p><span className="font-medium">Assigned To:</span> {assignedTo}</p>
-              <p><span className="font-medium">Start Date:</span> {serviceOrder.startDate ? format(new Date(serviceOrder.startDate), "PPP", { locale: enUS }) : 'N/A'}</p>
+              <p><span className="font-medium">Start Date:</span> {serviceOrder.startDate ? format(new Date(serviceOrder.startDate), "MMMM d'th', yyyy", { locale: enUS }) : 'N/A'}</p>
               <p><span className="font-medium">Details:</span></p>
               <p className="whitespace-pre-line mt-1">{serviceOrder.details || 'No specific details provided.'}</p>
             </CardContent>
@@ -717,8 +718,8 @@ export function ServiceOrderDetail({
               {clientSignature ? (
                 <div>
                   <p className="mb-2">Signed by client on: {serviceOrder.signedDate 
-                    ? format(new Date(serviceOrder.signedDate), "PPP", { locale: enUS }) 
-                    : format(new Date(), "PPP", { locale: enUS })}</p>
+                    ? format(new Date(serviceOrder.signedDate), "MMMM d'th', yyyy", { locale: enUS }) 
+                    : format(new Date(), "MMMM d'th', yyyy", { locale: enUS })}</p>
                   <div className="border rounded-md p-2 bg-gray-50">
                     <img src={clientSignature} alt="Client Signature" className="max-h-36" />
                   </div>
