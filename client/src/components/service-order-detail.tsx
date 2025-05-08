@@ -223,7 +223,7 @@ export function ServiceOrderDetail({
     signatureMutation.mutate(signatureDataUrl);
   };
 
-  // Function to generate and download PDF - styled to match the dialog view
+  // Function to generate and download PDF - styled to match the reference format
   const generatePDF = async () => {
     toast({
       title: "Generating PDF",
@@ -231,13 +231,7 @@ export function ServiceOrderDetail({
     });
     
     try {
-      // Use html2canvas to capture the service order as it appears on screen
-      const contentElement = document.getElementById('service-order-printable');
-      if (!contentElement) {
-        throw new Error('Could not find the service order content element');
-      }
-      
-      // Create the PDF with a portrait A4 page
+      // Create a new PDF document
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -245,116 +239,500 @@ export function ServiceOrderDetail({
         compress: true
       });
       
-      // Calculate PDF width (A4)
-      const pdfWidth = 210;
-      const pdfHeight = 297;
-      const margin = 10;
-      
-      // Function to add a section to the PDF
-      const addSectionToPDF = async (element: HTMLElement | null): Promise<{ canvas: HTMLCanvasElement; imgWidth: number; imgHeight: number } | null> => {
-        if (!element) return null;
-        
-        const canvas = await html2canvas(element, {
-          scale: 2, // Higher scale for better quality
-          useCORS: true, // Allow cross-origin images
-          logging: false,
-          backgroundColor: '#ffffff'
-        });
-        
-        // Get the actual width and height
-        const imgWidth = pdfWidth - (margin * 2);
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        return { canvas, imgWidth, imgHeight };
-      };
-      
-      // Generate a filename
+      // Generate a filename for the PDF
       const filename = `Dovalina_Painting_ServiceOrder_${serviceOrder.id}.pdf`;
       
-      // Header Section (Company Info)
-      const header = contentElement.querySelector('.company-header');
-      let yPos = margin;
+      // Set margins
+      const leftMargin = 15;
+      const pageWidth = 210 - (leftMargin * 2); // A4 width minus margins
+      let yPos = 15;
       
-      if (header instanceof HTMLElement) {
-        const result = await addSectionToPDF(header);
-        if (result) {
-          const { canvas, imgWidth, imgHeight } = result;
-          pdf.addImage(
-            canvas.toDataURL('image/png'), 
-            'PNG', 
-            margin, 
-            yPos, 
-            imgWidth, 
-            imgHeight
-          );
-          yPos += imgHeight + 5;
-        }
-      }
+      // --------------------------------------------
+      // HEADER SECTION
+      // --------------------------------------------
+      // Company info (left side)
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("DOVALINA PAINTING LLC", leftMargin, yPos);
       
-      // Project and Client Info Section
-      const infoSection = contentElement.querySelector('.info-grid');
-      if (infoSection instanceof HTMLElement) {
-        const result = await addSectionToPDF(infoSection);
-        if (result) {
-          const { canvas, imgWidth, imgHeight } = result;
-          pdf.addImage(
-            canvas.toDataURL('image/png'), 
-            'PNG', 
-            margin, 
-            yPos, 
-            imgWidth, 
-            imgHeight
-          );
-          yPos += imgHeight + 5;
-        }
-      }
+      // Service order info (right side)
+      const rightColStart = 160;
+      pdf.setFontSize(12);
+      pdf.text(`Service Order #${serviceOrder.id}`, rightColStart, yPos, { align: 'right' });
       
-      // Find all Card components (Service Details, Materials, etc.)
-      const cards = Array.from(contentElement.querySelectorAll('.mb-6.card')).filter(
-        card => !card.closest('.info-grid') // Exclude cards that are part of the info grid
+      // Company details
+      yPos += 5;
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text("3731 Aster Drive", leftMargin, yPos);
+      
+      // Order date
+      pdf.text(`Date: ${serviceOrder.createdAt 
+        ? format(new Date(serviceOrder.createdAt), "MMMM d'th', yyyy", { locale: enUS }) 
+        : 'N/A'}`, 
+        rightColStart, 
+        yPos, 
+        { align: 'right' }
       );
       
-      // Add each card to the PDF
-      for (const card of cards) {
-        // Check if we need a new page
-        if (yPos > pdfHeight - 30) {
+      // More company details
+      yPos += 5;
+      pdf.text("Charlotte, N.C. 28227", leftMargin, yPos);
+      
+      // Status
+      pdf.text(`Status: ${serviceOrder.status || 'pending'}`, 
+        rightColStart, 
+        yPos, 
+        { align: 'right' }
+      );
+      
+      // Phone
+      yPos += 5;
+      pdf.text("704-506-9741", leftMargin, yPos);
+      
+      // Due date
+      pdf.text(`Due Date: ${serviceOrder.dueDate 
+        ? format(new Date(serviceOrder.dueDate), "MMMM d'th', yyyy", { locale: enUS }) 
+        : 'N/A'}`, 
+        rightColStart, 
+        yPos, 
+        { align: 'right' }
+      );
+      
+      // Email
+      yPos += 5;
+      pdf.text("d-dovalina@hotmail.com", leftMargin, yPos);
+      
+      // Add horizontal line separator
+      yPos += 10;
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(leftMargin, yPos, 195, yPos);
+      
+      // --------------------------------------------
+      // PROJECT & CLIENT INFORMATION SECTIONS
+      // --------------------------------------------
+      yPos += 10;
+      
+      // PROJECT INFORMATION - Left box
+      pdf.setFillColor(245, 245, 245);
+      pdf.roundedRect(leftMargin, yPos, 85, 35, 1, 1, 'F');
+      
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Project Information", leftMargin + 5, yPos + 7);
+      
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Name: ${project?.title || 'N/A'}`, leftMargin + 5, yPos + 15);
+      pdf.text(`Address: ${project?.address || 'N/A'}`, leftMargin + 5, yPos + 22);
+      
+      const description = project?.description || 'N/A';
+      const descSplit = pdf.splitTextToSize(`Description: ${description}`, 75);
+      pdf.text(descSplit, leftMargin + 5, yPos + 29);
+      
+      // CLIENT INFORMATION - Right box
+      pdf.setFillColor(245, 245, 245);
+      pdf.roundedRect(leftMargin + 90, yPos, 85, 35, 1, 1, 'F');
+      
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Client Information", leftMargin + 95, yPos + 7);
+      
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Name: ${client?.name || 'N/A'}`, leftMargin + 95, yPos + 15);
+      pdf.text(`Email: ${client?.email || 'N/A'}`, leftMargin + 95, yPos + 22);
+      pdf.text(`Phone: ${client?.phone || 'N/A'}`, leftMargin + 95, yPos + 29);
+      
+      // --------------------------------------------
+      // SERVICE DETAILS SECTION
+      // --------------------------------------------
+      yPos += 45; // Space after the boxes
+      
+      // First calculate detailsHeight to see if we need special handling for long text
+      let detailsTextHeight = 0;
+      if (serviceOrder.details) {
+        // Calculate space needed for details text
+        const detailsTextLines = pdf.splitTextToSize(serviceOrder.details, pageWidth - 10);
+        detailsTextHeight = detailsTextLines.length * 5; // Each line ~5mm tall
+      }
+      
+      // Dynamic height for the service details box based on content
+      const baseDetailsHeight = 60; // Minimum height with no details
+      const detailsHeight = Math.max(
+        baseDetailsHeight,
+        detailsTextHeight > 0 ? 45 + detailsTextHeight : baseDetailsHeight
+      );
+      
+      // Draw the service details box
+      pdf.setFillColor(245, 245, 245);
+      pdf.roundedRect(leftMargin, yPos, pageWidth, detailsHeight, 1, 1, 'F');
+      
+      // Title
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Service Details", leftMargin + 5, yPos + 7);
+      
+      // Basic info - regular size for headers
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Assigned To: ${assignedTo || 'Not Assigned'}`, leftMargin + 5, yPos + 15);
+      pdf.text(`Start Date: ${serviceOrder.startDate 
+        ? format(new Date(serviceOrder.startDate), "MMMM d'th', yyyy", { locale: enUS }) 
+        : 'N/A'}`, 
+        leftMargin + 5, 
+        yPos + 22
+      );
+      
+      // Details field label
+      pdf.text("Details:", leftMargin + 5, yPos + 29);
+      
+      // Handle details text with potential wrapping
+      if (serviceOrder.details) {
+        // Use a smaller font size
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'normal');
+        
+        // Calculate maximum width for text - increase width to reduce wrapping
+        const maxDetailsWidth = pageWidth - 15;
+        
+        // Format details to match what is shown on screen
+        const formattedDetails = serviceOrder.details;
+        
+        // Split formatted text into lines that fit the width
+        const detailsLines = pdf.splitTextToSize(formattedDetails, maxDetailsWidth);
+        
+        // If there are too many lines, we need a new page
+        if (detailsLines.length > 30) { // Arbitrary cutoff for what's too long
+          // First part on this page - show only first lines
+          const firstPageLines = detailsLines.slice(0, 20);
+          pdf.text(firstPageLines, leftMargin + 5, yPos + 35);
+          
+          // Rest on new page
           pdf.addPage();
-          yPos = margin;
+          
+          // Add a header for continuation on new page
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text("Service Details (Continued)", leftMargin, 15);
+          
+          // Add a background for the continued text
+          pdf.setFillColor(245, 245, 245);
+          pdf.roundedRect(leftMargin, 20, pageWidth, 200, 1, 1, 'F');
+          
+          // Add the rest of the text
+          pdf.setFontSize(8);
+          pdf.setFont('helvetica', 'normal');
+          const remainingLines = detailsLines.slice(20);
+          pdf.text(remainingLines, leftMargin + 5, 25);
+          
+          // Now we continue with the next section on the first page
+          yPos += detailsHeight + 10;
+        } else {
+          // Text fits on current page
+          pdf.text(detailsLines, leftMargin + 5, yPos + 35);
+          yPos += detailsHeight + 10; // Move position for next section
+        }
+      } else {
+        // No details provided
+        pdf.setFont('helvetica', 'italic');
+        pdf.text("No specific details provided.", leftMargin + 5, yPos + 35);
+        yPos += detailsHeight + 10; // Move position for next section
+      }
+      
+      // --------------------------------------------
+      // MATERIALS REQUIRED SECTION (if present)
+      // --------------------------------------------
+      if (serviceOrder.materialsRequired) {
+        // Ensure spacing after previous section
+        if (yPos > 220) {
+          pdf.addPage();
+          yPos = 15;
         }
         
-        if (card instanceof HTMLElement) {
-          const result = await addSectionToPDF(card);
-          if (result) {
-            const { canvas, imgWidth, imgHeight } = result;
+        // Calculate needed height for materials text with slightly narrower margin
+        const materialsSplit = pdf.splitTextToSize(serviceOrder.materialsRequired, pageWidth - 20);
+        const materialHeight = Math.min(10 + materialsSplit.length * 5, 60); // Header + content, max 60mm
         
-            // If this specific card contains images, we might want to handle them specially
-            if (card.querySelector('.grid-cols-2') || card.querySelector('.grid-cols-3') || card.querySelector('.grid-cols-4')) {
-              // This card contains images
-              // Draw a border around the card area
-              pdf.setFillColor(245, 245, 245);
-              pdf.roundedRect(margin, yPos, imgWidth, imgHeight, 3, 3, 'F');
+        // Draw light gray background
+        pdf.setFillColor(245, 245, 245);
+        pdf.roundedRect(leftMargin, yPos, pageWidth, materialHeight, 1, 1, 'F');
+        
+        // Title
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text("Materials Required", leftMargin + 5, yPos + 7);
+        
+        // Content
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(materialsSplit, leftMargin + 5, yPos + 15);
+        
+        // Update position for next section
+        yPos += materialHeight + 10;
+      }
+      
+      // --------------------------------------------
+      // SPECIAL INSTRUCTIONS (if present)
+      // --------------------------------------------
+      if (serviceOrder.specialInstructions) {
+        // Ensure spacing after previous section
+        if (yPos > 220) {
+          pdf.addPage();
+          yPos = 15;
+        }
+        
+        // Calculate needed height for instructions text
+        const instructionsSplit = pdf.splitTextToSize(serviceOrder.specialInstructions, pageWidth - 20);
+        const instructionsHeight = Math.min(10 + instructionsSplit.length * 5, 60); // Header + content, max 60mm
+        
+        // Draw light gray background
+        pdf.setFillColor(245, 245, 245);
+        pdf.roundedRect(leftMargin, yPos, pageWidth, instructionsHeight, 1, 1, 'F');
+        
+        // Title
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text("Special Instructions", leftMargin + 5, yPos + 7);
+        
+        // Content
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(instructionsSplit, leftMargin + 5, yPos + 15);
+        
+        // Update position for next section
+        yPos += instructionsHeight + 10;
+      }
+      
+      // --------------------------------------------
+      // SAFETY REQUIREMENTS (if present)
+      // --------------------------------------------
+      if (serviceOrder.safetyRequirements) {
+        // Ensure spacing after previous section
+        if (yPos > 220) {
+          pdf.addPage();
+          yPos = 15;
+        }
+        
+        // Calculate needed height for safety text
+        const safetySplit = pdf.splitTextToSize(serviceOrder.safetyRequirements, pageWidth - 20);
+        const safetyHeight = Math.min(10 + safetySplit.length * 5, 60); // Header + content, max 60mm
+        
+        // Draw light gray background
+        pdf.setFillColor(245, 245, 245);
+        pdf.roundedRect(leftMargin, yPos, pageWidth, safetyHeight, 1, 1, 'F');
+        
+        // Title
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text("Safety Requirements", leftMargin + 5, yPos + 7);
+        
+        // Content
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(safetySplit, leftMargin + 5, yPos + 15);
+        
+        // Update position for next section
+        yPos += safetyHeight + 10;
+      }
+      
+      // --------------------------------------------
+      // CLIENT SIGNATURE SECTION
+      // --------------------------------------------
+      // Check if we need to add a new page for signature
+      if (yPos > 220) {
+        pdf.addPage();
+        yPos = 15;
+      }
+      
+      // Draw the client approval section box
+      pdf.setFillColor(245, 245, 245);
+      pdf.roundedRect(leftMargin, yPos, pageWidth, 70, 1, 1, 'F');
+      
+      // Title
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Client Approval", leftMargin + 5, yPos + 7);
+      
+      if (clientSignature) {
+        // Signature date
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(
+          `Signed by client on: ${serviceOrder.signedDate 
+            ? format(new Date(serviceOrder.signedDate), "MMMM do, yyyy", { locale: enUS }) 
+            : format(new Date(), "MMMM do, yyyy", { locale: enUS })}`, 
+          leftMargin + 5, 
+          yPos + 15
+        );
+        
+        // Add signature image
+        try {
+          // Center the signature horizontally in the box and give it plenty of vertical space
+          const sigWidth = 140; // Width of signature image
+          const sigHeight = 45; // Height of signature image
+          const sigX = leftMargin + 5; // Left aligned
+          const sigY = yPos + 20; // Position below text
+          
+          pdf.addImage(
+            clientSignature,
+            'PNG',
+            sigX,
+            sigY,
+            sigWidth,
+            sigHeight
+          );
+        } catch (e) {
+          console.error("Error adding signature to PDF:", e);
+          pdf.setFontSize(9);
+          pdf.setFont('helvetica', 'italic');
+          pdf.text("Error displaying signature image", leftMargin + 5, yPos + 25);
+        }
+      } else {
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'italic');
+        pdf.text("Not yet signed by client", leftMargin + 5, yPos + 15);
+      }
+      
+      // --------------------------------------------
+      // PROJECT IMAGES SECTION (if present)
+      // --------------------------------------------
+      if (Array.isArray(serviceOrder.beforeImages) && serviceOrder.beforeImages.length > 0 ||
+          Array.isArray(serviceOrder.afterImages) && serviceOrder.afterImages.length > 0) {
+        
+        // Add a new page for images
+        pdf.addPage();
+        yPos = 15;
+        
+        // Title
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text("Project Images", leftMargin, yPos);
+        yPos += 10;
+        
+        // Before Images
+        if (Array.isArray(serviceOrder.beforeImages) && serviceOrder.beforeImages.length > 0) {
+          pdf.setFontSize(10);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text("Before Images:", leftMargin, yPos);
+          yPos += 8;
+          
+          // Add each image
+          const imgWidth = 80; // Width of each image in mm
+          const imgHeight = 60; // Height of each image in mm
+          const imagesPerRow = 2; // Number of images per row
+          
+          for (let i = 0; i < serviceOrder.beforeImages.length; i++) {
+            try {
+              const xPos = leftMargin + (i % imagesPerRow) * (imgWidth + 5);
+              
+              // If we need to start a new row
+              if (i > 0 && i % imagesPerRow === 0) {
+                yPos += imgHeight + 10;
+              }
+              
+              // If we're about to go off the page, add a new page
+              if (yPos + imgHeight > 270) {
+                pdf.addPage();
+                yPos = 15;
+              }
+              
+              pdf.setFillColor(255, 255, 255);
+              pdf.roundedRect(xPos, yPos, imgWidth, imgHeight, 3, 3, 'F');
+              
+              // Add the image with rounded corners
+              pdf.addImage(
+                serviceOrder.beforeImages[i],
+                'JPEG',
+                xPos,
+                yPos,
+                imgWidth,
+                imgHeight,
+                undefined,
+                'NONE',
+                0
+              );
+              
+              // Draw a border around the image
+              pdf.setDrawColor(220, 220, 220);
+              pdf.roundedRect(xPos, yPos, imgWidth, imgHeight, 3, 3, 'S');
+              
+            } catch (e) {
+              console.error("Error adding before image to PDF:", e);
             }
+          }
+          
+          // Move position down for next section
+          yPos += imgHeight + 15;
+        }
         
-            pdf.addImage(
-              canvas.toDataURL('image/png'), 
-              'PNG', 
-              margin, 
-              yPos, 
-              imgWidth, 
-              imgHeight
-            );
-            yPos += imgHeight + 5;
+        // After Images
+        if (Array.isArray(serviceOrder.afterImages) && serviceOrder.afterImages.length > 0) {
+          // If we're about to go off the page, add a new page
+          if (yPos > 220) {
+            pdf.addPage();
+            yPos = 15;
+          }
+          
+          pdf.setFontSize(10);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text("After Images:", leftMargin, yPos);
+          yPos += 8;
+          
+          // Add each image
+          const imgWidth = 80; // Width of each image in mm
+          const imgHeight = 60; // Height of each image in mm
+          const imagesPerRow = 2; // Number of images per row
+          
+          for (let i = 0; i < serviceOrder.afterImages.length; i++) {
+            try {
+              const xPos = leftMargin + (i % imagesPerRow) * (imgWidth + 5);
+              
+              // If we need to start a new row
+              if (i > 0 && i % imagesPerRow === 0) {
+                yPos += imgHeight + 10;
+              }
+              
+              // If we're about to go off the page, add a new page
+              if (yPos + imgHeight > 270) {
+                pdf.addPage();
+                yPos = 15;
+              }
+              
+              pdf.setFillColor(255, 255, 255);
+              pdf.roundedRect(xPos, yPos, imgWidth, imgHeight, 3, 3, 'F');
+              
+              // Add the image with rounded corners
+              pdf.addImage(
+                serviceOrder.afterImages[i],
+                'JPEG',
+                xPos,
+                yPos,
+                imgWidth,
+                imgHeight,
+                undefined,
+                'NONE',
+                0
+              );
+              
+              // Draw a border around the image
+              pdf.setDrawColor(220, 220, 220);
+              pdf.roundedRect(xPos, yPos, imgWidth, imgHeight, 3, 3, 'S');
+              
+            } catch (e) {
+              console.error("Error adding after image to PDF:", e);
+            }
           }
         }
       }
       
-      // Add footer
+      // Add footer on current page
       pdf.setFontSize(8);
-      pdf.setFont('arial', 'normal');
+      pdf.setFont('helvetica', 'normal');
       pdf.text(
-        `Generated on ${format(new Date(), "MMMM d'th', yyyy", { locale: enUS })}`,
-        pdfWidth / 2,
-        pdfHeight - 10,
+        `Generated on ${format(new Date(), "MMMM do, yyyy", { locale: enUS })}`,
+        pdf.internal.pageSize.getWidth() / 2,
+        pdf.internal.pageSize.getHeight() - 10,
         { align: "center" }
       );
       
