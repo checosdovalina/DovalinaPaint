@@ -19,6 +19,7 @@ import Calendar from "@/pages/calendar";
 import Invoices from "@/pages/invoices";
 import Payments from "@/pages/payments";
 import FinancialReports from "@/pages/financial-reports";
+import Suppliers from "@/pages/suppliers";
 
 function Router() {
   return (
@@ -32,6 +33,7 @@ function Router() {
       <ProtectedRoute path="/calendar" component={Calendar} />
       <ProtectedRoute path="/personnel" component={Personnel} />
       <ProtectedRoute path="/subcontractors" component={Subcontractors} />
+      <ProtectedRoute path="/suppliers" component={Suppliers} />
       <ProtectedRoute path="/invoices" component={Invoices} />
       <ProtectedRoute path="/payments" component={Payments} />
       <ProtectedRoute path="/financial-reports" component={FinancialReports} />
