@@ -252,7 +252,7 @@ export function ServiceOrderDetail({
       // --------------------------------------------
       // Company info (left side)
       pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont('arial', 'bold');
       pdf.text("DOVALINA PAINTING LLC", leftMargin, yPos);
       
       // Service order info (right side)
@@ -263,7 +263,7 @@ export function ServiceOrderDetail({
       // Company details
       yPos += 5;
       pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
+      pdf.setFont('arial', 'normal');
       pdf.text("3731 Aster Drive", leftMargin, yPos);
       
       // Order date
@@ -318,11 +318,11 @@ export function ServiceOrderDetail({
       pdf.roundedRect(leftMargin, yPos, 85, 35, 1, 1, 'F');
       
       pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont('arial', 'bold');
       pdf.text("Project Information", leftMargin + 5, yPos + 7);
       
       pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
+      pdf.setFont('arial', 'normal'); // Cambio a fuente Courier para consistencia
       pdf.text(`Name: ${project?.title || 'N/A'}`, leftMargin + 5, yPos + 15);
       pdf.text(`Address: ${project?.address || 'N/A'}`, leftMargin + 5, yPos + 22);
       
@@ -335,11 +335,11 @@ export function ServiceOrderDetail({
       pdf.roundedRect(leftMargin + 90, yPos, 85, 35, 1, 1, 'F');
       
       pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont('arial', 'bold');
       pdf.text("Client Information", leftMargin + 95, yPos + 7);
       
       pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
+      pdf.setFont('arial', 'normal'); // Cambio a fuente Courier para consistencia
       pdf.text(`Name: ${client?.name || 'N/A'}`, leftMargin + 95, yPos + 15);
       pdf.text(`Email: ${client?.email || 'N/A'}`, leftMargin + 95, yPos + 22);
       pdf.text(`Phone: ${client?.phone || 'N/A'}`, leftMargin + 95, yPos + 29);
@@ -370,15 +370,15 @@ export function ServiceOrderDetail({
       
       // Title
       pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont('arial', 'bold');
       pdf.text("Service Details", leftMargin + 5, yPos + 7);
       
       // Basic info - regular size for headers
       pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
+      pdf.setFont('arial', 'normal'); // Cambio a fuente Courier para consistencia
       pdf.text(`Assigned To: ${assignedTo || 'Not Assigned'}`, leftMargin + 5, yPos + 15);
       pdf.text(`Start Date: ${serviceOrder.startDate 
-        ? format(new Date(serviceOrder.startDate), "MMMM do, yyyy", { locale: enUS }) 
+        ? format(new Date(serviceOrder.startDate), "MMMM d'th', yyyy", { locale: enUS }) 
         : 'N/A'}`, 
         leftMargin + 5, 
         yPos + 22
@@ -391,7 +391,7 @@ export function ServiceOrderDetail({
       if (serviceOrder.details) {
         // Usar fuente monoespaciada para que coincida exactamente con la imagen
         pdf.setFontSize(10); // Tamaño de letra similar al resto del PDF
-        pdf.setFont('courier', 'normal'); // Fuente monoespaciada tipo máquina de escribir
+        pdf.setFont('arial', 'normal'); // Fuente monoespaciada tipo máquina de escribir
         
         // Calculate maximum width for text - provide enough margin
         const maxDetailsWidth = pageWidth - 20; // Wider margin for monospaced font
@@ -426,7 +426,7 @@ export function ServiceOrderDetail({
           
           // Add a header for continuation on new page
           pdf.setFontSize(12);
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont('arial', 'bold');
           pdf.text("Service Details (Continued)", leftMargin, 15);
           
           // Add a background for the continued text
@@ -435,7 +435,7 @@ export function ServiceOrderDetail({
           
           // Add the rest of the text
           pdf.setFontSize(10);
-          pdf.setFont('courier', 'normal'); // Keep monospaced font consistent
+          pdf.setFont('arial', 'normal'); // Keep monospaced font consistent
           const remainingLines = detailsLines.slice(20);
           pdf.text(remainingLines, leftMargin + 5, 25);
           
@@ -448,7 +448,7 @@ export function ServiceOrderDetail({
         }
       } else {
         // No details provided
-        pdf.setFont('helvetica', 'italic');
+        pdf.setFont('arial', 'italic');
         pdf.text("No specific details provided.", leftMargin + 5, yPos + 35);
         yPos += detailsHeight + 10; // Move position for next section
       }
@@ -465,7 +465,7 @@ export function ServiceOrderDetail({
         
         // Use courier for materials to match details section styling 
         pdf.setFontSize(10);
-        pdf.setFont('courier', 'normal'); // Use monospaced font for consistency with details
+        pdf.setFont('arial', 'normal'); // Use monospaced font for consistency with details
         
         // Calculate needed height for materials text with slightly narrower margin
         const materialsSplit = pdf.splitTextToSize(serviceOrder.materialsRequired, pageWidth - 20);
@@ -477,12 +477,12 @@ export function ServiceOrderDetail({
         
         // Title
         pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont('arial', 'bold');
         pdf.text("Materials Required", leftMargin + 5, yPos + 7);
         
         // Content
         pdf.setFontSize(10); // Match details font size
-        pdf.setFont('courier', 'normal'); // Use monospaced font for consistent appearance
+        pdf.setFont('arial', 'normal'); // Use monospaced font for consistent appearance
         pdf.text(materialsSplit, leftMargin + 5, yPos + 15);
         
         // Update position for next section
@@ -504,13 +504,13 @@ export function ServiceOrderDetail({
       
       // Title
       pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont('arial', 'bold');
       pdf.text("Client Approval", leftMargin + 5, yPos + 7);
       
       if (clientSignature) {
         // Signature date
         pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont('arial', 'normal');
         pdf.text(
           `Signed by client on: ${serviceOrder.signedDate 
             ? format(new Date(serviceOrder.signedDate), "MMMM d'th', yyyy", { locale: enUS }) 
@@ -538,18 +538,18 @@ export function ServiceOrderDetail({
         } catch (e) {
           console.error("Error adding signature to PDF:", e);
           pdf.setFontSize(9);
-          pdf.setFont('helvetica', 'italic');
+          pdf.setFont('arial', 'italic');
           pdf.text("Error displaying signature image", leftMargin + 5, yPos + 25);
         }
       } else {
         pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'italic');
+        pdf.setFont('arial', 'italic');
         pdf.text("Not yet signed by client", leftMargin + 5, yPos + 15);
       }
       
       // Add footer with page number
       pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'normal');
+      pdf.setFont('arial', 'normal');
       pdf.text(
         `Generated on ${format(new Date(), "MMMM d'th', yyyy", { locale: enUS })}`,
         105,
