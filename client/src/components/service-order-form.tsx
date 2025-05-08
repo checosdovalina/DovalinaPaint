@@ -251,12 +251,105 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
+            name="assignedType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Asignación</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value || "staff"}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione tipo de asignación" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="staff">Personal Interno</SelectItem>
+                    <SelectItem value="subcontractor">Subcontratista</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch("assignedType") === "subcontractor" ? (
+            <FormField
+              control={form.control}
+              name="assignedTo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-1.5">
+                    <Briefcase className="h-4 w-4" />
+                    Subcontratista Asignado
+                  </FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(parseInt(value))}
+                    defaultValue={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un subcontratista" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="0">Ninguno</SelectItem>
+                      {subcontractors?.map((subcontractor) => (
+                        <SelectItem key={subcontractor.id} value={subcontractor.id.toString()}>
+                          {subcontractor.company}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : (
+            <FormField
+              control={form.control}
+              name="assignedTo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-1.5">
+                    <HardHat className="h-4 w-4" />
+                    Responsable Asignado
+                  </FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(parseInt(value))}
+                    defaultValue={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un responsable" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="0">Ninguno</SelectItem>
+                      {staffMembers?.map((staff) => (
+                        <SelectItem key={staff.id} value={staff.id.toString()}>
+                          {staff.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
             name="assignedSubcontractorId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center gap-1.5">
                   <Briefcase className="h-4 w-4" />
-                  Subcontratista
+                  Subcontratista de Apoyo
                 </FormLabel>
                 <Select
                   onValueChange={(value) => field.onChange(parseInt(value))}
@@ -427,6 +520,63 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                     />
                   </PopoverContent>
                 </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Materiales, Instrucciones y Requisitos de Seguridad */}
+        <div className="grid grid-cols-1 gap-6">
+          <FormField
+            control={form.control}
+            name="materialsRequired"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Materiales Requeridos</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Describa los materiales necesarios para esta orden de servicio"
+                    {...field}
+                    rows={3}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="specialInstructions"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Instrucciones Especiales</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Incluya instrucciones especiales para el equipo de trabajo"
+                    {...field}
+                    rows={3}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="safetyRequirements"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Requisitos de Seguridad</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Especifique los requisitos de seguridad necesarios"
+                    {...field}
+                    rows={3}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
