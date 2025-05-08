@@ -7,6 +7,9 @@ import { Loader2, Plus, FileText } from "lucide-react";
 import { InvoiceList } from "@/components/invoice-list";
 import { InvoiceDetail } from "@/components/invoice-detail";
 import { InvoiceForm } from "@/components/invoice-form";
+import { Layout } from "@/components/layout";
+import { Helmet } from "react-helmet";
+import PageHeader from "@/components/page-header";
 import {
   Sheet,
   SheetContent,
@@ -87,19 +90,21 @@ export default function InvoicesPage() {
     : null;
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Facturas</h1>
-          <p className="text-muted-foreground">
-            Gestión de facturas para clientes y proyectos
-          </p>
-        </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nueva Factura
-        </Button>
-      </div>
+    <Layout title="Facturas">
+      <Helmet>
+        <title>Facturas | Dovalina Painting LLC</title>
+      </Helmet>
+      
+      <PageHeader
+        title="Facturas"
+        description="Gestión de facturas para clientes y proyectos"
+        actions={
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nueva Factura
+          </Button>
+        }
+      />
 
       {/* Invoice List */}
       {invoices && invoices.length > 0 ? (
@@ -157,6 +162,6 @@ export default function InvoicesPage() {
           </div>
         </SheetContent>
       </Sheet>
-    </div>
+    </Layout>
   );
 }
