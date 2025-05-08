@@ -181,7 +181,7 @@ export default function Suppliers() {
       (supplier.contactName && supplier.contactName.toLowerCase().includes(search.toLowerCase())) ||
       (supplier.category && supplier.category.toLowerCase().includes(search.toLowerCase()));
     
-    const categoryMatch = categoryFilter === "" || supplier.category === categoryFilter;
+    const categoryMatch = categoryFilter === "" || categoryFilter === "all" || supplier.category === categoryFilter;
     
     return searchMatch && categoryMatch;
   });
@@ -258,7 +258,7 @@ export default function Suppliers() {
       <Tabs defaultValue="all" className="w-full">
         <div className="flex justify-between items-center mb-4 flex-col md:flex-row gap-4">
           <TabsList>
-            <TabsTrigger value="all" onClick={() => setCategoryFilter("")}>All Suppliers</TabsTrigger>
+            <TabsTrigger value="all" onClick={() => setCategoryFilter("all")}>All Suppliers</TabsTrigger>
             <TabsTrigger value="categories">By Category</TabsTrigger>
           </TabsList>
 
@@ -279,14 +279,14 @@ export default function Suppliers() {
             <CardHeader className="pb-3">
               <div className="flex justify-between items-center">
                 <CardTitle>All Suppliers</CardTitle>
-                {categoryFilter && (
+                {categoryFilter && categoryFilter !== "all" && (
                   <Badge className="ml-2" variant="secondary">
                     {categoryFilter}
                     <Button 
                       variant="ghost" 
                       size="icon" 
                       className="h-4 w-4 ml-1 p-0" 
-                      onClick={() => setCategoryFilter("")}
+                      onClick={() => setCategoryFilter("all")}
                     >
                       &times;
                     </Button>
@@ -297,7 +297,7 @@ export default function Suppliers() {
                     <SelectValue placeholder="Filter by Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     {SUPPLIER_CATEGORIES.map((category) => (
                       <SelectItem key={category} value={category}>{category}</SelectItem>
                     ))}
@@ -305,7 +305,7 @@ export default function Suppliers() {
                 </Select>
               </div>
               <CardDescription>
-                {filteredSuppliers.length} suppliers {categoryFilter && `in ${categoryFilter}`}
+                {filteredSuppliers.length} suppliers {categoryFilter && categoryFilter !== "all" && `in ${categoryFilter}`}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -393,7 +393,7 @@ export default function Suppliers() {
                   categoryFilter === category ? "ring-2 ring-primary" : ""
                 }`}
                 onClick={() => {
-                  setCategoryFilter(categoryFilter === category ? "" : category);
+                  setCategoryFilter(categoryFilter === category ? "all" : category);
                 }}
               >
                 <CardHeader className="pb-2">
