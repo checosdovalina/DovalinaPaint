@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet";
 import PageHeader from "@/components/page-header";
+import { Layout } from "@/components/layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -194,21 +195,22 @@ export default function FinancialReportsPage() {
   const isLoading = paymentsLoading || invoicesLoading || profitLoading || projectsLoading;
   
   return (
-    <div className="container mx-auto py-6 space-y-6 max-w-7xl px-4 md:px-6">
+    <Layout title="Reportes Financieros">
       <Helmet>
         <title>Reportes Financieros | Dovalina Painting LLC</title>
       </Helmet>
       
-      <PageHeader
-        title="Reportes Financieros"
-        description="Análisis detallado de ingresos, gastos y rentabilidad por período."
-        actions={
-          <Button onClick={generatePDF} variant="outline" disabled={isLoading}>
-            <Download className="mr-2 h-4 w-4" />
-            Descargar PDF
-          </Button>
-        }
-      />
+      <div className="container mx-auto py-6 space-y-6">
+        <PageHeader
+          title="Reportes Financieros"
+          description="Análisis detallado de ingresos, gastos y rentabilidad por período."
+          actions={
+            <Button onClick={generatePDF} variant="outline" disabled={isLoading}>
+              <Download className="mr-2 h-4 w-4" />
+              Descargar PDF
+            </Button>
+          }
+        />
       
       <Card className="mb-6">
         <CardHeader className="pb-3">
@@ -573,6 +575,7 @@ export default function FinancialReportsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 }

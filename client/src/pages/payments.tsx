@@ -65,7 +65,7 @@ export default function PaymentsPage() {
   };
 
   return (
-    <Layout>
+    <Layout title="Gestión de Pagos">
       <Helmet>
         <title>Pagos | Dovalina Painting LLC</title>
       </Helmet>
