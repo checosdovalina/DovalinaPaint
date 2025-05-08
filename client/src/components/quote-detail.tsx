@@ -82,9 +82,15 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
     },
   });
 
-  // Calculate totals (hardcoded as per request with profit margin already included)
-  const materialsTotal = 5322; // Sum of 1980 + 2832 + 510
-  const laborTotal = 7533; // Sum of 2640 + 2193 + 2700
+  // Calculate materials total from the quote data
+  const materialsTotal = Array.isArray(quote.materialsEstimate) 
+    ? quote.materialsEstimate.reduce((sum, item) => sum + (item.total || 0), 0)
+    : 0;
+  
+  // Calculate labor total from the quote data
+  const laborTotal = Array.isArray(quote.laborEstimate) 
+    ? quote.laborEstimate.reduce((sum, item) => sum + (item.total || 0), 0)
+    : 0;
   
   // Calculate subtotal (materials + labor)
   const baseSubtotal = materialsTotal + laborTotal;
@@ -92,8 +98,8 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
   // Calculate additional costs (if any)
   const additionalCosts = (quote as any).additionalCosts || 0;
   
-  // Full subtotal including additional costs - total amount already includes profit
-  const totalAmount = baseSubtotal + additionalCosts;
+  // Get the total amount directly from the quote or calculate it if needed
+  const totalAmount = quote.totalEstimate || (baseSubtotal + additionalCosts);
 
   // Function to generate PDF (using browser's print functionality)
   const generatePDF = () => {
@@ -216,18 +222,18 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-t">
-                      <td className="py-2 px-3">Shewin Williams #DF0034</td>
-                      <td className="py-2 px-3 text-right">$1980.00</td>
-                    </tr>
-                    <tr className="border-t">
-                      <td className="py-2 px-3">Shewin Williams #CCC034</td>
-                      <td className="py-2 px-3 text-right">$2832.00</td>
-                    </tr>
-                    <tr className="border-t">
-                      <td className="py-2 px-3">Shewin Williams #RRR034</td>
-                      <td className="py-2 px-3 text-right">$510.00</td>
-                    </tr>
+                    {Array.isArray(quote.materialsEstimate) && quote.materialsEstimate.length > 0 ? (
+                      quote.materialsEstimate.map((item, index) => (
+                        <tr key={index} className="border-t">
+                          <td className="py-2 px-3">{item.name}</td>
+                          <td className="py-2 px-3 text-right">${(item.total || 0).toFixed(2)}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr className="border-t">
+                        <td className="py-2 px-3 text-center" colSpan={2}>No material items found</td>
+                      </tr>
+                    )}
                     <tr className="border-t bg-muted">
                       <td className="py-2 px-3 font-medium text-right">Materials Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${materialsTotal.toFixed(2)}</td>
@@ -251,18 +257,18 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-t">
-                      <td className="py-2 px-3">Paint in walls room 1</td>
-                      <td className="py-2 px-3 text-right">$2640.00</td>
-                    </tr>
-                    <tr className="border-t">
-                      <td className="py-2 px-3">Paint in walls room 2</td>
-                      <td className="py-2 px-3 text-right">$2193.00</td>
-                    </tr>
-                    <tr className="border-t">
-                      <td className="py-2 px-3">Paint in ceiling rooms</td>
-                      <td className="py-2 px-3 text-right">$2700.00</td>
-                    </tr>
+                    {Array.isArray(quote.laborEstimate) && quote.laborEstimate.length > 0 ? (
+                      quote.laborEstimate.map((item, index) => (
+                        <tr key={index} className="border-t">
+                          <td className="py-2 px-3">{item.description}</td>
+                          <td className="py-2 px-3 text-right">${(item.total || 0).toFixed(2)}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr className="border-t">
+                        <td className="py-2 px-3 text-center" colSpan={2}>No labor items found</td>
+                      </tr>
+                    )}
                     <tr className="border-t bg-muted">
                       <td className="py-2 px-3 font-medium text-right">Labor Subtotal:</td>
                       <td className="py-2 px-3 font-medium text-right">${laborTotal.toFixed(2)}</td>
