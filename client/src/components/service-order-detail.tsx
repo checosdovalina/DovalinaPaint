@@ -350,12 +350,12 @@ export function ServiceOrderDetail({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl overflow-y-auto max-h-[90vh]">
+      <DialogContent className="max-w-4xl max-h-[90vh] h-[90vh] flex flex-col overflow-hidden">
         <DialogHeader className="print:hidden">
           <DialogTitle>Service Order #{serviceOrder.id}</DialogTitle>
         </DialogHeader>
         
-        <div className="p-4 print:p-6" id="service-order-printable">
+        <div className="p-4 print:p-6 overflow-y-auto flex-grow" id="service-order-printable">
           {/* Company information header */}
           <div className="flex justify-between items-start border-b pb-4 mb-6 company-header">
             <div>
