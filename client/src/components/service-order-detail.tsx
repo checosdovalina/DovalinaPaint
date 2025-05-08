@@ -328,9 +328,19 @@ export function ServiceOrderDetail({
       // --- SERVICE DETAILS SECTION ---
       yPos += 40;
       
-      // Draw light gray background
+      // Calculate needed height for details
+      let detailsHeight = 40; // Minimum height
+      if (serviceOrder.details) {
+        const detailsText = serviceOrder.details || '';
+        const detailsSplit = pdf.splitTextToSize(detailsText, 170);
+        // Each line is about 5mm tall
+        const neededLinesHeight = Math.min(detailsSplit.length * 5, 150); // Cap at 150mm (30 lines)
+        detailsHeight = Math.max(detailsHeight, neededLinesHeight + 30); // Base + content
+      }
+      
+      // Draw light gray background with calculated height
       pdf.setFillColor(245, 245, 245);
-      pdf.rect(leftMargin, yPos, 180, 40, 'F');
+      pdf.rect(leftMargin, yPos, 180, detailsHeight, 'F');
       
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
@@ -346,21 +356,57 @@ export function ServiceOrderDetail({
         pdf.text("Details:", leftMargin + 5, yPos + 29);
         
         pdf.setFont('helvetica', 'normal');
-        const detailsText = serviceOrder.details.substring(0, 300) + (serviceOrder.details.length > 300 ? '...' : '');
-        const detailsSplit = pdf.splitTextToSize(detailsText, 170);
-        pdf.text(detailsSplit, leftMargin + 5, yPos + 36);
+        // Get full details and handle multi-page if needed
+        const detailsSplit = pdf.splitTextToSize(serviceOrder.details, 170);
+        
+        // Check if we need a new page
+        if (detailsSplit.length > 20) { // If more than ~20 lines, start a new page
+          pdf.addPage();
+          yPos = 15; // Reset Y position on new page
+          
+          // Add title on new page
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text("Service Details (Continued)", leftMargin, yPos);
+          
+          // Draw light gray background on new page
+          pdf.setFillColor(245, 245, 245);
+          pdf.rect(leftMargin, yPos + 5, 180, 250, 'F');
+          
+          // Add details on new page
+          pdf.setFontSize(10);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(detailsSplit, leftMargin + 5, yPos + 15);
+          
+          // Update position for next section (on original page)
+          yPos = 95; // Return to first page position
+        } else {
+          // If it fits on the same page
+          pdf.text(detailsSplit, leftMargin + 5, yPos + 36);
+          
+          // Update position based on content height
+          const contentHeight = Math.min(detailsSplit.length * 5, 150);
+          yPos += contentHeight > 30 ? contentHeight : 30;
+        }
       } else {
         pdf.setFont('helvetica', 'italic');
         pdf.text("No specific details provided.", leftMargin + 5, yPos + 29);
+        
+        // Basic position update
+        yPos += 30;
       }
       
       // --- MATERIALS REQUIRED SECTION ---
       if (serviceOrder.materialsRequired) {
-        yPos += 50;
+        yPos += 10;
+        
+        // Calculate needed height for materials
+        const materialsSplit = pdf.splitTextToSize(serviceOrder.materialsRequired, 170);
+        const materialHeight = Math.min(10 + materialsSplit.length * 5, 60); // Header + content
         
         // Draw light gray background
         pdf.setFillColor(245, 245, 245);
-        pdf.rect(leftMargin, yPos, 180, 25, 'F');
+        pdf.rect(leftMargin, yPos, 180, materialHeight, 'F');
         
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'bold');
@@ -368,17 +414,23 @@ export function ServiceOrderDetail({
         
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
-        const materialsText = serviceOrder.materialsRequired.substring(0, 300) + (serviceOrder.materialsRequired.length > 300 ? '...' : '');
-        const materialsSplit = pdf.splitTextToSize(materialsText, 170);
         pdf.text(materialsSplit, leftMargin + 5, yPos + 15);
+        
+        yPos += materialHeight + 10; // Add spacing after materials
+      } else {
+        yPos += 10; // Just add some spacing
       }
       
       // --- CLIENT SIGNATURE SECTION ---
-      yPos = Math.min(yPos + 35, 220); // Make sure we have room
+      // Check if we need to add a new page for signature
+      if (yPos > 220) {
+        pdf.addPage();
+        yPos = 15;
+      }
       
       // Draw light gray background
       pdf.setFillColor(245, 245, 245);
-      pdf.rect(leftMargin, yPos, 180, 30, 'F');
+      pdf.rect(leftMargin, yPos, 180, 50, 'F'); // Make signature box taller
       
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
@@ -397,13 +449,18 @@ export function ServiceOrderDetail({
         
         // Add signature image
         try {
+          // The signature is usually wider than tall, so adjust dimensions
+          // to maintain aspect ratio but control the width
+          const sigWidth = 120; // Wider signature image
+          const sigHeight = 30; // Reasonable height
+          
           pdf.addImage(
             clientSignature,
             'PNG',
             leftMargin + 5,
-            yPos + 20,
-            80,
-            20
+            yPos + 18, // Position it lower in the box
+            sigWidth,
+            sigHeight
           );
         } catch (e) {
           console.error("Error adding signature to PDF:", e);
