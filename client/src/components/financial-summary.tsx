@@ -69,15 +69,15 @@ export function FinancialSummary({
     if (!paymentsData?.timeSeriesData || !invoicesData?.timeSeriesData) return;
     
     // Get all dates from both datasets
-    const allDates = new Set([
-      ...paymentsData.timeSeriesData.map((item: any) => item.date),
-      ...invoicesData.timeSeriesData.map((item: any) => item.date),
+    const allDates = new Set<string>([
+      ...(paymentsData.timeSeriesData || []).map((item: any) => item.date),
+      ...(invoicesData.timeSeriesData || []).map((item: any) => item.date),
     ]);
     
     // Create data with both revenue and expenses for each date
     const data = Array.from(allDates).map((date) => {
-      const paymentItem = paymentsData.timeSeriesData.find((item: any) => item.date === date);
-      const invoiceItem = invoicesData.timeSeriesData.find((item: any) => item.date === date);
+      const paymentItem = paymentsData.timeSeriesData?.find((item: any) => item.date === date);
+      const invoiceItem = invoicesData.timeSeriesData?.find((item: any) => item.date === date);
       
       return {
         date,
@@ -97,7 +97,7 @@ export function FinancialSummary({
   const prepareCategoryData = () => {
     if (!paymentsData?.categorySummary) return;
     
-    const data = paymentsData.categorySummary.map((item: any) => ({
+    const data = (paymentsData.categorySummary || []).map((item: any) => ({
       name: item.name,
       value: item.total,
     }));
@@ -112,7 +112,7 @@ export function FinancialSummary({
     // Group by recipient type
     const groupedByType: Record<string, number> = {};
     
-    paymentsData.recipientSummary.forEach((item: any) => {
+    (paymentsData.recipientSummary || []).forEach((item: any) => {
       const type = item.type;
       if (!groupedByType[type]) {
         groupedByType[type] = 0;

@@ -16,7 +16,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Separator } from "@/components/ui/separator";
-import { FinancialSummary } from "../components/financial-summary";
+import { FinancialSummary } from "@/components/financial-summary";
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
