@@ -1,0 +1,67 @@
+/* Print-specific styles for service orders */
+@media print {
+  /* Hide elements that shouldn't print */
+  .print-hidden, 
+  button,
+  [role="dialog"] > div:first-child {
+    display: none !important;
+  }
+  
+  /* Force background colors and images to print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Remove dialog styling */
+  [role="dialog"] {
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    background: white !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  /* Add page breaks intelligently */
+  .company-header {
+    page-break-inside: avoid;
+  }
+  
+  .info-card {
+    page-break-inside: avoid;
+  }
+  
+  h3 {
+    page-break-after: avoid;
+  }
+  
+  /* Ensure better print layout */
+  .print-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+  
+  /* Improve text contrast for printing */
+  body {
+    color: black !important;
+    font-size: 12pt !important;
+  }
+  
+  /* Ensure tables print well */
+  table {
+    border-collapse: collapse !important;
+  }
+  
+  table td, table th {
+    border: 1px solid #ddd !important;
+  }
+}

@@ -174,7 +174,7 @@ export const insertSubcontractorSchema = createInsertSchema(subcontractors).pick
   status: true,
 });
 
-// Service Order schema - actualizado con idioma, subcontratistas y supervisor
+// Service Order schema - actualizado con campos adicionales
 export const serviceOrders = pgTable("service_orders", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").notNull(),
@@ -184,12 +184,18 @@ export const serviceOrders = pgTable("service_orders", {
   supervisorId: integer("supervisor_id"), // ID del miembro del personal que supervisa
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
+  dueDate: timestamp("due_date"), // Fecha límite
   status: text("status").notNull().default("pending"), // pending, in_progress, completed
   beforeImages: jsonb("before_images"),
   afterImages: jsonb("after_images"),
   clientSignature: text("client_signature"),
-  signatureDate: timestamp("signature_date"),
-  language: text("language").default("english").notNull(), // Nuevo campo para idioma: english, spanish
+  signedDate: timestamp("signed_date"), // Cambio de nombre para ser más claro
+  materialsRequired: text("materials_required"), // Lista de materiales requeridos
+  specialInstructions: text("special_instructions"), // Instrucciones especiales
+  safetyRequirements: text("safety_requirements"), // Requisitos de seguridad
+  assignedTo: integer("assigned_to"), // ID del staff o subcontratista asignado como principal
+  assignedType: text("assigned_type"), // Tipo de asignación: 'staff' o 'subcontractor'
+  language: text("language").default("english").notNull(), // english, spanish
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -205,6 +211,12 @@ const baseServiceOrderSchema = createInsertSchema(serviceOrders).pick({
   afterImages: true,
   clientSignature: true,
   language: true,
+  // Nuevos campos
+  materialsRequired: true,
+  specialInstructions: true,
+  safetyRequirements: true,
+  assignedTo: true,
+  assignedType: true,
 });
 
 // Añadir validación personalizada para fechas
@@ -225,7 +237,15 @@ export const insertServiceOrderSchema = baseServiceOrderSchema.extend({
     z.null(),
     z.undefined()
   ]).optional(),
-  signatureDate: z.union([
+  dueDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "La fecha límite debe ser válida"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  signedDate: z.union([
     z.date(),
     z.string().refine((val) => !isNaN(Date.parse(val)), {
       message: "La fecha de firma debe ser válida"

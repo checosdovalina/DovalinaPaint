@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ServiceOrder, Project, Staff, Subcontractor } from "@shared/schema";
+import { ServiceOrder, Project, Staff, Subcontractor, Client } from "@shared/schema";
 import { Layout } from "@/components/layout";
 import { ServiceOrderForm } from "@/components/service-order-form";
+import { ServiceOrderDetail } from "@/components/service-order-detail";
 import {
   Card,
   CardContent,
