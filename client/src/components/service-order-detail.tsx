@@ -352,6 +352,7 @@ export function ServiceOrderDetail({
       // First calculate detailsHeight to see if we need special handling for long text
       let detailsTextHeight = 0;
       if (serviceOrder.details) {
+        // Calculate space needed for details text
         const detailsTextLines = pdf.splitTextToSize(serviceOrder.details, pageWidth - 10);
         detailsTextHeight = detailsTextLines.length * 5; // Each line ~5mm tall
       }
@@ -372,7 +373,7 @@ export function ServiceOrderDetail({
       pdf.setFont('helvetica', 'bold');
       pdf.text("Service Details", leftMargin + 5, yPos + 7);
       
-      // Basic info
+      // Basic info - regular size for headers
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
       pdf.text(`Assigned To: ${assignedTo || 'Not Assigned'}`, leftMargin + 5, yPos + 15);
@@ -383,20 +384,35 @@ export function ServiceOrderDetail({
         yPos + 22
       );
       
-      // Details field
+      // Details field label
       pdf.text("Details:", leftMargin + 5, yPos + 29);
       
       // Handle details text with potential wrapping
       if (serviceOrder.details) {
-        // Use a smaller font size for details to fit more text in the box
-        pdf.setFontSize(9); // Smaller font for details
-        pdf.setFont('helvetica', 'normal');
+        // Use monospaced font for bulleted code-like content
+        pdf.setFontSize(10); // Slightly larger and more readable
+        pdf.setFont('courier', 'normal'); // Use monospaced font for code-like details
         
-        // Calculate maximum width for text - narrower to ensure it stays within bounds
-        const maxDetailsWidth = pageWidth - 15; // Slightly narrower margin for safety
+        // Calculate maximum width for text - provide enough margin
+        const maxDetailsWidth = pageWidth - 20; // Wider margin for monospaced font
         
-        // Split the text into lines that fit the width
-        const detailsLines = pdf.splitTextToSize(serviceOrder.details, maxDetailsWidth);
+        // Format the details - reproduce the bullet point style
+        const formattedDetails = serviceOrder.details
+          .split('\n')
+          .map(line => line.trim()) // Clean up each line
+          .filter(line => line.length > 0) // Remove empty lines
+          .map(line => {
+            // If it starts with a bullet point or number, keep it as is
+            if (line.startsWith('•') || line.startsWith('*') || /^\d+\./.test(line)) {
+              return line;
+            }
+            // Otherwise add a bullet point for each line like in the image
+            return line.startsWith("'") ? line : "' " + line;
+          })
+          .join('\n');
+          
+        // Split formatted text into lines that fit the width
+        const detailsLines = pdf.splitTextToSize(formattedDetails, maxDetailsWidth);
         
         // If there are too many lines, we need a new page
         if (detailsLines.length > 30) { // Arbitrary cutoff for what's too long
@@ -417,8 +433,8 @@ export function ServiceOrderDetail({
           pdf.roundedRect(leftMargin, 20, pageWidth, 200, 1, 1, 'F');
           
           // Add the rest of the text
-          pdf.setFontSize(9); // Keep same smaller font size
-          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(10);
+          pdf.setFont('courier', 'normal'); // Keep monospaced font consistent
           const remainingLines = detailsLines.slice(20);
           pdf.text(remainingLines, leftMargin + 5, 25);
           
@@ -446,12 +462,12 @@ export function ServiceOrderDetail({
           yPos = 15;
         }
         
-        // Use smaller font for materials to ensure proper rendering
-        pdf.setFontSize(9); // Smaller font for materials
-        pdf.setFont('helvetica', 'normal');
+        // Use courier for materials to match details section styling 
+        pdf.setFontSize(10);
+        pdf.setFont('courier', 'normal'); // Use monospaced font for consistency with details
         
         // Calculate needed height for materials text with slightly narrower margin
-        const materialsSplit = pdf.splitTextToSize(serviceOrder.materialsRequired, pageWidth - 15);
+        const materialsSplit = pdf.splitTextToSize(serviceOrder.materialsRequired, pageWidth - 20);
         const materialHeight = Math.min(10 + materialsSplit.length * 5, 60); // Header + content, max 60mm
         
         // Draw light gray background
@@ -464,8 +480,8 @@ export function ServiceOrderDetail({
         pdf.text("Materials Required", leftMargin + 5, yPos + 7);
         
         // Content
-        pdf.setFontSize(9); // Keep font small for materials content
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10); // Match details font size
+        pdf.setFont('courier', 'normal'); // Use monospaced font for consistent appearance
         pdf.text(materialsSplit, leftMargin + 5, yPos + 15);
         
         // Update position for next section
