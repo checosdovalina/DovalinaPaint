@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarIcon, HardHat, Briefcase } from "lucide-react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { StaffAssignment } from "@/components/staff-assignment";
@@ -148,7 +148,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-h-[90vh] overflow-y-auto pb-4">
         <FormField
           control={form.control}
           name="projectId"
