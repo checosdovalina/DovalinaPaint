@@ -258,6 +258,13 @@ export function InvoiceDetail({ invoice, onClose, onSuccess }: InvoiceDetailProp
             </Button>
           </div>
           <div className="flex space-x-2">
+            <Button
+              variant="secondary"
+              onClick={() => onDuplicate(invoice)}
+            >
+              <CopyIcon className="mr-2 h-4 w-4" />
+              Factura Igual
+            </Button>
             {invoice.status !== "paid" && (
               <Button 
                 variant="default" 
