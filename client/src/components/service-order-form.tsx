@@ -36,6 +36,7 @@ import { enUS } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { StaffAssignment } from "@/components/staff-assignment";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 // Extend the schema to handle the form
 const formSchema = insertServiceOrderSchema
@@ -62,6 +63,12 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
   const { toast } = useToast();
   const [assignedStaff, setAssignedStaff] = useState<number[]>(
     initialData?.assignedStaff || []
+  );
+  const [beforeImages, setBeforeImages] = useState<string[]>(
+    initialData?.beforeImages as string[] || []
+  );
+  const [afterImages, setAfterImages] = useState<string[]>(
+    initialData?.afterImages as string[] || []
   );
 
   // Fetch projects for the dropdown
@@ -109,6 +116,8 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
       const serviceOrderData = {
         ...data,
         assignedStaff,
+        beforeImages,
+        afterImages,
         assignedSubcontractorId: data.assignedSubcontractorId ? data.assignedSubcontractorId : null,
         supervisorId: data.supervisorId ? data.supervisorId : null,
       };
@@ -590,11 +599,23 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
           />
         </div>
 
-        {/* Image upload could be added here */}
         <div className="border-t mt-6 pt-6">
-          <p className="text-sm text-gray-500 mb-4">
-            Before/after images can be attached after creating the service order
-          </p>
+          <h3 className="text-lg font-medium mb-3">Project Images</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ImageUpload
+              label="Before Images"
+              value={beforeImages}
+              onChange={setBeforeImages}
+              multiple={true}
+            />
+            
+            <ImageUpload
+              label="After Images"
+              value={afterImages}
+              onChange={setAfterImages}
+              multiple={true}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end space-x-2">
