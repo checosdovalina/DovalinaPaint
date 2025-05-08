@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 // Import print styles
 import "./quote-print.css";
@@ -101,54 +103,124 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
   // Get the total amount directly from the quote or calculate it if needed
   const totalAmount = quote.totalEstimate || (baseSubtotal + additionalCosts);
 
-  // Function to generate PDF (using browser's print functionality)
-  const generatePDF = () => {
+  // Function to generate and download PDF
+  const generatePDF = async () => {
     toast({
       title: "Generating PDF",
-      description: "The quote PDF is being generated...",
+      description: "Please wait while your PDF is being generated...",
     });
     
-    // Save original styles and title
-    const originalTitle = document.title;
-    
-    // Update title for the PDF filename
-    document.title = `Dovalina_Painting_Quote_${quote.id}_${project?.title || 'Project'}`.replace(/\s+/g, '_');
-    
-    // Add print-specific classes to enhance print layout
-    const printableContent = document.getElementById('quote-detail-printable');
-    if (printableContent) {
-      printableContent.classList.add('print-content');
-    }
-    
-    // Hide elements that shouldn't be in the PDF
-    const elementsToHide = document.querySelectorAll('.print-hidden');
-    elementsToHide.forEach(el => {
-      (el as HTMLElement).style.display = 'none';
-    });
-    
-    // Start print process
-    window.print();
-    
-    // Restore everything after printing
-    setTimeout(() => {
-      // Restore title
-      document.title = originalTitle;
-      
-      // Remove print-specific classes
-      if (printableContent) {
-        printableContent.classList.remove('print-content');
+    try {
+      // Get the printable content element
+      const printableContent = document.getElementById('quote-detail-printable');
+      if (!printableContent) {
+        throw new Error("Content element not found");
       }
       
-      // Show hidden elements again
+      // Add print-specific classes to enhance PDF layout
+      printableContent.classList.add('print-content');
+      
+      // Hide elements that shouldn't be in the PDF
+      const elementsToHide = document.querySelectorAll('.print-hidden');
+      elementsToHide.forEach(el => {
+        (el as HTMLElement).style.display = 'none';
+      });
+      
+      // Generate a filename for the PDF
+      const filename = `Dovalina_Painting_Quote_${quote.id}_${project?.title || 'Project'}.pdf`.replace(/\s+/g, '_');
+      
+      // Capture the content as an image using html2canvas
+      const canvas = await html2canvas(printableContent, {
+        scale: 1.5, // Higher scale for better quality
+        useCORS: true,
+        allowTaint: true,
+        logging: false, // Disable logging
+      });
+      
+      // Create a new PDF document in portrait, using mm units
+      const pdfWidth = 210; // A4 width in mm
+      const pdfHeight = 297; // A4 height in mm
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      // Create new PDF
+      const pdf = new jsPDF({
+        orientation: imgHeight > imgWidth ? 'portrait' : 'landscape',
+        unit: 'mm',
+        format: 'a4',
+      });
+      
+      // If content is larger than A4, split it into multiple pages
+      if (imgHeight > pdfHeight) {
+        let heightLeft = imgHeight;
+        let position = 0;
+        let page = 1;
+        
+        while (heightLeft > 0) {
+          // Add page and add content
+          if (page > 1) {
+            pdf.addPage();
+          }
+          
+          // Add image to the page
+          pdf.addImage(
+            canvas.toDataURL('image/jpeg', 0.95), // JPEG with 95% quality gives smaller file size
+            'JPEG',
+            0, // Left margin
+            position, // Top position
+            imgWidth,
+            imgHeight
+          );
+          
+          // Move to next page
+          heightLeft -= pdfHeight;
+          position -= pdfHeight;
+          page++;
+        }
+      } else {
+        // Content fits in one page
+        pdf.addImage(
+          canvas.toDataURL('image/jpeg', 0.95),
+          'JPEG',
+          0,
+          0,
+          imgWidth,
+          imgHeight
+        );
+      }
+      
+      // Save the PDF file
+      pdf.save(filename);
+      
+      // Restore the UI
+      printableContent.classList.remove('print-content');
       elementsToHide.forEach(el => {
         (el as HTMLElement).style.display = '';
       });
       
       toast({
-        title: "PDF Generated",
-        description: "The quote has been prepared to save as PDF",
+        title: "PDF Downloaded",
+        description: "Your quote has been saved as a PDF file.",
       });
-    }, 1000);
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast({
+        title: "PDF Generation Failed",
+        description: "There was a problem generating the PDF. Please try again.",
+        variant: "destructive",
+      });
+      
+      // Restore the UI in case of error
+      const printableContent = document.getElementById('quote-detail-printable');
+      if (printableContent) {
+        printableContent.classList.remove('print-content');
+      }
+      
+      const elementsToHide = document.querySelectorAll('.print-hidden');
+      elementsToHide.forEach(el => {
+        (el as HTMLElement).style.display = '';
+      });
+    }
   };
 
   // Function to print
