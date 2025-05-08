@@ -51,6 +51,7 @@ interface CalendarViewProps {
   isLoadingProjects?: boolean;
   isLoadingServiceOrders?: boolean;
   refreshData?: () => void;
+  onAddEvent?: () => void; // Nueva prop para abrir el diálogo de nuevo evento
 }
 
 export function CalendarView({
@@ -60,6 +61,7 @@ export function CalendarView({
   isLoadingProjects = false,
   isLoadingServiceOrders = false,
   refreshData,
+  onAddEvent,
 }: CalendarViewProps) {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [showGoogleEvents, setShowGoogleEvents] = useState(false);
@@ -256,6 +258,26 @@ export function CalendarView({
       default: return '#2196f3'; // Blue
     }
   };
+  
+  // Effect to handle onAddEvent prop
+  useEffect(() => {
+    if (onAddEvent) {
+      const handleAddEvent = () => {
+        setNewEvent({
+          title: '',
+          start: '',
+          end: '',
+          allDay: false,
+          description: '',
+          location: '',
+        });
+        setShowAddEvent(true);
+      };
+      
+      // Assign the function to the onAddEvent prop
+      onAddEvent = handleAddEvent;
+    }
+  }, [onAddEvent]);
 
   return (
     <div className="calendar-container">
