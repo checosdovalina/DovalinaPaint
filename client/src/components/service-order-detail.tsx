@@ -384,59 +384,47 @@ export function ServiceOrderDetail({
         yPos + 22
       );
       
-      // Details field label
+      // Details field with smaller font size
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'medium');
       pdf.text("Details:", leftMargin + 5, yPos + 29);
       
-      // Handle details text with potential wrapping
+      // Handle details text
       if (serviceOrder.details) {
-        // Use a smaller font size
+        // Use a smaller font size for the details text
         pdf.setFontSize(8);
         pdf.setFont('helvetica', 'normal');
         
-        // Calculate maximum width for text - increase width to reduce wrapping
+        // Calculate maximum width for text - entire page width almost
         const maxDetailsWidth = pageWidth - 15;
         
-        // Format details to match what is shown on screen
+        // Add the details as inline text (on same line as "Details:" label)
         const formattedDetails = serviceOrder.details;
         
-        // Split formatted text into lines that fit the width
-        const detailsLines = pdf.splitTextToSize(formattedDetails, maxDetailsWidth);
+        // Measure the width of "Details: " text to know where to start
+        const textWidth = 45; // Approximate width of "Details: " with correct font
         
-        // If there are too many lines, we need a new page
-        if (detailsLines.length > 30) { // Arbitrary cutoff for what's too long
-          // First part on this page - show only first lines
-          const firstPageLines = detailsLines.slice(0, 20);
-          pdf.text(firstPageLines, leftMargin + 5, yPos + 35);
-          
-          // Rest on new page
-          pdf.addPage();
-          
-          // Add a header for continuation on new page
-          pdf.setFontSize(12);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text("Service Details (Continued)", leftMargin, 15);
-          
-          // Add a background for the continued text
-          pdf.setFillColor(245, 245, 245);
-          pdf.roundedRect(leftMargin, 20, pageWidth, 200, 1, 1, 'F');
-          
-          // Add the rest of the text
-          pdf.setFontSize(8);
-          pdf.setFont('helvetica', 'normal');
-          const remainingLines = detailsLines.slice(20);
-          pdf.text(remainingLines, leftMargin + 5, 25);
-          
-          // Now we continue with the next section on the first page
-          yPos += detailsHeight + 10;
-        } else {
-          // Text fits on current page
-          pdf.text(detailsLines, leftMargin + 5, yPos + 35);
-          yPos += detailsHeight + 10; // Move position for next section
+        // Split formatted text into lines that fit the remaining width
+        const detailsLines = pdf.splitTextToSize(formattedDetails, maxDetailsWidth - textWidth);
+        
+        // Position text after the "Details:" label on the same line
+        if (detailsLines.length > 0) {
+          pdf.text(detailsLines[0], leftMargin + 5 + textWidth, yPos + 29);
         }
+        
+        // If we have more lines, add them underneath
+        if (detailsLines.length > 1) {
+          const remainingLines = detailsLines.slice(1);
+          pdf.text(remainingLines, leftMargin + 5, yPos + 35);
+        }
+        
+        // Move to next section
+        yPos += detailsHeight + 10;
       } else {
         // No details provided
+        pdf.setFontSize(8);
         pdf.setFont('helvetica', 'italic');
-        pdf.text("No specific details provided.", leftMargin + 5, yPos + 35);
+        pdf.text("No specific details provided.", leftMargin + 5 + 45, yPos + 29);
         yPos += detailsHeight + 10; // Move position for next section
       }
       
@@ -811,8 +799,7 @@ export function ServiceOrderDetail({
               <h3 className="text-lg font-semibold mb-2">Service Details</h3>
               <p><span className="font-medium">Assigned To:</span> {assignedTo}</p>
               <p><span className="font-medium">Start Date:</span> {serviceOrder.startDate ? format(new Date(serviceOrder.startDate), "MMMM d'th', yyyy", { locale: enUS }) : 'N/A'}</p>
-              <p><span className="font-medium">Details:</span></p>
-              <p className="whitespace-pre-line mt-1">{serviceOrder.details || 'No specific details provided.'}</p>
+              <p><span className="font-medium">Details:</span> <span className="text-sm">{serviceOrder.details || 'No specific details provided.'}</span></p>
             </CardContent>
           </Card>
           
@@ -821,7 +808,7 @@ export function ServiceOrderDetail({
             <Card className="mb-6">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">Materials Required</h3>
-                <p className="whitespace-pre-line">{serviceOrder.materialsRequired}</p>
+                <p className="text-sm">{serviceOrder.materialsRequired}</p>
               </CardContent>
             </Card>
           )}
@@ -831,7 +818,7 @@ export function ServiceOrderDetail({
             <Card className="mb-6">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">Special Instructions</h3>
-                <p className="whitespace-pre-line">{serviceOrder.specialInstructions}</p>
+                <p className="text-sm">{serviceOrder.specialInstructions}</p>
               </CardContent>
             </Card>
           )}
@@ -841,7 +828,7 @@ export function ServiceOrderDetail({
             <Card className="mb-6">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">Safety Requirements</h3>
-                <p className="whitespace-pre-line">{serviceOrder.safetyRequirements}</p>
+                <p className="text-sm">{serviceOrder.safetyRequirements}</p>
               </CardContent>
             </Card>
           )}
