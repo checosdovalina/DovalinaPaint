@@ -545,6 +545,115 @@ export function ServiceOrderDetail({
         pdf.setFont('arial', 'italic');
         pdf.text("Not yet signed by client", leftMargin + 5, yPos + 15);
       }
+      // --------------------------------------------
+      // PROJECT IMAGES SECTION (if present)
+      // --------------------------------------------
+      if (Array.isArray(serviceOrder.beforeImages) && serviceOrder.beforeImages.length > 0 ||
+          Array.isArray(serviceOrder.afterImages) && serviceOrder.afterImages.length > 0) {
+        
+        // Add a new page for images
+        pdf.addPage();
+        yPos = 15;
+        
+        // Title
+        pdf.setFontSize(12);
+        pdf.setFont('arial', 'bold');
+        pdf.text("Project Images", leftMargin, yPos);
+        yPos += 10;
+        
+        // Before Images
+        if (Array.isArray(serviceOrder.beforeImages) && serviceOrder.beforeImages.length > 0) {
+          pdf.setFontSize(10);
+          pdf.setFont('arial', 'bold');
+          pdf.text("Before Images:", leftMargin, yPos);
+          yPos += 8;
+          
+          // Add each image
+          const imgWidth = 80; // Width of each image in mm
+          const imgHeight = 60; // Height of each image in mm
+          const imagesPerRow = 2; // Number of images per row
+          
+          for (let i = 0; i < serviceOrder.beforeImages.length; i++) {
+            try {
+              const xPos = leftMargin + (i % imagesPerRow) * (imgWidth + 5);
+              
+              // If we need to start a new row
+              if (i > 0 && i % imagesPerRow === 0) {
+                yPos += imgHeight + 10;
+              }
+              
+              // If we're about to go off the page, add a new page
+              if (yPos + imgHeight > 270) {
+                pdf.addPage();
+                yPos = 15;
+              }
+              
+              // Add the image
+              pdf.addImage(
+                serviceOrder.beforeImages[i],
+                'JPEG',
+                xPos,
+                yPos,
+                imgWidth,
+                imgHeight
+              );
+            } catch (e) {
+              console.error("Error adding before image to PDF:", e);
+            }
+          }
+          
+          // Move position down for next section
+          yPos += imgHeight + 15;
+        }
+        
+        // After Images
+        if (Array.isArray(serviceOrder.afterImages) && serviceOrder.afterImages.length > 0) {
+          // If we're about to go off the page, add a new page
+          if (yPos > 220) {
+            pdf.addPage();
+            yPos = 15;
+          }
+          
+          pdf.setFontSize(10);
+          pdf.setFont('arial', 'bold');
+          pdf.text("After Images:", leftMargin, yPos);
+          yPos += 8;
+          
+          // Add each image
+          const imgWidth = 80; // Width of each image in mm
+          const imgHeight = 60; // Height of each image in mm
+          const imagesPerRow = 2; // Number of images per row
+          
+          for (let i = 0; i < serviceOrder.afterImages.length; i++) {
+            try {
+              const xPos = leftMargin + (i % imagesPerRow) * (imgWidth + 5);
+              
+              // If we need to start a new row
+              if (i > 0 && i % imagesPerRow === 0) {
+                yPos += imgHeight + 10;
+              }
+              
+              // If we're about to go off the page, add a new page
+              if (yPos + imgHeight > 270) {
+                pdf.addPage();
+                yPos = 15;
+              }
+              
+              // Add the image
+              pdf.addImage(
+                serviceOrder.afterImages[i],
+                'JPEG',
+                xPos,
+                yPos,
+                imgWidth,
+                imgHeight
+              );
+            } catch (e) {
+              console.error("Error adding after image to PDF:", e);
+            }
+          }
+        }
+      }
       
       // Add footer with page number
       pdf.setFontSize(8);
