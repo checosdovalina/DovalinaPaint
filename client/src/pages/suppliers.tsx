@@ -50,6 +50,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // Define form schema for suppliers
 const supplierFormSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
+  company: z.string().min(1, { message: "Company is required" }),
   email: z.string().email({ message: "Invalid email address" }).optional().or(z.literal('')),
   phone: z.string().optional(),
   address: z.string().optional(),
@@ -82,6 +83,7 @@ export default function Suppliers() {
     resolver: zodResolver(supplierFormSchema),
     defaultValues: {
       name: "",
+      company: "",
       email: "",
       phone: "",
       address: "",
@@ -201,6 +203,7 @@ export default function Suppliers() {
     setEditingSupplierId(null);
     form.reset({
       name: "",
+      company: "",
       email: "",
       phone: "",
       address: "",
@@ -216,6 +219,7 @@ export default function Suppliers() {
     setEditingSupplierId(supplier.id);
     form.reset({
       name: supplier.name,
+      company: supplier.company || "",
       email: supplier.email || "",
       phone: supplier.phone || "",
       address: supplier.address || "",
@@ -434,6 +438,20 @@ export default function Suppliers() {
                     <FormLabel>Name*</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter supplier name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="company"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company*</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter company name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
