@@ -5,6 +5,7 @@ import { Plus, Search, Edit, Trash2, PackageOpen } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import PageHeader from "@/components/page-header";
+import { Layout } from "@/components/layout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -239,7 +240,7 @@ export default function Suppliers() {
   }));
 
   return (
-    <div className="container mx-auto py-6 space-y-6 max-w-7xl px-4 md:px-6">
+    <Layout title="Suppliers Management">
       <Helmet>
         <title>Suppliers | Dovalina Painting LLC</title>
       </Helmet>
@@ -564,6 +565,6 @@ export default function Suppliers() {
           </Form>
         </DialogContent>
       </Dialog>
-    </div>
+    </Layout>
   );
 }
