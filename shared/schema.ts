@@ -433,9 +433,6 @@ export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 
-export type Supplier = typeof suppliers.$inferSelect;
-export type InsertSupplier = z.infer<typeof insertSupplierSchema>;
-
 // Suppliers schema
 export const suppliers = pgTable("suppliers", {
   id: serial("id").primaryKey(),
@@ -522,6 +519,9 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
 
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+
+export type Supplier = typeof suppliers.$inferSelect;
+export type InsertSupplier = z.infer<typeof insertSupplierSchema>;
 
 // Session schema (para manejar las sesiones de connect-pg-simple)
 export const session = pgTable("session", {
