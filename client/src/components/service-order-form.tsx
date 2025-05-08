@@ -193,11 +193,21 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
             <FormItem>
               <FormLabel>Details</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Specific details about the work to be done"
-                  {...field}
-                  rows={5}
-                />
+                <div className="flex flex-col">
+                  <Textarea
+                    placeholder="Specific details about the work to be done"
+                    {...field}
+                    rows={5}
+                  />
+                  <div className="mt-1 text-xs text-gray-500">
+                    <p>Formato:</p>
+                    <ul className="list-disc ml-4">
+                      <li>Inicie cada punto de la lista con "•", "-", "*" o "✓"</li>
+                      <li>Cada línea nueva creará un párrafo separado</li>
+                      <li>Ejemplo: "✓ Preparar superficie\n✓ Aplicar primera capa"</li>
+                    </ul>
+                  </div>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

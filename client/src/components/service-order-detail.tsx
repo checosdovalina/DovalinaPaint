@@ -398,28 +398,57 @@ export function ServiceOrderDetail({
         // Calculate maximum width for text - entire page width almost
         const maxDetailsWidth = pageWidth - 15;
         
-        // Add the details as inline text (on same line as "Details:" label)
-        const formattedDetails = serviceOrder.details;
+        // Offset for details content
+        const contentStartX = leftMargin + 10;
+        const contentStartY = yPos + 35;
         
-        // Measure the width of "Details: " text to know where to start
-        const textWidth = 45; // Approximate width of "Details: " with correct font
+        // Process each line of the details
+        const detailsLines = serviceOrder.details.split('\n');
+        let lineY = contentStartY;
         
-        // Split formatted text into lines that fit the remaining width
-        const detailsLines = pdf.splitTextToSize(formattedDetails, maxDetailsWidth - textWidth);
-        
-        // Position text after the "Details:" label on the same line
-        if (detailsLines.length > 0) {
-          pdf.text(detailsLines[0], leftMargin + 5 + textWidth, yPos + 29);
+        for (let i = 0; i < detailsLines.length; i++) {
+          const line = detailsLines[i];
+          // Si la línea comienza con un punto, asterisco o guión, mostrarla como un ítem de lista
+          const isListItem = /^\s*[\•\-\*\✓]\s+/.test(line);
+          
+          if (isListItem) {
+            // For list items, add a bullet point
+            const bulletX = contentStartX;
+            const textX = contentStartX + 3;
+            
+            // Clean the text by removing bullet markers
+            const cleanText = line.replace(/^\s*[\•\-\*\✓]\s+/, '');
+            
+            // Split text to fit width
+            const textLines = pdf.splitTextToSize(cleanText, maxDetailsWidth - 15);
+            
+            // Add bullet
+            pdf.text("•", bulletX, lineY);
+            
+            // Add text after bullet
+            pdf.text(textLines, textX, lineY);
+            
+            // Move position down for next line
+            lineY += textLines.length * 4;
+          } else {
+            // Regular paragraph
+            const textLines = pdf.splitTextToSize(line, maxDetailsWidth - 10);
+            pdf.text(textLines, contentStartX, lineY);
+            lineY += textLines.length * 4;
+          }
+          
+          // Add small space between items
+          lineY += 1;
+          
+          // Check if we need a new page
+          if (lineY > 260) {
+            pdf.addPage();
+            lineY = 20;
+          }
         }
         
-        // If we have more lines, add them underneath
-        if (detailsLines.length > 1) {
-          const remainingLines = detailsLines.slice(1);
-          pdf.text(remainingLines, leftMargin + 5, yPos + 35);
-        }
-        
-        // Move to next section
-        yPos += detailsHeight + 10;
+        // Move to next section with enough space
+        yPos = lineY + 5;
       } else {
         // No details provided
         pdf.setFontSize(8);
@@ -799,7 +828,27 @@ export function ServiceOrderDetail({
               <h3 className="text-lg font-semibold mb-2">Service Details</h3>
               <p><span className="font-medium">Assigned To:</span> {assignedTo}</p>
               <p><span className="font-medium">Start Date:</span> {serviceOrder.startDate ? format(new Date(serviceOrder.startDate), "MMMM d'th', yyyy", { locale: enUS }) : 'N/A'}</p>
-              <p><span className="font-medium">Details:</span> <span className="text-sm">{serviceOrder.details || 'No specific details provided.'}</span></p>
+              <div>
+                <p className="font-medium mb-1">Details:</p>
+                {serviceOrder.details ? (
+                  <div className="ml-2 text-sm">
+                    {serviceOrder.details.split('\n').map((line, index) => {
+                      // Si la línea comienza con un punto, asterisco o guión, mostrarla como un ítem de lista
+                      const isListItem = /^\s*[\•\-\*\✓]\s+/.test(line);
+                      return isListItem ? (
+                        <div key={index} className="flex items-start mb-0.5">
+                          <span className="mr-1">•</span>
+                          <span>{line.replace(/^\s*[\•\-\*\✓]\s+/, '')}</span>
+                        </div>
+                      ) : (
+                        <p key={index} className="mb-0.5">{line || ' '}</p>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm italic ml-2">No specific details provided.</p>
+                )}
+              </div>
             </CardContent>
           </Card>
           
@@ -808,7 +857,20 @@ export function ServiceOrderDetail({
             <Card className="mb-6">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">Materials Required</h3>
-                <p className="text-sm">{serviceOrder.materialsRequired}</p>
+                <div className="ml-2 text-sm">
+                  {serviceOrder.materialsRequired.split('\n').map((line, index) => {
+                    // Si la línea comienza con un punto, asterisco o guión, mostrarla como un ítem de lista
+                    const isListItem = /^\s*[\•\-\*\✓]\s+/.test(line);
+                    return isListItem ? (
+                      <div key={index} className="flex items-start mb-0.5">
+                        <span className="mr-1">•</span>
+                        <span>{line.replace(/^\s*[\•\-\*\✓]\s+/, '')}</span>
+                      </div>
+                    ) : (
+                      <p key={index} className="mb-0.5">{line || ' '}</p>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
           )}
@@ -818,7 +880,20 @@ export function ServiceOrderDetail({
             <Card className="mb-6">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">Special Instructions</h3>
-                <p className="text-sm">{serviceOrder.specialInstructions}</p>
+                <div className="ml-2 text-sm">
+                  {serviceOrder.specialInstructions.split('\n').map((line, index) => {
+                    // Si la línea comienza con un punto, asterisco o guión, mostrarla como un ítem de lista
+                    const isListItem = /^\s*[\•\-\*\✓]\s+/.test(line);
+                    return isListItem ? (
+                      <div key={index} className="flex items-start mb-0.5">
+                        <span className="mr-1">•</span>
+                        <span>{line.replace(/^\s*[\•\-\*\✓]\s+/, '')}</span>
+                      </div>
+                    ) : (
+                      <p key={index} className="mb-0.5">{line || ' '}</p>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
           )}
@@ -828,7 +903,20 @@ export function ServiceOrderDetail({
             <Card className="mb-6">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">Safety Requirements</h3>
-                <p className="text-sm">{serviceOrder.safetyRequirements}</p>
+                <div className="ml-2 text-sm">
+                  {serviceOrder.safetyRequirements.split('\n').map((line, index) => {
+                    // Si la línea comienza con un punto, asterisco o guión, mostrarla como un ítem de lista
+                    const isListItem = /^\s*[\•\-\*\✓]\s+/.test(line);
+                    return isListItem ? (
+                      <div key={index} className="flex items-start mb-0.5">
+                        <span className="mr-1">•</span>
+                        <span>{line.replace(/^\s*[\•\-\*\✓]\s+/, '')}</span>
+                      </div>
+                    ) : (
+                      <p key={index} className="mb-0.5">{line || ' '}</p>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
           )}
