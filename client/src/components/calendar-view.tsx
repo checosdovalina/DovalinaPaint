@@ -51,7 +51,8 @@ interface CalendarViewProps {
   isLoadingProjects?: boolean;
   isLoadingServiceOrders?: boolean;
   refreshData?: () => void;
-  onAddEvent?: () => void; // Nueva prop para abrir el diálogo de nuevo evento
+  showAddEvent?: boolean; // Indica si debemos mostrar el diálogo de nuevo evento
+  onCloseAddEvent?: () => void; // Función para cerrar el diálogo
 }
 
 export function CalendarView({
@@ -61,7 +62,8 @@ export function CalendarView({
   isLoadingProjects = false,
   isLoadingServiceOrders = false,
   refreshData,
-  onAddEvent,
+  showAddEvent: externalShowAddEvent,
+  onCloseAddEvent,
 }: CalendarViewProps) {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [showGoogleEvents, setShowGoogleEvents] = useState(false);
@@ -77,6 +79,8 @@ export function CalendarView({
     allDay: false,
     description: '',
     location: '',
+    assignedStaff: [] as string[],
+    assignedType: 'staff', // 'staff' o 'subcontractor'
   });
 
   // Convert projects and service orders to calendar events
@@ -259,25 +263,22 @@ export function CalendarView({
     }
   };
   
-  // Effect to handle onAddEvent prop
+  // Efecto para manejar la apertura del diálogo desde props externas
   useEffect(() => {
-    if (onAddEvent) {
-      const handleAddEvent = () => {
-        setNewEvent({
-          title: '',
-          start: '',
-          end: '',
-          allDay: false,
-          description: '',
-          location: '',
-        });
-        setShowAddEvent(true);
-      };
-      
-      // Assign the function to the onAddEvent prop
-      onAddEvent = handleAddEvent;
+    if (externalShowAddEvent) {
+      setNewEvent({
+        title: '',
+        start: '',
+        end: '',
+        allDay: false,
+        description: '',
+        location: '',
+        assignedStaff: [],
+        assignedType: 'staff',
+      });
+      setShowAddEvent(true);
     }
-  }, [onAddEvent]);
+  }, [externalShowAddEvent]);
 
   return (
     <div className="calendar-container">
@@ -324,6 +325,8 @@ export function CalendarView({
                 allDay: false,
                 description: '',
                 location: '',
+                assignedStaff: [],
+                assignedType: 'staff',
               });
               setShowAddEvent(true);
             }}
@@ -468,7 +471,15 @@ export function CalendarView({
       </Dialog>
 
       {/* Add Event Dialog */}
-      <Dialog open={showAddEvent} onOpenChange={setShowAddEvent}>
+      <Dialog 
+        open={showAddEvent} 
+        onOpenChange={(open) => {
+          setShowAddEvent(open);
+          if (!open && onCloseAddEvent) {
+            onCloseAddEvent();
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Nuevo Evento</DialogTitle>

@@ -43,6 +43,9 @@ export default function Calendar() {
     refetchServiceOrders();
   };
 
+  // Estado para controlar cuando debemos abrir el formulario de nuevo evento
+  const [openAddEventForm, setOpenAddEventForm] = useState(false);
+  
   return (
     <Layout title="Calendario">
       <div className="mb-6">
@@ -51,7 +54,7 @@ export default function Calendar() {
             <CalendarIcon className="h-6 w-6 mr-2" />
             <h1 className="text-2xl font-bold">Calendario</h1>
           </div>
-          <Button onClick={refreshData}>
+          <Button onClick={() => setOpenAddEventForm(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Evento
           </Button>
@@ -68,6 +71,8 @@ export default function Calendar() {
         isLoadingProjects={isLoadingProjects}
         isLoadingServiceOrders={isLoadingServiceOrders}
         refreshData={refreshData}
+        showAddEvent={openAddEventForm}
+        onCloseAddEvent={() => setOpenAddEventForm(false)}
       />
     </Layout>
   );
