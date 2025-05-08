@@ -71,7 +71,9 @@ export function InvoiceForm({
       projectId: duplicateFrom?.projectId || defaultValues?.projectId || 0,
       totalAmount: duplicateFrom?.totalAmount ? Number(duplicateFrom.totalAmount) : defaultValues?.totalAmount || 0,
       issueDate: defaultValues?.issueDate || new Date(),
-      dueDate: defaultValues?.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      dueDate: duplicateFrom?.dueDate 
+        ? new Date(new Date().getTime() + (new Date(duplicateFrom.dueDate).getTime() - new Date(duplicateFrom.issueDate).getTime())) 
+        : defaultValues?.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Mantiene el mismo plazo de la factura original
       status: "draft", // Always start as draft for duplicated invoices
       notes: duplicateFrom ? `${duplicateFrom.notes || ""}\n(Duplicado de factura #${duplicateFrom.invoiceNumber})` : defaultValues?.notes || "",
     },

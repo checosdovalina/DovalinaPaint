@@ -122,13 +122,19 @@ export default function InvoicesPage() {
       <Sheet open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <SheetContent className="w-full max-w-3xl sm:max-w-xl md:max-w-2xl lg:max-w-3xl">
           <SheetHeader>
-            <SheetTitle>Nueva Factura</SheetTitle>
+            <SheetTitle>{duplicateInvoiceData ? 'Duplicar Factura' : 'Nueva Factura'}</SheetTitle>
             <SheetDescription>
-              Crear una nueva factura para un proyecto.
+              {duplicateInvoiceData 
+                ? `Crear una copia de la factura #${duplicateInvoiceData.invoiceNumber}` 
+                : 'Crear una nueva factura para un proyecto.'}
             </SheetDescription>
           </SheetHeader>
           <div className="py-4">
-            <InvoiceForm onSuccess={handleSuccess} onCancel={handleCloseModals} />
+            <InvoiceForm 
+              onSuccess={handleSuccess} 
+              onCancel={handleCloseModals} 
+              duplicateFrom={duplicateInvoiceData || undefined}
+            />
           </div>
         </SheetContent>
       </Sheet>
