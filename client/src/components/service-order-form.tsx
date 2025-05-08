@@ -41,13 +41,13 @@ import { ImageUpload } from "@/components/ui/image-upload";
 // Extend the schema to handle the form
 const formSchema = insertServiceOrderSchema
   .extend({
-    startDate: z.date().optional(),
-    endDate: z.date().optional(),
-    dueDate: z.date().optional(),
-    materialsRequired: z.string().optional(),
-    specialInstructions: z.string().optional(),
-    safetyRequirements: z.string().optional(),
-    assignedTo: z.number().optional(),
+    startDate: z.union([z.date(), z.string(), z.null()]).nullable().optional(),
+    endDate: z.union([z.date(), z.string(), z.null()]).nullable().optional(),
+    dueDate: z.union([z.date(), z.string(), z.null()]).nullable().optional(),
+    materialsRequired: z.union([z.string(), z.null()]).nullable().optional(),
+    specialInstructions: z.union([z.string(), z.null()]).nullable().optional(),
+    safetyRequirements: z.union([z.string(), z.null()]).nullable().optional(),
+    assignedTo: z.union([z.number(), z.null()]).nullable().optional(),
     assignedType: z.enum(["staff", "subcontractor"]).optional(),
   })
   .omit({ assignedStaff: true });
@@ -546,6 +546,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                   <Textarea
                     placeholder="List required materials for the job"
                     {...field}
+                    value={field.value || ""}
                     rows={3}
                   />
                 </FormControl>
@@ -564,6 +565,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                   <Textarea
                     placeholder="Include special instructions for the work team"
                     {...field}
+                    value={field.value || ""}
                     rows={3}
                   />
                 </FormControl>
@@ -582,6 +584,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                   <Textarea
                     placeholder="Specify necessary safety requirements"
                     {...field}
+                    value={field.value || ""}
                     rows={3}
                   />
                 </FormControl>
