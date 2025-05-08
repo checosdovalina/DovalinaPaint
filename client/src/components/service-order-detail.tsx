@@ -560,8 +560,8 @@ export function ServiceOrderDetail({
         pdf.setFont('helvetica', 'normal');
         pdf.text(
           `Signed by client on: ${serviceOrder.signedDate 
-            ? format(new Date(serviceOrder.signedDate), "MMMM do, yyyy", { locale: enUS }) 
-            : format(new Date(), "MMMM do, yyyy", { locale: enUS })}`, 
+            ? format(new Date(serviceOrder.signedDate), "MMMM d'th', yyyy", { locale: enUS }) 
+            : format(new Date(), "MMMM d'th', yyyy", { locale: enUS })}`, 
           leftMargin + 5, 
           yPos + 15
         );
@@ -730,7 +730,7 @@ export function ServiceOrderDetail({
       pdf.setFontSize(8);
       pdf.setFont('helvetica', 'normal');
       pdf.text(
-        `Generated on ${format(new Date(), "MMMM do, yyyy", { locale: enUS })}`,
+        `Generated on ${format(new Date(), "MMMM d'th', yyyy", { locale: enUS })}`,
         pdf.internal.pageSize.getWidth() / 2,
         pdf.internal.pageSize.getHeight() - 10,
         { align: "center" }
