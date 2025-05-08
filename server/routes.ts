@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
 import { google } from 'googleapis';
-import { insertClientSchema, insertProjectSchema, insertQuoteSchema, insertServiceOrderSchema, insertStaffSchema, insertActivitySchema, insertSubcontractorSchema, insertInvoiceSchema } from "@shared/schema";
+import { insertClientSchema, insertProjectSchema, insertQuoteSchema, insertServiceOrderSchema, insertStaffSchema, insertActivitySchema, insertSubcontractorSchema, insertInvoiceSchema, insertSupplierSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -1027,6 +1027,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Google Create Event Error:', error);
       res.status(500).json({ message: "Failed to create Google Calendar event" });
+    }
+  });
+  
+  // Supplier routes
+  app.get("/api/suppliers", isAuthenticated, async (req, res) => {
+    try {
+      let suppliers;
+      if (req.query.category) {
+        suppliers = await storage.getSuppliersByCategory(req.query.category as string);
+      } else {
+        suppliers = await storage.getSuppliers();
+      }
+      res.json(suppliers);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/suppliers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const supplier = await storage.getSupplier(parseInt(req.params.id));
+      if (!supplier) {
+        return res.status(404).json({ message: "Supplier not found" });
+      }
+      res.json(supplier);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/suppliers", isAuthenticated, async (req, res) => {
+    try {
+      const supplierData = insertSupplierSchema.parse(req.body);
+      const supplier = await storage.createSupplier(supplierData);
+      
+      // Create activity for supplier creation
+      await storage.createActivity({
+        type: "supplier_created",
+        description: `New supplier "${supplier.name}" added`,
+        userId: req.user.id,
+        clientId: null,
+        projectId: null
+      });
+      
+      res.status(201).json(supplier);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid supplier data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/suppliers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const supplierData = insertSupplierSchema.partial().parse(req.body);
+      const updatedSupplier = await storage.updateSupplier(id, supplierData);
+      
+      if (!updatedSupplier) {
+        return res.status(404).json({ message: "Supplier not found" });
+      }
+      
+      // Create activity for supplier update
+      await storage.createActivity({
+        type: "supplier_updated",
+        description: `Supplier "${updatedSupplier.name}" updated`,
+        userId: req.user.id,
+        clientId: null,
+        projectId: null
+      });
+      
+      res.json(updatedSupplier);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid supplier data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/suppliers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const supplier = await storage.getSupplier(id);
+      
+      if (!supplier) {
+        return res.status(404).json({ message: "Supplier not found" });
+      }
+      
+      const deleted = await storage.deleteSupplier(id);
+      
+      if (deleted) {
+        // Create activity for supplier deletion
+        await storage.createActivity({
+          type: "supplier_deleted",
+          description: `Supplier "${supplier.name}" deleted`,
+          userId: req.user.id,
+          clientId: null,
+          projectId: null
+        });
+        
+        res.sendStatus(204);
+      } else {
+        res.status(500).json({ message: "Failed to delete supplier" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
   });
 

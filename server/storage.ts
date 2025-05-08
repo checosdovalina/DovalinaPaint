@@ -735,6 +735,69 @@ export class DatabaseStorage implements IStorage {
       return false;
     }
   }
+  
+  // Supplier methods
+  async getSuppliers(): Promise<Supplier[]> {
+    try {
+      return await db.select().from(suppliers);
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+      return [];
+    }
+  }
+  
+  async getSupplier(id: number): Promise<Supplier | undefined> {
+    try {
+      const [supplier] = await db.select().from(suppliers).where(eq(suppliers.id, id));
+      return supplier;
+    } catch (error) {
+      console.error("Error fetching supplier:", error);
+      return undefined;
+    }
+  }
+  
+  async getSuppliersByCategory(category: string): Promise<Supplier[]> {
+    try {
+      return await db.select().from(suppliers).where(eq(suppliers.category, category));
+    } catch (error) {
+      console.error("Error fetching suppliers by category:", error);
+      return [];
+    }
+  }
+  
+  async createSupplier(supplier: InsertSupplier): Promise<Supplier> {
+    try {
+      const [newSupplier] = await db.insert(suppliers).values(supplier).returning();
+      return newSupplier;
+    } catch (error) {
+      console.error("Error creating supplier:", error);
+      throw error;
+    }
+  }
+  
+  async updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier | undefined> {
+    try {
+      const [updatedSupplier] = await db
+        .update(suppliers)
+        .set(supplier)
+        .where(eq(suppliers.id, id))
+        .returning();
+      return updatedSupplier;
+    } catch (error) {
+      console.error("Error updating supplier:", error);
+      return undefined;
+    }
+  }
+  
+  async deleteSupplier(id: number): Promise<boolean> {
+    try {
+      await db.delete(suppliers).where(eq(suppliers.id, id));
+      return true;
+    } catch (error) {
+      console.error("Error deleting supplier:", error);
+      return false;
+    }
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -747,6 +810,7 @@ export class MemStorage implements IStorage {
   private staffMembers: Map<number, Staff> = new Map();
   private activitiesLog: Map<number, Activity> = new Map();
   private subcontractors: Map<number, Subcontractor> = new Map();
+  private suppliers: Map<number, Supplier> = new Map();
   
   sessionStore: any;
   
@@ -825,6 +889,14 @@ export class MemStorage implements IStorage {
   async createInvoice(invoice: InsertInvoice): Promise<Invoice> { throw new Error("Not implemented"); }
   async updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined> { return undefined; }
   async deleteInvoice(id: number): Promise<boolean> { return false; }
+
+  // Supplier methods
+  async getSuppliers(): Promise<Supplier[]> { return []; }
+  async getSupplier(id: number): Promise<Supplier | undefined> { return undefined; }
+  async getSuppliersByCategory(category: string): Promise<Supplier[]> { return []; }
+  async createSupplier(supplier: InsertSupplier): Promise<Supplier> { throw new Error("Not implemented"); }
+  async updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier | undefined> { return undefined; }
+  async deleteSupplier(id: number): Promise<boolean> { return false; }
 }
 
 // Use database storage instead of memory storage
