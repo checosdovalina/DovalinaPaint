@@ -433,6 +433,42 @@ export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 
+export type Supplier = typeof suppliers.$inferSelect;
+export type InsertSupplier = z.infer<typeof insertSupplierSchema>;
+
+// Suppliers schema
+export const suppliers = pgTable("suppliers", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  company: text("company").notNull(),
+  contactPerson: text("contact_person"),
+  email: text("email"),
+  phone: text("phone").notNull(),
+  address: text("address"),
+  taxId: text("tax_id"),
+  category: text("category").notNull(), // paint, tools, materials, hardware, etc.
+  paymentTerms: text("payment_terms"), // net30, net60, cod, etc.
+  website: text("website"),
+  notes: text("notes"),
+  status: text("status").default("active").notNull(), // active, inactive
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertSupplierSchema = createInsertSchema(suppliers).pick({
+  name: true,
+  company: true,
+  contactPerson: true,
+  email: true,
+  phone: true,
+  address: true,
+  taxId: true,
+  category: true,
+  paymentTerms: true,
+  website: true,
+  notes: true,
+  status: true,
+});
+
 // Session schema (para manejar las sesiones de connect-pg-simple)
 export const session = pgTable("session", {
   sid: varchar("sid").primaryKey(),

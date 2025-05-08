@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice } from "@shared/schema";
+import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice, suppliers, Supplier, InsertSupplier } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { db } from "./db";
@@ -43,6 +43,14 @@ export interface IStorage {
   createSubcontractor(subcontractor: InsertSubcontractor): Promise<Subcontractor>;
   updateSubcontractor(id: number, subcontractor: Partial<InsertSubcontractor>): Promise<Subcontractor | undefined>;
   deleteSubcontractor(id: number): Promise<boolean>;
+  
+  // Supplier methods
+  getSuppliers(): Promise<Supplier[]>;
+  getSupplier(id: number): Promise<Supplier | undefined>;
+  getSuppliersByCategory(category: string): Promise<Supplier[]>;
+  createSupplier(supplier: InsertSupplier): Promise<Supplier>;
+  updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier | undefined>;
+  deleteSupplier(id: number): Promise<boolean>;
   
   // Service Order methods
   getServiceOrders(): Promise<ServiceOrder[]>;
