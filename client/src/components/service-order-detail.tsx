@@ -388,19 +388,26 @@ export function ServiceOrderDetail({
       
       // Handle details text with potential wrapping
       if (serviceOrder.details) {
-        const maxDetailsWidth = pageWidth - 10;
+        // Use a smaller font size for details to fit more text in the box
+        pdf.setFontSize(9); // Smaller font for details
+        pdf.setFont('helvetica', 'normal');
+        
+        // Calculate maximum width for text - narrower to ensure it stays within bounds
+        const maxDetailsWidth = pageWidth - 15; // Slightly narrower margin for safety
+        
+        // Split the text into lines that fit the width
         const detailsLines = pdf.splitTextToSize(serviceOrder.details, maxDetailsWidth);
         
         // If there are too many lines, we need a new page
         if (detailsLines.length > 30) { // Arbitrary cutoff for what's too long
-          // First part on this page
+          // First part on this page - show only first lines
           const firstPageLines = detailsLines.slice(0, 20);
           pdf.text(firstPageLines, leftMargin + 5, yPos + 35);
           
           // Rest on new page
           pdf.addPage();
           
-          // Add a header for continuation
+          // Add a header for continuation on new page
           pdf.setFontSize(12);
           pdf.setFont('helvetica', 'bold');
           pdf.text("Service Details (Continued)", leftMargin, 15);
@@ -410,7 +417,7 @@ export function ServiceOrderDetail({
           pdf.roundedRect(leftMargin, 20, pageWidth, 200, 1, 1, 'F');
           
           // Add the rest of the text
-          pdf.setFontSize(10);
+          pdf.setFontSize(9); // Keep same smaller font size
           pdf.setFont('helvetica', 'normal');
           const remainingLines = detailsLines.slice(20);
           pdf.text(remainingLines, leftMargin + 5, 25);
@@ -439,8 +446,12 @@ export function ServiceOrderDetail({
           yPos = 15;
         }
         
-        // Calculate needed height for materials text
-        const materialsSplit = pdf.splitTextToSize(serviceOrder.materialsRequired, pageWidth - 10);
+        // Use smaller font for materials to ensure proper rendering
+        pdf.setFontSize(9); // Smaller font for materials
+        pdf.setFont('helvetica', 'normal');
+        
+        // Calculate needed height for materials text with slightly narrower margin
+        const materialsSplit = pdf.splitTextToSize(serviceOrder.materialsRequired, pageWidth - 15);
         const materialHeight = Math.min(10 + materialsSplit.length * 5, 60); // Header + content, max 60mm
         
         // Draw light gray background
@@ -453,7 +464,7 @@ export function ServiceOrderDetail({
         pdf.text("Materials Required", leftMargin + 5, yPos + 7);
         
         // Content
-        pdf.setFontSize(10);
+        pdf.setFontSize(9); // Keep font small for materials content
         pdf.setFont('helvetica', 'normal');
         pdf.text(materialsSplit, leftMargin + 5, yPos + 15);
         
