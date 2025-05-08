@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Project, ServiceOrder, Staff } from '@shared/schema';
+import { Project, ServiceOrder, Staff, Subcontractor } from '@shared/schema';
 import {
   Dialog,
   DialogContent,
@@ -51,6 +51,7 @@ interface CalendarViewProps {
   projects?: Project[];
   serviceOrders?: ServiceOrder[];
   staff?: Staff[];
+  subcontractors?: Subcontractor[];
   isLoadingProjects?: boolean;
   isLoadingServiceOrders?: boolean;
   refreshData?: () => void;
@@ -62,6 +63,7 @@ export function CalendarView({
   projects = [],
   serviceOrders = [],
   staff = [],
+  subcontractors = [],
   isLoadingProjects = false,
   isLoadingServiceOrders = false,
   refreshData,
@@ -650,9 +652,20 @@ export function CalendarView({
                       <SelectValue placeholder="Seleccionar subcontratista" />
                     </SelectTrigger>
                     <SelectContent>
-                      {/* Aquí iría un mapeo de subcontratistas si tuviéramos el dato */}
-                      <SelectItem value="Contratista 1">Contratista 1</SelectItem>
-                      <SelectItem value="Contratista 2">Contratista 2</SelectItem>
+                      {subcontractors.length > 0 ? (
+                        subcontractors.map((subcontractor) => (
+                          <SelectItem 
+                            key={subcontractor.id} 
+                            value={subcontractor.name}
+                          >
+                            {subcontractor.name} ({subcontractor.company})
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="" disabled>
+                          No hay subcontratistas disponibles
+                        </SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

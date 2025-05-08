@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Project, ServiceOrder, Staff } from '@shared/schema';
+import { Project, ServiceOrder, Staff, Subcontractor } from '@shared/schema';
 import { Layout } from '@/components/layout';
 import { CalendarView } from '@/components/calendar-view';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,16 @@ export default function Calendar() {
       return res.json();
     },
   });
+  
+  // Fetch subcontractors
+  const { data: subcontractors, isLoading: isLoadingSubcontractors } = useQuery<Subcontractor[]>({
+    queryKey: ['/api/subcontractors'],
+    queryFn: async () => {
+      const res = await fetch('/api/subcontractors');
+      if (!res.ok) throw new Error('Failed to fetch subcontractors');
+      return res.json();
+    },
+  });
 
   // Function to refresh all data
   const refreshData = () => {
@@ -68,6 +78,7 @@ export default function Calendar() {
         projects={projects}
         serviceOrders={serviceOrders}
         staff={staff}
+        subcontractors={subcontractors}
         isLoadingProjects={isLoadingProjects}
         isLoadingServiceOrders={isLoadingServiceOrders}
         refreshData={refreshData}
