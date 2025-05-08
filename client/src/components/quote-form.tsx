@@ -337,7 +337,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-white p-6 rounded-lg shadow-sm border h-[75vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-xl font-semibold">
@@ -733,26 +733,28 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
           />
         </div>
 
-        <div className="flex justify-end space-x-3">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => onSuccess()}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? (
-              <>Guardando...</>
-            ) : initialData?.id ? (
-              <>Actualizar Cotización</>
-            ) : (
-              <>Crear Cotización</>
-            )}
-          </Button>
+        <div className="sticky bottom-0 bg-white p-4 border rounded-lg shadow-sm">
+          <div className="flex justify-end space-x-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onSuccess()}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? (
+                <>Guardando...</>
+              ) : initialData?.id ? (
+                <>Actualizar Cotización</>
+              ) : (
+                <>Crear Cotización</>
+              )}
+            </Button>
+          </div>
         </div>
       </form>
     </Form>
