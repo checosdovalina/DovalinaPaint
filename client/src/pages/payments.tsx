@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet";
 import PageHeader from "@/components/page-header";
+import { Layout } from "@/components/layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -64,12 +65,12 @@ export default function PaymentsPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6 max-w-7xl px-4 md:px-6">
+    <Layout>
       <Helmet>
         <title>Pagos | Dovalina Painting LLC</title>
       </Helmet>
 
-      <div className="flex items-center justify-between">
+      <div className="container mx-auto py-6 space-y-6">
         <PageHeader
           title="Gestión de Pagos"
           description="Registra y administra todos los pagos a subcontratistas, empleados y proveedores."
@@ -82,95 +83,95 @@ export default function PaymentsPage() {
             )
           }
         />
-      </div>
 
-      {showPaymentForm ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{editingPayment ? "Editar Pago" : "Registrar Nuevo Pago"}</CardTitle>
-            <CardDescription>
-              {editingPayment
-                ? "Actualiza la información del pago seleccionado."
-                : "Completa el formulario para registrar un nuevo pago."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PaymentForm
-              payment={editingPayment}
-              recipients={recipients}
-              projects={projects}
-              categories={categories}
-              onSubmit={handlePaymentSubmit}
-              onCancel={handleCancel}
-            />
-          </CardContent>
-        </Card>
-      ) : (
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="all">Todos los Pagos</TabsTrigger>
-            <TabsTrigger value="subcontractors">Subcontratistas</TabsTrigger>
-            <TabsTrigger value="employees">Empleados</TabsTrigger>
-            <TabsTrigger value="suppliers">Proveedores</TabsTrigger>
-            <TabsTrigger value="other">Otros</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="all">
-            <PaymentList 
-              payments={payments}
-              isLoading={isLoading}
-              projects={projects} 
-              onEdit={handleEditPayment}
-              refetch={refetch}
-              filterType={null}
-            />
-          </TabsContent>
-          
-          <TabsContent value="subcontractors">
-            <PaymentList 
-              payments={payments}
-              isLoading={isLoading}
-              projects={projects} 
-              onEdit={handleEditPayment}
-              refetch={refetch}
-              filterType="subcontractor"
-            />
-          </TabsContent>
-          
-          <TabsContent value="employees">
-            <PaymentList 
-              payments={payments}
-              isLoading={isLoading}
-              projects={projects} 
-              onEdit={handleEditPayment}
-              refetch={refetch}
-              filterType="employee"
-            />
-          </TabsContent>
-          
-          <TabsContent value="suppliers">
-            <PaymentList 
-              payments={payments}
-              isLoading={isLoading}
-              projects={projects} 
-              onEdit={handleEditPayment}
-              refetch={refetch}
-              filterType="supplier"
-            />
-          </TabsContent>
-          
-          <TabsContent value="other">
-            <PaymentList 
-              payments={payments}
-              isLoading={isLoading}
-              projects={projects} 
-              onEdit={handleEditPayment}
-              refetch={refetch}
-              filterType="other"
-            />
-          </TabsContent>
-        </Tabs>
-      )}
-    </div>
+        {showPaymentForm ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>{editingPayment ? "Editar Pago" : "Registrar Nuevo Pago"}</CardTitle>
+              <CardDescription>
+                {editingPayment
+                  ? "Actualiza la información del pago seleccionado."
+                  : "Completa el formulario para registrar un nuevo pago."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PaymentForm
+                payment={editingPayment}
+                recipients={recipients}
+                projects={projects}
+                categories={categories}
+                onSubmit={handlePaymentSubmit}
+                onCancel={handleCancel}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="all">Todos los Pagos</TabsTrigger>
+              <TabsTrigger value="subcontractors">Subcontratistas</TabsTrigger>
+              <TabsTrigger value="employees">Empleados</TabsTrigger>
+              <TabsTrigger value="suppliers">Proveedores</TabsTrigger>
+              <TabsTrigger value="other">Otros</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="all">
+              <PaymentList 
+                payments={payments}
+                isLoading={isLoading}
+                projects={projects} 
+                onEdit={handleEditPayment}
+                refetch={refetch}
+                filterType={null}
+              />
+            </TabsContent>
+            
+            <TabsContent value="subcontractors">
+              <PaymentList 
+                payments={payments}
+                isLoading={isLoading}
+                projects={projects} 
+                onEdit={handleEditPayment}
+                refetch={refetch}
+                filterType="subcontractor"
+              />
+            </TabsContent>
+            
+            <TabsContent value="employees">
+              <PaymentList 
+                payments={payments}
+                isLoading={isLoading}
+                projects={projects} 
+                onEdit={handleEditPayment}
+                refetch={refetch}
+                filterType="employee"
+              />
+            </TabsContent>
+            
+            <TabsContent value="suppliers">
+              <PaymentList 
+                payments={payments}
+                isLoading={isLoading}
+                projects={projects} 
+                onEdit={handleEditPayment}
+                refetch={refetch}
+                filterType="supplier"
+              />
+            </TabsContent>
+            
+            <TabsContent value="other">
+              <PaymentList 
+                payments={payments}
+                isLoading={isLoading}
+                projects={projects} 
+                onEdit={handleEditPayment}
+                refetch={refetch}
+                filterType="other"
+              />
+            </TabsContent>
+          </Tabs>
+        )}
+      </div>
+    </Layout>
   );
 }
