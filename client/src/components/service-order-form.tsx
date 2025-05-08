@@ -553,12 +553,21 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
               <FormItem>
                 <FormLabel>Required Materials</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder="List required materials for the job"
-                    {...field}
-                    value={field.value || ""}
-                    rows={3}
-                  />
+                  <div className="flex flex-col">
+                    <Textarea
+                      placeholder="List required materials for the job"
+                      {...field}
+                      value={field.value || ""}
+                      rows={3}
+                    />
+                    <div className="mt-1 text-xs text-gray-500">
+                      <p>Formato:</p>
+                      <ul className="list-disc ml-4">
+                        <li>Inicie cada material con "•", "-", "*" o "✓"</li>
+                        <li>Ejemplo: "✓ Pintura blanca\n✓ Brochas 2 pulgadas"</li>
+                      </ul>
+                    </div>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -572,12 +581,21 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
               <FormItem>
                 <FormLabel>Special Instructions</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder="Include special instructions for the work team"
-                    {...field}
-                    value={field.value || ""}
-                    rows={3}
-                  />
+                  <div className="flex flex-col">
+                    <Textarea
+                      placeholder="Include special instructions for the work team"
+                      {...field}
+                      value={field.value || ""}
+                      rows={3}
+                    />
+                    <div className="mt-1 text-xs text-gray-500">
+                      <p>Formato:</p>
+                      <ul className="list-disc ml-4">
+                        <li>Inicie cada instrucción con "•", "-", "*" o "✓"</li>
+                        <li>Ejemplo: "✓ Cubrir muebles\n✓ Proteger pisos"</li>
+                      </ul>
+                    </div>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -591,12 +609,21 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
               <FormItem>
                 <FormLabel>Safety Requirements</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder="Specify necessary safety requirements"
-                    {...field}
-                    value={field.value || ""}
-                    rows={3}
-                  />
+                  <div className="flex flex-col">
+                    <Textarea
+                      placeholder="Specify necessary safety requirements"
+                      {...field}
+                      value={field.value || ""}
+                      rows={3}
+                    />
+                    <div className="mt-1 text-xs text-gray-500">
+                      <p>Formato:</p>
+                      <ul className="list-disc ml-4">
+                        <li>Inicie cada requisito con "•", "-", "*" o "✓"</li>
+                        <li>Ejemplo: "✓ Usar guantes\n✓ Usar mascarilla"</li>
+                      </ul>
+                    </div>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>

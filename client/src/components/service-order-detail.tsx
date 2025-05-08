@@ -467,26 +467,78 @@ export function ServiceOrderDetail({
           yPos = 15;
         }
         
-        // Calculate needed height for materials text with slightly narrower margin
-        const materialsSplit = pdf.splitTextToSize(serviceOrder.materialsRequired, pageWidth - 20);
-        const materialHeight = Math.min(10 + materialsSplit.length * 5, 60); // Header + content, max 60mm
-        
-        // Draw light gray background
+        // Draw light gray background - use dynamic height later
+        const initialMaterialHeight = 60;
         pdf.setFillColor(245, 245, 245);
-        pdf.roundedRect(leftMargin, yPos, pageWidth, materialHeight, 1, 1, 'F');
+        pdf.roundedRect(leftMargin, yPos, pageWidth, initialMaterialHeight, 1, 1, 'F');
         
         // Title
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'bold');
         pdf.text("Materials Required", leftMargin + 5, yPos + 7);
         
-        // Content
-        pdf.setFontSize(10);
+        // Content with formatting
+        pdf.setFontSize(9);
         pdf.setFont('helvetica', 'normal');
-        pdf.text(materialsSplit, leftMargin + 5, yPos + 15);
+        
+        // Offset for content
+        const contentStartX = leftMargin + 10;
+        const contentStartY = yPos + 15;
+        
+        // Process each line of the materials
+        const materialsLines = serviceOrder.materialsRequired.split('\n');
+        let lineY = contentStartY;
+        
+        for (let i = 0; i < materialsLines.length; i++) {
+          const line = materialsLines[i];
+          // Si la línea comienza con un punto, asterisco o guión, mostrarla como un ítem de lista
+          const isListItem = /^\s*[\•\-\*\✓]\s+/.test(line);
+          
+          if (isListItem) {
+            // For list items, add a bullet point
+            const bulletX = contentStartX;
+            const textX = contentStartX + 3;
+            
+            // Clean the text by removing bullet markers
+            const cleanText = line.replace(/^\s*[\•\-\*\✓]\s+/, '');
+            
+            // Split text to fit width
+            const textLines = pdf.splitTextToSize(cleanText, pageWidth - 25);
+            
+            // Add bullet
+            pdf.text("•", bulletX, lineY);
+            
+            // Add text after bullet
+            pdf.text(textLines, textX, lineY);
+            
+            // Move position down for next line
+            lineY += textLines.length * 4;
+          } else {
+            // Regular paragraph
+            const textLines = pdf.splitTextToSize(line, pageWidth - 20);
+            pdf.text(textLines, contentStartX, lineY);
+            lineY += textLines.length * 4;
+          }
+          
+          // Add small space between items
+          lineY += 1;
+          
+          // Check if we need a new page
+          if (lineY > 260) {
+            pdf.addPage();
+            lineY = 20;
+          }
+        }
+        
+        // Calculate actual height used
+        const actualHeight = Math.min(lineY - contentStartY + 10, initialMaterialHeight);
+        
+        // Redraw the background with correct height
+        pdf.setFillColor(245, 245, 245);
+        pdf.roundedRect(leftMargin, yPos, pageWidth, actualHeight, 1, 1, 'F');
         
         // Update position for next section
-        yPos += materialHeight + 10;
+        yPos = lineY + 5;
       }
       
       // --------------------------------------------
@@ -499,26 +551,78 @@ export function ServiceOrderDetail({
           yPos = 15;
         }
         
-        // Calculate needed height for instructions text
-        const instructionsSplit = pdf.splitTextToSize(serviceOrder.specialInstructions, pageWidth - 20);
-        const instructionsHeight = Math.min(10 + instructionsSplit.length * 5, 60); // Header + content, max 60mm
-        
-        // Draw light gray background
+        // Draw light gray background - use dynamic height later
+        const initialInstructionsHeight = 60;
         pdf.setFillColor(245, 245, 245);
-        pdf.roundedRect(leftMargin, yPos, pageWidth, instructionsHeight, 1, 1, 'F');
+        pdf.roundedRect(leftMargin, yPos, pageWidth, initialInstructionsHeight, 1, 1, 'F');
         
         // Title
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'bold');
         pdf.text("Special Instructions", leftMargin + 5, yPos + 7);
         
-        // Content
-        pdf.setFontSize(10);
+        // Content with formatting
+        pdf.setFontSize(9);
         pdf.setFont('helvetica', 'normal');
-        pdf.text(instructionsSplit, leftMargin + 5, yPos + 15);
+        
+        // Offset for content
+        const contentStartX = leftMargin + 10;
+        const contentStartY = yPos + 15;
+        
+        // Process each line of the instructions
+        const instructionsLines = serviceOrder.specialInstructions.split('\n');
+        let lineY = contentStartY;
+        
+        for (let i = 0; i < instructionsLines.length; i++) {
+          const line = instructionsLines[i];
+          // Si la línea comienza con un punto, asterisco o guión, mostrarla como un ítem de lista
+          const isListItem = /^\s*[\•\-\*\✓]\s+/.test(line);
+          
+          if (isListItem) {
+            // For list items, add a bullet point
+            const bulletX = contentStartX;
+            const textX = contentStartX + 3;
+            
+            // Clean the text by removing bullet markers
+            const cleanText = line.replace(/^\s*[\•\-\*\✓]\s+/, '');
+            
+            // Split text to fit width
+            const textLines = pdf.splitTextToSize(cleanText, pageWidth - 25);
+            
+            // Add bullet
+            pdf.text("•", bulletX, lineY);
+            
+            // Add text after bullet
+            pdf.text(textLines, textX, lineY);
+            
+            // Move position down for next line
+            lineY += textLines.length * 4;
+          } else {
+            // Regular paragraph
+            const textLines = pdf.splitTextToSize(line, pageWidth - 20);
+            pdf.text(textLines, contentStartX, lineY);
+            lineY += textLines.length * 4;
+          }
+          
+          // Add small space between items
+          lineY += 1;
+          
+          // Check if we need a new page
+          if (lineY > 260) {
+            pdf.addPage();
+            lineY = 20;
+          }
+        }
+        
+        // Calculate actual height used
+        const actualHeight = Math.min(lineY - contentStartY + 10, initialInstructionsHeight);
+        
+        // Redraw the background with correct height
+        pdf.setFillColor(245, 245, 245);
+        pdf.roundedRect(leftMargin, yPos, pageWidth, actualHeight, 1, 1, 'F');
         
         // Update position for next section
-        yPos += instructionsHeight + 10;
+        yPos = lineY + 5;
       }
       
       // --------------------------------------------
@@ -531,26 +635,78 @@ export function ServiceOrderDetail({
           yPos = 15;
         }
         
-        // Calculate needed height for safety text
-        const safetySplit = pdf.splitTextToSize(serviceOrder.safetyRequirements, pageWidth - 20);
-        const safetyHeight = Math.min(10 + safetySplit.length * 5, 60); // Header + content, max 60mm
-        
-        // Draw light gray background
+        // Draw light gray background - use dynamic height later
+        const initialSafetyHeight = 60;
         pdf.setFillColor(245, 245, 245);
-        pdf.roundedRect(leftMargin, yPos, pageWidth, safetyHeight, 1, 1, 'F');
+        pdf.roundedRect(leftMargin, yPos, pageWidth, initialSafetyHeight, 1, 1, 'F');
         
         // Title
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'bold');
         pdf.text("Safety Requirements", leftMargin + 5, yPos + 7);
         
-        // Content
-        pdf.setFontSize(10);
+        // Content with formatting
+        pdf.setFontSize(9);
         pdf.setFont('helvetica', 'normal');
-        pdf.text(safetySplit, leftMargin + 5, yPos + 15);
+        
+        // Offset for content
+        const contentStartX = leftMargin + 10;
+        const contentStartY = yPos + 15;
+        
+        // Process each line of the safety requirements
+        const safetyLines = serviceOrder.safetyRequirements.split('\n');
+        let lineY = contentStartY;
+        
+        for (let i = 0; i < safetyLines.length; i++) {
+          const line = safetyLines[i];
+          // Si la línea comienza con un punto, asterisco o guión, mostrarla como un ítem de lista
+          const isListItem = /^\s*[\•\-\*\✓]\s+/.test(line);
+          
+          if (isListItem) {
+            // For list items, add a bullet point
+            const bulletX = contentStartX;
+            const textX = contentStartX + 3;
+            
+            // Clean the text by removing bullet markers
+            const cleanText = line.replace(/^\s*[\•\-\*\✓]\s+/, '');
+            
+            // Split text to fit width
+            const textLines = pdf.splitTextToSize(cleanText, pageWidth - 25);
+            
+            // Add bullet
+            pdf.text("•", bulletX, lineY);
+            
+            // Add text after bullet
+            pdf.text(textLines, textX, lineY);
+            
+            // Move position down for next line
+            lineY += textLines.length * 4;
+          } else {
+            // Regular paragraph
+            const textLines = pdf.splitTextToSize(line, pageWidth - 20);
+            pdf.text(textLines, contentStartX, lineY);
+            lineY += textLines.length * 4;
+          }
+          
+          // Add small space between items
+          lineY += 1;
+          
+          // Check if we need a new page
+          if (lineY > 260) {
+            pdf.addPage();
+            lineY = 20;
+          }
+        }
+        
+        // Calculate actual height used
+        const actualHeight = Math.min(lineY - contentStartY + 10, initialSafetyHeight);
+        
+        // Redraw the background with correct height
+        pdf.setFillColor(245, 245, 245);
+        pdf.roundedRect(leftMargin, yPos, pageWidth, actualHeight, 1, 1, 'F');
         
         // Update position for next section
-        yPos += safetyHeight + 10;
+        yPos = lineY + 5;
       }
       
       // --------------------------------------------
