@@ -18,6 +18,7 @@ import {
   Users,
   Plus,
   Edit,
+  Eye,
   Trash,
   Search,
   Image,
@@ -480,6 +481,18 @@ export default function ServiceOrders() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Service Order Detail Dialog */}
+      {serviceOrderToView && (
+        <ServiceOrderDetail
+          serviceOrder={serviceOrderToView}
+          project={projects?.find(p => p.id === serviceOrderToView.projectId)}
+          staff={staffMembers}
+          subcontractors={subcontractors}
+          onClose={handleCloseDetail}
+          open={showServiceOrderDetail}
+        />
+      )}
     </Layout>
   );
 }
