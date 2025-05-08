@@ -124,11 +124,11 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
     onSuccess: () => {
       toast({
         title: initialData?.id
-          ? "Orden de servicio actualizada"
-          : "Orden de servicio creada",
+          ? "Service order updated"
+          : "Service order created",
         description: initialData?.id
-          ? "La orden de servicio ha sido actualizada exitosamente"
-          : "La orden de servicio ha sido creada exitosamente",
+          ? "The service order has been successfully updated"
+          : "The service order has been successfully created",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/service-orders"] });
       onSuccess();
@@ -136,7 +136,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
     onError: (error) => {
       toast({
         title: "Error",
-        description: `No se pudo ${initialData?.id ? "actualizar" : "crear"} la orden de servicio: ${error.message}`,
+        description: `Could not ${initialData?.id ? "update" : "create"} service order: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -154,18 +154,18 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
           name="projectId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Proyecto</FormLabel>
+              <FormLabel>Project</FormLabel>
               <Select
                 onValueChange={(value) => field.onChange(parseInt(value))}
                 defaultValue={field.value?.toString()}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un proyecto" />
+                    <SelectValue placeholder="Select a project" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {projects?.map((project) => (
+                  {projects?.map((project: any) => (
                     <SelectItem key={project.id} value={project.id.toString()}>
                       {project.title}
                     </SelectItem>
@@ -182,10 +182,10 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
           name="details"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Detalles</FormLabel>
+              <FormLabel>Details</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Detalles específicos sobre el trabajo a realizar"
+                  placeholder="Specific details about the work to be done"
                   {...field}
                   rows={5}
                 />
@@ -201,20 +201,20 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Estado</FormLabel>
+                <FormLabel>Status</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione el estado" />
+                      <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="pending">Pendiente</SelectItem>
-                    <SelectItem value="in_progress">En Progreso</SelectItem>
-                    <SelectItem value="completed">Completado</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -227,14 +227,14 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
             name="language"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Idioma</FormLabel>
+                <FormLabel>Language</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value || "english"}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione el idioma" />
+                      <SelectValue placeholder="Select language" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -254,19 +254,19 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
             name="assignedType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Asignación</FormLabel>
+                <FormLabel>Assignment Type</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value || "staff"}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione tipo de asignación" />
+                      <SelectValue placeholder="Select assignment type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="staff">Personal Interno</SelectItem>
-                    <SelectItem value="subcontractor">Subcontratista</SelectItem>
+                    <SelectItem value="staff">Internal Staff</SelectItem>
+                    <SelectItem value="subcontractor">Subcontractor</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -282,7 +282,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                 <FormItem>
                   <FormLabel className="flex items-center gap-1.5">
                     <Briefcase className="h-4 w-4" />
-                    Subcontratista Asignado
+                    Assigned Subcontractor
                   </FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(parseInt(value))}
@@ -290,12 +290,12 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccione un subcontratista" />
+                        <SelectValue placeholder="Select a subcontractor" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="0">Ninguno</SelectItem>
-                      {subcontractors?.map((subcontractor) => (
+                      <SelectItem value="0">None</SelectItem>
+                      {subcontractors?.map((subcontractor: any) => (
                         <SelectItem key={subcontractor.id} value={subcontractor.id.toString()}>
                           {subcontractor.company}
                         </SelectItem>
@@ -314,7 +314,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                 <FormItem>
                   <FormLabel className="flex items-center gap-1.5">
                     <HardHat className="h-4 w-4" />
-                    Responsable Asignado
+                    Assigned Responsible
                   </FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(parseInt(value))}
@@ -322,12 +322,12 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccione un responsable" />
+                        <SelectValue placeholder="Select a responsible person" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="0">Ninguno</SelectItem>
-                      {staffMembers?.map((staff) => (
+                      <SelectItem value="0">None</SelectItem>
+                      {staffMembers?.map((staff: any) => (
                         <SelectItem key={staff.id} value={staff.id.toString()}>
                           {staff.name}
                         </SelectItem>
@@ -349,7 +349,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
               <FormItem>
                 <FormLabel className="flex items-center gap-1.5">
                   <Briefcase className="h-4 w-4" />
-                  Subcontratista de Apoyo
+                  Support Subcontractor
                 </FormLabel>
                 <Select
                   onValueChange={(value) => field.onChange(parseInt(value))}
@@ -357,12 +357,12 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un subcontratista" />
+                      <SelectValue placeholder="Select a subcontractor" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="0">Ninguno</SelectItem>
-                    {subcontractors?.map((subcontractor) => (
+                    <SelectItem value="0">None</SelectItem>
+                    {subcontractors?.map((subcontractor: any) => (
                       <SelectItem key={subcontractor.id} value={subcontractor.id.toString()}>
                         {subcontractor.company}
                       </SelectItem>
@@ -389,12 +389,12 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un supervisor" />
+                      <SelectValue placeholder="Select a supervisor" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="0">Ninguno</SelectItem>
-                    {staffMembers?.map((staff) => (
+                    <SelectItem value="0">None</SelectItem>
+                    {staffMembers?.map((staff: any) => (
                       <SelectItem key={staff.id} value={staff.id.toString()}>
                         {staff.name}
                       </SelectItem>
@@ -413,7 +413,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
             name="startDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha de Inicio</FormLabel>
+                <FormLabel>Start Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -425,9 +425,9 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP", { locale: es })
+                          format(field.value, "PPP", { locale: enUS })
                         ) : (
-                          <span>Seleccione una fecha</span>
+                          <span>Select a date</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -452,7 +452,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
             name="endDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha de Finalización</FormLabel>
+                <FormLabel>Completion Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -464,9 +464,9 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP", { locale: es })
+                          format(field.value, "PPP", { locale: enUS })
                         ) : (
-                          <span>Seleccione una fecha</span>
+                          <span>Select a date</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -491,7 +491,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
             name="dueDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha Límite</FormLabel>
+                <FormLabel>Due Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -503,9 +503,9 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP", { locale: es })
+                          format(field.value, "PPP", { locale: enUS })
                         ) : (
-                          <span>Seleccione una fecha</span>
+                          <span>Select a date</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -526,17 +526,16 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
           />
         </div>
 
-        {/* Materiales, Instrucciones y Requisitos de Seguridad */}
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="materialsRequired"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Materiales Requeridos</FormLabel>
+                <FormLabel>Required Materials</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Describa los materiales necesarios para esta orden de servicio"
+                    placeholder="List required materials for the job"
                     {...field}
                     rows={3}
                   />
@@ -551,10 +550,10 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
             name="specialInstructions"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Instrucciones Especiales</FormLabel>
+                <FormLabel>Special Instructions</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Incluya instrucciones especiales para el equipo de trabajo"
+                    placeholder="Include special instructions for the work team"
                     {...field}
                     rows={3}
                   />
@@ -569,10 +568,10 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
             name="safetyRequirements"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Requisitos de Seguridad</FormLabel>
+                <FormLabel>Safety Requirements</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Especifique los requisitos de seguridad necesarios"
+                    placeholder="Specify necessary safety requirements"
                     {...field}
                     rows={3}
                   />
@@ -584,7 +583,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
         </div>
 
         <div>
-          <FormLabel>Personal Asignado</FormLabel>
+          <FormLabel>Assigned Staff</FormLabel>
           <StaffAssignment
             selectedStaff={assignedStaff}
             onChange={setAssignedStaff}
@@ -594,7 +593,7 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
         {/* Image upload could be added here */}
         <div className="border-t mt-6 pt-6">
           <p className="text-sm text-gray-500 mb-4">
-            Las imágenes de antes/después pueden ser adjuntadas después de la creación de la orden de servicio
+            Before/after images can be attached after creating the service order
           </p>
         </div>
 
@@ -604,17 +603,17 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
             variant="outline"
             onClick={onSuccess}
           >
-            Cancelar
+            Cancel
           </Button>
           <Button
             type="submit"
             disabled={mutation.isPending}
           >
             {mutation.isPending
-              ? "Guardando..."
+              ? "Saving..."
               : initialData?.id
-              ? "Actualizar Orden de Servicio"
-              : "Crear Orden de Servicio"}
+              ? "Update Service Order"
+              : "Create Service Order"}
           </Button>
         </div>
       </form>
