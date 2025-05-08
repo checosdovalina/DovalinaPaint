@@ -389,14 +389,14 @@ export function ServiceOrderDetail({
       
       // Handle details text with potential wrapping
       if (serviceOrder.details) {
-        // Usar fuente monoespaciada para que coincida exactamente con la imagen
+        // Usar fuente Arial normal para consistencia con el resto del documento
         pdf.setFontSize(10); // Tamaño de letra similar al resto del PDF
-        pdf.setFont('arial', 'normal'); // Fuente monoespaciada tipo máquina de escribir
+        pdf.setFont('arial', 'normal');
         
         // Calculate maximum width for text - provide enough margin
-        const maxDetailsWidth = pageWidth - 20; // Wider margin for monospaced font
+        const maxDetailsWidth = pageWidth - 20;
         
-        // Espaciar manualmente cada caracter como en la imagen para simular el estilo de máquina de escribir
+        // Mantener el formato con las comillas al inicio pero usar la fuente Arial
         const formattedDetails = serviceOrder.details
           .split('\n')
           .map(line => line.trim()) // Clean up each line
@@ -409,7 +409,6 @@ export function ServiceOrderDetail({
             // Add single quote and space exactly like in the image
             return "' " + line;
           })
-          // No "spacear" el texto ya que la fuente courier ya lo hace naturalmente
           .join('\n');
           
         // Split formatted text into lines that fit the width
@@ -463,9 +462,9 @@ export function ServiceOrderDetail({
           yPos = 15;
         }
         
-        // Use courier for materials to match details section styling 
+        // Use consistent Arial font for materials
         pdf.setFontSize(10);
-        pdf.setFont('arial', 'normal'); // Use monospaced font for consistency with details
+        pdf.setFont('arial', 'normal');
         
         // Calculate needed height for materials text with slightly narrower margin
         const materialsSplit = pdf.splitTextToSize(serviceOrder.materialsRequired, pageWidth - 20);
@@ -482,7 +481,7 @@ export function ServiceOrderDetail({
         
         // Content
         pdf.setFontSize(10); // Match details font size
-        pdf.setFont('arial', 'normal'); // Use monospaced font for consistent appearance
+        pdf.setFont('arial', 'normal'); // Use Arial font for consistent appearance
         pdf.text(materialsSplit, leftMargin + 5, yPos + 15);
         
         // Update position for next section
