@@ -223,7 +223,7 @@ export function ServiceOrderDetail({
     signatureMutation.mutate(signatureDataUrl);
   };
 
-  // Function to generate and download PDF - super simple approach
+  // Function to generate and download PDF - improved visual approach
   const generatePDF = async () => {
     toast({
       title: "Generating PDF",
@@ -231,59 +231,201 @@ export function ServiceOrderDetail({
     });
     
     try {
-      // Create a new PDF document
-      const pdf = new jsPDF();
+      // Create a new PDF document with more generous margins
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
       
       // Generate a filename for the PDF
-      const filename = `ServiceOrder_${serviceOrder.id}.pdf`;
+      const filename = `Dovalina_Painting_ServiceOrder_${serviceOrder.id}.pdf`;
       
-      // Add company header
+      // Set starting positions
+      const leftMargin = 15;
+      const topMargin = 15;
+      let yPos = topMargin;
+      
+      // --- HEADER SECTION ---
+      // Company info (left side)
       pdf.setFontSize(16);
-      pdf.text("DOVALINA PAINTING LLC", 105, 15, { align: "center" });
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("DOVALINA PAINTING LLC", leftMargin, yPos);
       
+      yPos += 5;
       pdf.setFontSize(10);
-      pdf.text("3731 Aster Drive, Charlotte, N.C. 28227", 105, 20, { align: "center" });
-      pdf.text("704-506-9741 | d-dovalina@hotmail.com", 105, 25, { align: "center" });
+      pdf.setFont('helvetica', 'normal');
+      pdf.text("3731 Aster Drive", leftMargin, yPos);
       
-      // Add title
-      pdf.setFontSize(14);
-      pdf.text(`SERVICE ORDER #${serviceOrder.id}`, 105, 35, { align: "center" });
+      yPos += 5;
+      pdf.text("Charlotte, N.C. 28227", leftMargin, yPos);
       
-      // Add basic info
-      pdf.setFontSize(10);
-      pdf.text(`Date: ${serviceOrder.createdAt ? format(new Date(serviceOrder.createdAt), "MM/dd/yyyy") : 'N/A'}`, 15, 45);
-      pdf.text(`Status: ${serviceOrder.status || 'Pending'}`, 15, 50);
+      yPos += 5;
+      pdf.text("704-506-9741", leftMargin, yPos);
       
-      // Project info
+      yPos += 5;
+      pdf.text("d-dovalina@hotmail.com", leftMargin, yPos);
+      
+      // Service order info (right side)
+      const rightColStart = 140;
+      yPos = topMargin;
+      
       pdf.setFontSize(12);
-      pdf.text("Project Information:", 15, 60);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`Service Order #${serviceOrder.id}`, rightColStart, yPos);
       
+      yPos += 5;
       pdf.setFontSize(10);
-      pdf.text(`Project: ${project?.title || 'N/A'}`, 20, 65);
-      pdf.text(`Address: ${project?.address || 'N/A'}`, 20, 70);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Date: ${serviceOrder.createdAt ? format(new Date(serviceOrder.createdAt), "MMMM do, yyyy", { locale: enUS }) : 'N/A'}`, rightColStart, yPos);
       
-      // Client info
+      yPos += 5;
+      pdf.text(`Status: ${serviceOrder.status || 'pending'}`, rightColStart, yPos);
+      
+      yPos += 5;
+      pdf.text(`Due Date: ${serviceOrder.dueDate ? format(new Date(serviceOrder.dueDate), "MMMM do, yyyy", { locale: enUS }) : 'N/A'}`, rightColStart, yPos);
+      
+      // Add horizontal line separator
+      yPos = 45;
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(leftMargin, yPos, 195, yPos);
+      
+      // --- PROJECT INFORMATION SECTION ---
+      yPos += 10;
+      
+      // Draw light gray background
+      pdf.setFillColor(245, 245, 245);
+      pdf.rect(leftMargin, yPos, 85, 30, 'F');
+      
       pdf.setFontSize(12);
-      pdf.text("Client Information:", 15, 80);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Project Information", leftMargin + 5, yPos + 7);
       
       pdf.setFontSize(10);
-      pdf.text(`Name: ${client?.name || 'N/A'}`, 20, 85);
-      pdf.text(`Phone: ${client?.phone || 'N/A'}`, 20, 90);
-      pdf.text(`Email: ${client?.email || 'N/A'}`, 20, 95);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Name: ${project?.title || 'N/A'}`, leftMargin + 5, yPos + 15);
+      pdf.text(`Address: ${project?.address || 'N/A'}`, leftMargin + 5, yPos + 22);
       
-      // Service details
+      const description = project?.description || 'N/A';
+      const descSplit = pdf.splitTextToSize(`Description: ${description}`, 75);
+      pdf.text(descSplit, leftMargin + 5, yPos + 29);
+      
+      // --- CLIENT INFORMATION SECTION ---
+      // Draw light gray background
+      pdf.setFillColor(245, 245, 245);
+      pdf.rect(110, yPos, 85, 30, 'F');
+      
       pdf.setFontSize(12);
-      pdf.text("Service Details:", 15, 105);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Client Information", 115, yPos + 7);
       
       pdf.setFontSize(10);
-      pdf.text(`Assigned To: ${assignedTo || 'Not assigned'}`, 20, 110);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Name: ${client?.name || 'N/A'}`, 115, yPos + 15);
+      pdf.text(`Email: ${client?.email || 'N/A'}`, 115, yPos + 22);
+      pdf.text(`Phone: ${client?.phone || 'N/A'}`, 115, yPos + 29);
+      
+      // --- SERVICE DETAILS SECTION ---
+      yPos += 40;
+      
+      // Draw light gray background
+      pdf.setFillColor(245, 245, 245);
+      pdf.rect(leftMargin, yPos, 180, 40, 'F');
+      
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Service Details", leftMargin + 5, yPos + 7);
+      
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Assigned To: ${assignedTo || 'Not Assigned'}`, leftMargin + 5, yPos + 15);
+      pdf.text(`Start Date: ${serviceOrder.startDate ? format(new Date(serviceOrder.startDate), "MMMM do, yyyy", { locale: enUS }) : 'N/A'}`, leftMargin + 5, yPos + 22);
       
       if (serviceOrder.details) {
-        pdf.text("Details:", 20, 115);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text("Details:", leftMargin + 5, yPos + 29);
         
-        const lines = pdf.splitTextToSize(serviceOrder.details, 170);
-        pdf.text(lines, 20, 120);
+        pdf.setFont('helvetica', 'normal');
+        const detailsText = serviceOrder.details.substring(0, 300) + (serviceOrder.details.length > 300 ? '...' : '');
+        const detailsSplit = pdf.splitTextToSize(detailsText, 170);
+        pdf.text(detailsSplit, leftMargin + 5, yPos + 36);
+      } else {
+        pdf.setFont('helvetica', 'italic');
+        pdf.text("No specific details provided.", leftMargin + 5, yPos + 29);
       }
+      
+      // --- MATERIALS REQUIRED SECTION ---
+      if (serviceOrder.materialsRequired) {
+        yPos += 50;
+        
+        // Draw light gray background
+        pdf.setFillColor(245, 245, 245);
+        pdf.rect(leftMargin, yPos, 180, 25, 'F');
+        
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text("Materials Required", leftMargin + 5, yPos + 7);
+        
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        const materialsText = serviceOrder.materialsRequired.substring(0, 300) + (serviceOrder.materialsRequired.length > 300 ? '...' : '');
+        const materialsSplit = pdf.splitTextToSize(materialsText, 170);
+        pdf.text(materialsSplit, leftMargin + 5, yPos + 15);
+      }
+      
+      // --- CLIENT SIGNATURE SECTION ---
+      yPos = Math.min(yPos + 35, 220); // Make sure we have room
+      
+      // Draw light gray background
+      pdf.setFillColor(245, 245, 245);
+      pdf.rect(leftMargin, yPos, 180, 30, 'F');
+      
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Client Approval", leftMargin + 5, yPos + 7);
+      
+      if (clientSignature) {
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(
+          `Signed by client on: ${serviceOrder.signedDate 
+            ? format(new Date(serviceOrder.signedDate), "MMMM do, yyyy", { locale: enUS }) 
+            : format(new Date(), "MMMM do, yyyy", { locale: enUS })}`, 
+          leftMargin + 5, 
+          yPos + 15
+        );
+        
+        // Add signature image
+        try {
+          pdf.addImage(
+            clientSignature,
+            'PNG',
+            leftMargin + 5,
+            yPos + 20,
+            80,
+            20
+          );
+        } catch (e) {
+          console.error("Error adding signature to PDF:", e);
+          pdf.setFontSize(9);
+          pdf.setFont('helvetica', 'italic');
+          pdf.text("Error displaying signature image", leftMargin + 5, yPos + 25);
+        }
+      } else {
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'italic');
+        pdf.text("Not yet signed by client", leftMargin + 5, yPos + 15);
+      }
+      
+      // Add footer with page number
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(
+        `Generated on ${format(new Date(), "MMMM do, yyyy", { locale: enUS })}`,
+        105,
+        285,
+        { align: "center" }
+      );
       
       // Save the PDF file
       pdf.save(filename);
