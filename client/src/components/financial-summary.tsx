@@ -1,398 +1,353 @@
-import { useQuery } from "@tanstack/react-query";
-import { DollarSign, TrendingUp, TrendingDown, Wallet, User, HardHat, PackageOpen } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+// Chart imports
 import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
   Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useState } from "react";
-import { format } from "date-fns";
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  BarElement, 
-  ArcElement,
-  Title, 
-  Tooltip as ChartTooltip, 
-  Legend, 
-  PointElement,
-  LineElement
-} from 'chart.js';
-import { Bar, Pie, Line } from 'react-chartjs-2';
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  ChartTooltip,
   Legend,
-  PointElement,
-  LineElement
-);
+  Cell,
+} from 'recharts';
 
-export default function FinancialSummary() {
-  const [timeRange, setTimeRange] = useState("all");
+// Types
+type FinancialSummaryProps = {
+  paymentsData: any;
+  invoicesData: any;
+  isLoading: boolean;
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+};
 
-  // Fetch financial summary
-  const { data: summary, isLoading: summaryLoading } = useQuery({
-    queryKey: ["/api/reports/financial/summary"],
-    staleTime: 60000, // 1 minute
-  });
+// Color palette
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A569BD', '#5DADE2', '#45B39D', '#F4D03F', '#EB984E'];
 
-  // Fetch all payments for detailed reporting
-  const { data: payments = [], isLoading: paymentsLoading } = useQuery({
-    queryKey: ["/api/payments"],
-    staleTime: 60000, // 1 minute
-  });
-
-  // Fetch invoices for detailed reporting
-  const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
-    queryKey: ["/api/invoices"],
-    staleTime: 60000, // 1 minute
-  });
-
-  const isLoading = summaryLoading || paymentsLoading || invoicesLoading;
-
+export function FinancialSummary({
+  paymentsData,
+  invoicesData,
+  isLoading,
+  startDate,
+  endDate,
+}: FinancialSummaryProps) {
+  const [summaryData, setSummaryData] = useState<any[]>([]);
+  const [categoryData, setCategoryData] = useState<any[]>([]);
+  const [recipientTypeData, setRecipientTypeData] = useState<any[]>([]);
+  
+  // Prepare data for charts when props change
+  useEffect(() => {
+    if (paymentsData && invoicesData) {
+      // Prepare summary data for line/bar chart
+      prepareSummaryData();
+      
+      // Prepare category data for pie chart
+      prepareCategoryData();
+      
+      // Prepare recipient type data for pie chart
+      prepareRecipientTypeData();
+    }
+  }, [paymentsData, invoicesData]);
+  
+  // Format the date range for display
+  const formatDateRange = () => {
+    if (!startDate || !endDate) return '';
+    
+    return `${format(startDate, 'dd MMM yyyy', { locale: es })} - ${format(endDate, 'dd MMM yyyy', { locale: es })}`;
+  };
+  
+  // Prepare summary data for line/bar chart
+  const prepareSummaryData = () => {
+    if (!paymentsData?.timeSeriesData || !invoicesData?.timeSeriesData) return;
+    
+    // Get all dates from both datasets
+    const allDates = new Set([
+      ...paymentsData.timeSeriesData.map((item: any) => item.date),
+      ...invoicesData.timeSeriesData.map((item: any) => item.date),
+    ]);
+    
+    // Create data with both revenue and expenses for each date
+    const data = Array.from(allDates).map((date) => {
+      const paymentItem = paymentsData.timeSeriesData.find((item: any) => item.date === date);
+      const invoiceItem = invoicesData.timeSeriesData.find((item: any) => item.date === date);
+      
+      return {
+        date,
+        gastos: paymentItem ? paymentItem.amount : 0,
+        ingresos: invoiceItem ? invoiceItem.amount : 0,
+        beneficio: (invoiceItem ? invoiceItem.amount : 0) - (paymentItem ? paymentItem.amount : 0),
+      };
+    });
+    
+    // Sort by date
+    data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    setSummaryData(data);
+  };
+  
+  // Prepare category data for pie chart
+  const prepareCategoryData = () => {
+    if (!paymentsData?.categorySummary) return;
+    
+    const data = paymentsData.categorySummary.map((item: any) => ({
+      name: item.name,
+      value: item.total,
+    }));
+    
+    setCategoryData(data);
+  };
+  
+  // Prepare recipient type data for pie chart
+  const prepareRecipientTypeData = () => {
+    if (!paymentsData?.recipientSummary) return;
+    
+    // Group by recipient type
+    const groupedByType: Record<string, number> = {};
+    
+    paymentsData.recipientSummary.forEach((item: any) => {
+      const type = item.type;
+      if (!groupedByType[type]) {
+        groupedByType[type] = 0;
+      }
+      groupedByType[type] += item.total;
+    });
+    
+    // Convert to array format for chart
+    const data = Object.entries(groupedByType).map(([type, total]) => ({
+      name: getRecipientTypeLabel(type),
+      value: total,
+    }));
+    
+    setRecipientTypeData(data);
+  };
+  
+  // Custom tooltip for charts
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border rounded shadow-sm">
+          <p className="font-medium">{format(new Date(label), 'dd MMM yyyy', { locale: es })}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} style={{ color: entry.color }}>
+              {entry.name}: {formatCurrency(entry.value)}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+  
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+  
+  // Format date for X-axis
+  const formatXAxis = (date: string) => {
+    return format(new Date(date), 'dd/MM', { locale: es });
+  };
+  
+  // Get recipient type label
+  const getRecipientTypeLabel = (type: string) => {
+    switch (type) {
+      case 'subcontractor':
+        return 'Subcontratistas';
+      case 'employee':
+        return 'Empleados';
+      case 'supplier':
+        return 'Proveedores';
+      default:
+        return 'Otros';
+    }
+  };
+  
+  // Custom legend formatter for pie charts
+  const renderLegend = (props: any) => {
+    const { payload } = props;
+    
+    return (
+      <ul className="flex flex-wrap justify-center gap-4 mt-4">
+        {payload.map((entry: any, index: number) => (
+          <li key={`item-${index}`} className="flex items-center">
+            <span
+              className="inline-block w-3 h-3 mr-2 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className="text-sm">{entry.value}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+  
+  // PieChart custom label formatter
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
+    const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+    
+    return percent > 0.05 ? (
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontSize={12}
+        fontWeight="bold"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    ) : null;
+  };
+  
   if (isLoading) {
     return (
-      <div className="w-full flex justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center py-12">
+            <p className="text-lg text-gray-500">Cargando datos financieros...</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
-
-  if (!summary) {
-    return (
-      <div className="p-4 text-center">
-        <p className="text-muted-foreground">No financial data available</p>
-      </div>
-    );
-  }
-
-  // Filter data by time range if needed
-  const filterDataByTimeRange = (data: any[]) => {
-    if (timeRange === "all") return data;
-    
-    const now = new Date();
-    let startDate: Date;
-    
-    switch (timeRange) {
-      case "month":
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        break;
-      case "quarter":
-        startDate = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
-        break;
-      case "year":
-        startDate = new Date(now.getFullYear(), 0, 1);
-        break;
-      default:
-        return data;
-    }
-    
-    return data.filter((item) => new Date(item.date || item.createdAt) >= startDate);
-  };
-
-  const filteredPayments = filterDataByTimeRange(payments);
-  const filteredInvoices = filterDataByTimeRange(invoices);
-
-  // Calculate filtered totals
-  const filteredTotalInvoiced = filteredInvoices.reduce((sum, invoice) => sum + parseFloat(invoice.totalAmount), 0);
-  const filteredTotalPaid = filteredPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
-  const filteredNetProfit = filteredTotalInvoiced - filteredTotalPaid;
-  const filteredProfitMargin = filteredTotalInvoiced > 0 ? (filteredNetProfit / filteredTotalInvoiced) * 100 : 0;
-
-  // Group payments by recipient type for filtered data
-  const filteredPaymentsByType = {
-    staff: filteredPayments.filter(p => p.recipientType === 'staff').reduce((sum, p) => sum + parseFloat(p.amount), 0),
-    subcontractor: filteredPayments.filter(p => p.recipientType === 'subcontractor').reduce((sum, p) => sum + parseFloat(p.amount), 0),
-    supplier: filteredPayments.filter(p => p.recipientType === 'supplier').reduce((sum, p) => sum + parseFloat(p.amount), 0),
-    other: filteredPayments.filter(p => !['staff', 'subcontractor', 'supplier'].includes(p.recipientType)).reduce((sum, p) => sum + parseFloat(p.amount), 0)
-  };
-
-  // Calculate percentage distribution
-  const calculatePercentage = (amount: number) => {
-    return filteredTotalPaid > 0 ? (amount / filteredTotalPaid) * 100 : 0;
-  };
-
-  // Prepare data for payments distribution pie chart
-  const paymentDistributionData = {
-    labels: ['Staff', 'Subcontractors', 'Suppliers', 'Other'],
-    datasets: [
-      {
-        data: [
-          filteredPaymentsByType.staff, 
-          filteredPaymentsByType.subcontractor, 
-          filteredPaymentsByType.supplier, 
-          filteredPaymentsByType.other
-        ],
-        backgroundColor: [
-          'rgba(54, 162, 235, 0.7)',
-          'rgba(255, 159, 64, 0.7)',
-          'rgba(75, 192, 192, 0.7)',
-          'rgba(201, 203, 207, 0.7)'
-        ],
-        borderColor: [
-          'rgb(54, 162, 235)',
-          'rgb(255, 159, 64)',
-          'rgb(75, 192, 192)',
-          'rgb(201, 203, 207)'
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  // Group payments by month
-  const paymentsByMonth: Record<string, number> = {};
-  const invoicesByMonth: Record<string, number> = {};
   
-  filteredPayments.forEach(payment => {
-    const monthYear = format(new Date(payment.date), 'MMM yyyy');
-    paymentsByMonth[monthYear] = (paymentsByMonth[monthYear] || 0) + parseFloat(payment.amount);
-  });
-  
-  filteredInvoices.forEach(invoice => {
-    const monthYear = format(new Date(invoice.createdAt), 'MMM yyyy');
-    invoicesByMonth[monthYear] = (invoicesByMonth[monthYear] || 0) + parseFloat(invoice.totalAmount);
-  });
-
-  // Combine and sort months
-  const allMonths = [...new Set([...Object.keys(paymentsByMonth), ...Object.keys(invoicesByMonth)])];
-  allMonths.sort((a, b) => {
-    const dateA = new Date(a);
-    const dateB = new Date(b);
-    return dateA.getTime() - dateB.getTime();
-  });
-
-  // Prepare data for monthly comparison chart
-  const monthlyComparisonData = {
-    labels: allMonths,
-    datasets: [
-      {
-        label: 'Income',
-        data: allMonths.map(month => invoicesByMonth[month] || 0),
-        backgroundColor: 'rgba(75, 192, 192, 0.5)',
-        borderColor: 'rgb(75, 192, 192)',
-        borderWidth: 2,
-        tension: 0.1,
-      },
-      {
-        label: 'Expenses',
-        data: allMonths.map(month => paymentsByMonth[month] || 0),
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        borderColor: 'rgb(255, 99, 132)',
-        borderWidth: 2,
-        tension: 0.1,
-      }
-    ],
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Financial Report</h2>
-          <p className="text-muted-foreground">
-            Overview of financial performance
-          </p>
-        </div>
-
-        <div className="flex">
-          <select
-            className="bg-background border rounded-md px-3 py-2 text-sm"
-            value={timeRange}
-            onChange={e => setTimeRange(e.target.value)}
-          >
-            <option value="all">All Time</option>
-            <option value="month">This Month</option>
-            <option value="quarter">This Quarter</option>
-            <option value="year">This Year</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${filteredTotalInvoiced.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              From {filteredInvoices.length} invoice{filteredInvoices.length !== 1 ? 's' : ''}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${filteredTotalPaid.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              From {filteredPayments.length} payment{filteredPayments.length !== 1 ? 's' : ''}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
-            {filteredNetProfit >= 0 ? (
-              <TrendingUp className="h-4 w-4 text-green-500" />
-            ) : (
-              <TrendingDown className="h-4 w-4 text-red-500" />
-            )}
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${filteredNetProfit < 0 ? 'text-red-500' : 'text-green-500'}`}>
-              ${filteredNetProfit.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              From {timeRange === "all" ? "all time" : timeRange === "month" ? "this month" : timeRange === "quarter" ? "this quarter" : "this year"}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Profit Margin</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {filteredProfitMargin.toFixed(2)}%
-            </div>
-            <Progress 
-              value={filteredProfitMargin > 100 ? 100 : filteredProfitMargin < 0 ? 0 : filteredProfitMargin} 
-              className="h-2" 
-            />
-          </CardContent>
-        </Card>
-      </div>
-
+      <Card>
+        <CardHeader>
+          <CardTitle>Resumen Financiero</CardTitle>
+          <CardDescription>
+            Período: {formatDateRange()}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={summaryData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" tickFormatter={formatXAxis} />
+                <YAxis 
+                  yAxisId="left" 
+                  orientation="left" 
+                  tickFormatter={(value) => `$${value.toLocaleString()}`} 
+                />
+                <YAxis 
+                  yAxisId="right" 
+                  orientation="right" 
+                  tickFormatter={(value) => `$${value.toLocaleString()}`} 
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Bar yAxisId="left" dataKey="ingresos" name="Ingresos" fill="#4CAF50" />
+                <Bar yAxisId="left" dataKey="gastos" name="Gastos" fill="#FF5722" />
+                <Line 
+                  yAxisId="right" 
+                  type="monotone" 
+                  dataKey="beneficio" 
+                  name="Beneficio" 
+                  stroke="#2196F3" 
+                  strokeWidth={2} 
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Expense Distribution</CardTitle>
-            <CardDescription>Breakdown of expenses by recipient type</CardDescription>
+            <CardTitle>Distribución de Gastos</CardTitle>
+            <CardDescription>Por categoría</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
-              <Pie data={paymentDistributionData} options={{ maintainAspectRatio: false }} />
-            </div>
-            
-            <div className="space-y-4 mt-6">
-              <TooltipProvider>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <User className="h-4 w-4 mr-2 text-blue-500" />
-                    <span>Staff</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="font-medium">${filteredPaymentsByType.staff.toFixed(2)}</span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{calculatePercentage(filteredPaymentsByType.staff).toFixed(1)}% of total expenses</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
+            <div className="h-64">
+              {categoryData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={categoryData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={renderCustomizedLabel}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {categoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                    <Legend 
+                      formatter={(value, entry, index) => value}
+                      iconType="circle"
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">No hay datos disponibles</p>
                 </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <HardHat className="h-4 w-4 mr-2 text-orange-500" />
-                    <span>Subcontractors</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="font-medium">${filteredPaymentsByType.subcontractor.toFixed(2)}</span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{calculatePercentage(filteredPaymentsByType.subcontractor).toFixed(1)}% of total expenses</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <PackageOpen className="h-4 w-4 mr-2 text-teal-500" />
-                    <span>Suppliers</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="font-medium">${filteredPaymentsByType.supplier.toFixed(2)}</span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{calculatePercentage(filteredPaymentsByType.supplier).toFixed(1)}% of total expenses</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                </div>
-                
-                {filteredPaymentsByType.other > 0 && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="h-4 w-4 mr-2 bg-gray-400 rounded-full" />
-                      <span>Other</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="font-medium">${filteredPaymentsByType.other.toFixed(2)}</span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{calculatePercentage(filteredPaymentsByType.other).toFixed(1)}% of total expenses</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </div>
-                )}
-              </TooltipProvider>
+              )}
             </div>
           </CardContent>
         </Card>
-
+        
         <Card>
           <CardHeader>
-            <CardTitle>Income vs. Expenses</CardTitle>
-            <CardDescription>Monthly comparison</CardDescription>
+            <CardTitle>Pagos por Tipo de Destinatario</CardTitle>
+            <CardDescription>Distribución del gasto total</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
-              <Line 
-                data={monthlyComparisonData} 
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        callback: function(value) {
-                          return '$' + value;
-                        }
-                      }
-                    }
-                  }
-                }} 
-              />
+            <div className="h-64">
+              {recipientTypeData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={recipientTypeData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={renderCustomizedLabel}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {recipientTypeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                    <Legend 
+                      formatter={(value, entry, index) => value}
+                      iconType="circle"
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">No hay datos disponibles</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

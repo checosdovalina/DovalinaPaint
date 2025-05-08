@@ -1,275 +1,422 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useToast } from "@/hooks/use-toast";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useEffect, useState } from "react";
-import { ChevronsUpDown, Check, CalendarIcon } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, AlertCircle } from "lucide-react";
 
-const paymentSchema = z.object({
-  amount: z.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
-    message: "Amount must be a positive number",
-  }),
+// Define the form validation schema
+const paymentFormSchema = z.object({
   date: z.date({
-    required_error: "Payment date is required",
+    required_error: "La fecha de pago es requerida.",
   }),
-  description: z.string().min(1, { message: "Description is required" }),
-  method: z.string().min(1, { message: "Payment method is required" }),
-  status: z.string().min(1, { message: "Status is required" }),
-  recipientType: z.string().min(1, { message: "Recipient type is required" }),
-  recipientId: z.number({
-    required_error: "Recipient is required",
-  }),
-  projectId: z.number().nullable().optional(),
-  invoiceId: z.number().nullable().optional(),
+  amount: z.string().min(1, "El monto es requerido."),
+  recipientType: z.string().min(1, "El tipo de destinatario es requerido."),
+  recipientId: z.string().min(1, "El destinatario es requerido."),
+  categoryId: z.string().min(1, "La categoría es requerida."),
+  projectId: z.string().optional(),
+  description: z.string().optional(),
   reference: z.string().optional(),
+  paymentMethod: z.string().min(1, "El método de pago es requerido."),
 });
 
-type PaymentFormData = z.infer<typeof paymentSchema>;
+const paymentMethods = [
+  { id: "cash", name: "Efectivo" },
+  { id: "check", name: "Cheque" },
+  { id: "transfer", name: "Transferencia Bancaria" },
+  { id: "credit_card", name: "Tarjeta de Crédito" },
+  { id: "debit_card", name: "Tarjeta de Débito" },
+  { id: "venmo", name: "Venmo" },
+  { id: "paypal", name: "PayPal" },
+  { id: "zelle", name: "Zelle" },
+  { id: "other", name: "Otro" },
+];
 
-interface PaymentFormProps {
+const recipientTypes = [
+  { id: "subcontractor", name: "Subcontratista" },
+  { id: "employee", name: "Empleado" },
+  { id: "supplier", name: "Proveedor" },
+  { id: "other", name: "Otro" },
+];
+
+type PaymentFormProps = {
   payment?: any;
-  onComplete: () => void;
-}
+  recipients?: any;
+  projects?: any;
+  categories?: any;
+  onSubmit: () => void;
+  onCancel: () => void;
+};
 
-export default function PaymentForm({ payment, onComplete }: PaymentFormProps) {
-  const { toast } = useToast();
-  const [recipientType, setRecipientType] = useState<string>(payment?.recipientType || "staff");
-  const [selectedProject, setSelectedProject] = useState<number | null>(payment?.projectId || null);
-  
-  // Fetch projects for dropdown
-  const { data: projects = [] } = useQuery({
-    queryKey: ["/api/projects"],
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  });
-  
-  // Fetch staff for dropdown
-  const { data: staff = [] } = useQuery({
-    queryKey: ["/api/staff"],
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  });
-  
-  // Fetch subcontractors for dropdown
-  const { data: subcontractors = [] } = useQuery({
-    queryKey: ["/api/subcontractors"],
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  });
-  
-  // Fetch suppliers for dropdown
-  const { data: suppliers = [] } = useQuery({
-    queryKey: ["/api/suppliers"],
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  });
+export default function PaymentForm({
+  payment,
+  recipients,
+  projects,
+  categories,
+  onSubmit,
+  onCancel,
+}: PaymentFormProps) {
+  const [selectedRecipientType, setSelectedRecipientType] = useState<string>(
+    payment?.recipientType || ""
+  );
+  const [filteredRecipients, setFilteredRecipients] = useState<any[]>([]);
 
-  const form = useForm<PaymentFormData>({
-    resolver: zodResolver(paymentSchema),
-    defaultValues: payment ? {
-      amount: payment.amount.toString(),
-      date: new Date(payment.date),
-      description: payment.description,
-      method: payment.method,
-      status: payment.status,
-      recipientType: payment.recipientType,
-      recipientId: payment.recipientId,
-      projectId: payment.projectId,
-      invoiceId: payment.invoiceId,
-      reference: payment.reference || "",
-    } : {
-      amount: "",
-      date: new Date(),
-      description: "",
-      method: "check",
-      status: "completed",
-      recipientType: "staff",
-      recipientId: 0,
-      projectId: null,
-      invoiceId: null,
-      reference: "",
-    }
+  // Initialize the form with default values or payment data if editing
+  const form = useForm<z.infer<typeof paymentFormSchema>>({
+    resolver: zodResolver(paymentFormSchema),
+    defaultValues: {
+      date: payment ? new Date(payment.date) : new Date(),
+      amount: payment ? String(payment.amount) : "",
+      recipientType: payment?.recipientType || "",
+      recipientId: payment ? String(payment.recipientId) : "",
+      categoryId: payment ? String(payment.categoryId) : "",
+      projectId: payment?.projectId ? String(payment.projectId) : undefined,
+      description: payment?.description || "",
+      reference: payment?.reference || "",
+      paymentMethod: payment?.paymentMethod || "",
+    },
   });
 
-  // Update form when recipientType changes
-  useEffect(() => {
-    form.setValue("recipientType", recipientType);
-    form.setValue("recipientId", 0); // Reset the recipient when type changes
-  }, [recipientType, form]);
-
-  // Update form when selectedProject changes
-  useEffect(() => {
-    form.setValue("projectId", selectedProject);
-  }, [selectedProject, form]);
-
-  const createMutation = useMutation({
-    mutationFn: async (data: PaymentFormData) => {
+  const createPaymentMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof paymentFormSchema>) => {
       // Convert amount from string to number
       const paymentData = {
         ...data,
         amount: parseFloat(data.amount),
+        // Convert string IDs to numbers where appropriate
+        recipientId: parseInt(data.recipientId),
+        categoryId: parseInt(data.categoryId),
+        projectId: data.projectId ? parseInt(data.projectId) : undefined,
       };
       
-      const res = await apiRequest("POST", "/api/payments", paymentData);
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to create payment");
+      const response = await apiRequest(
+        "POST",
+        "/api/payments",
+        paymentData
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Error al crear el pago");
       }
-      return await res.json();
+      
+      return await response.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Payment created",
-        description: "The payment has been created successfully.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
-      onComplete();
+      queryClient.invalidateQueries({ queryKey: ['/api/payments'] });
+      onSubmit();
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
   });
 
-  const updateMutation = useMutation({
-    mutationFn: async (data: PaymentFormData) => {
+  const updatePaymentMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof paymentFormSchema>) => {
       // Convert amount from string to number
       const paymentData = {
         ...data,
         amount: parseFloat(data.amount),
+        // Convert string IDs to numbers where appropriate
+        recipientId: parseInt(data.recipientId),
+        categoryId: parseInt(data.categoryId),
+        projectId: data.projectId ? parseInt(data.projectId) : undefined,
       };
       
-      const res = await apiRequest("PATCH", `/api/payments/${payment.id}`, paymentData);
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to update payment");
+      const response = await apiRequest(
+        "PATCH",
+        `/api/payments/${payment.id}`,
+        paymentData
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Error al actualizar el pago");
       }
-      return await res.json();
+      
+      return await response.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Payment updated",
-        description: "The payment has been updated successfully.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
-      onComplete();
+      queryClient.invalidateQueries({ queryKey: ['/api/payments'] });
+      onSubmit();
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
   });
 
-  const onSubmit = (data: PaymentFormData) => {
-    if (payment) {
-      updateMutation.mutate(data);
+  // Watch for changes in recipientType to filter recipients
+  useEffect(() => {
+    if (recipients && selectedRecipientType) {
+      setFilteredRecipients(
+        recipients.filter((r: any) => r.type === selectedRecipientType)
+      );
     } else {
-      createMutation.mutate(data);
+      setFilteredRecipients([]);
+    }
+  }, [selectedRecipientType, recipients]);
+
+  // Handle form submission
+  const onFormSubmit = (data: z.infer<typeof paymentFormSchema>) => {
+    if (payment) {
+      updatePaymentMutation.mutate(data);
+    } else {
+      createPaymentMutation.mutate(data);
     }
   };
 
-  // Get recipients based on type
-  const getRecipients = () => {
-    switch (recipientType) {
-      case "staff":
-        return staff;
-      case "subcontractor":
-        return subcontractors;
-      case "supplier":
-        return suppliers;
-      default:
-        return [];
-    }
+  // Handle recipient type change
+  const handleRecipientTypeChange = (value: string) => {
+    setSelectedRecipientType(value);
+    form.setValue("recipientId", "");
   };
 
-  // Get recipient name by ID
-  const getRecipientName = (id: number) => {
-    const recipients = getRecipients();
-    const recipient = recipients.find((r: any) => r.id === id);
-    return recipient ? recipient.name : "Unknown Recipient";
-  };
+  const isLoading = createPaymentMutation.isPending || updatePaymentMutation.isPending;
+  const error = createPaymentMutation.error || updatePaymentMutation.error;
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Amount ($)</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    step="0.01" 
-                    min="0" 
-                    placeholder="0.00" 
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-6">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error.message || "Ocurrió un error. Intente de nuevo."}
+            </AlertDescription>
+          </Alert>
+        )}
 
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Payment Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Fecha de Pago</FormLabel>
+                  <FormControl>
+                    <DatePicker
+                      date={field.value}
+                      setDate={field.onChange}
+                      disabled={isLoading}
                     />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Monto ($)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="0.00"
+                      {...field}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      disabled={isLoading}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="paymentMethod"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Método de Pago</FormLabel>
+                  <Select
+                    disabled={isLoading}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar método de pago" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {paymentMethods.map((method) => (
+                        <SelectItem key={method.id} value={method.id}>
+                          {method.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="reference"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Referencia/No. de Cheque (Opcional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Número de referencia o de cheque"
+                      {...field}
+                      disabled={isLoading}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="space-y-6">
+            <FormField
+              control={form.control}
+              name="recipientType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de Destinatario</FormLabel>
+                  <Select
+                    disabled={isLoading}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      handleRecipientTypeChange(value);
+                    }}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {recipientTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="recipientId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Destinatario</FormLabel>
+                  <Select
+                    disabled={
+                      isLoading || !selectedRecipientType || filteredRecipients.length === 0
+                    }
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar destinatario" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {filteredRecipients.map((recipient: any) => (
+                        <SelectItem key={recipient.id} value={String(recipient.id)}>
+                          {recipient.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoría</FormLabel>
+                  <Select
+                    disabled={isLoading || !categories}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar categoría" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories?.map((category: any) => (
+                        <SelectItem key={category.id} value={String(category.id)}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="projectId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Proyecto (Opcional)</FormLabel>
+                  <Select
+                    disabled={isLoading || !projects}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar proyecto" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Ninguno</SelectItem>
+                      {projects?.map((project: any) => (
+                        <SelectItem key={project.id} value={String(project.id)}>
+                          {project.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         <FormField
@@ -277,11 +424,13 @@ export default function PaymentForm({ payment, onComplete }: PaymentFormProps) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>Descripción (Opcional)</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Payment description..." 
-                  {...field} 
+                <Textarea
+                  placeholder="Detalles adicionales sobre este pago"
+                  {...field}
+                  disabled={isLoading}
+                  rows={3}
                 />
               </FormControl>
               <FormMessage />
@@ -289,244 +438,18 @@ export default function PaymentForm({ payment, onComplete }: PaymentFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="method"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Payment Method</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select payment method" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="check">Check</SelectItem>
-                    <SelectItem value="cash">Cash</SelectItem>
-                    <SelectItem value="credit_card">Credit Card</SelectItem>
-                    <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                    <SelectItem value="paypal">PayPal</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select payment status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="recipientType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Recipient Type</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    setRecipientType(value);
-                  }}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select recipient type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="staff">Staff</SelectItem>
-                    <SelectItem value="subcontractor">Subcontractor</SelectItem>
-                    <SelectItem value="supplier">Supplier</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="recipientId"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Recipient</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "w-full justify-between",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value
-                          ? getRecipientName(field.value)
-                          : "Select recipient"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder={`Search ${recipientType}...`} />
-                      <CommandEmpty>No {recipientType} found.</CommandEmpty>
-                      <CommandGroup>
-                        {getRecipients().map((recipient: any) => (
-                          <CommandItem
-                            key={recipient.id}
-                            value={recipient.name}
-                            onSelect={() => {
-                              form.setValue("recipientId", recipient.id);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                recipient.id === field.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {recipient.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="projectId"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Project (Optional)</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        "w-full justify-between",
-                        !field.value && "text-muted-foreground"
-                      )}
-                      onClick={() => {
-                        if (field.value === null) {
-                          setSelectedProject(null);
-                        }
-                      }}
-                    >
-                      {field.value
-                        ? projects.find((project: any) => project.id === field.value)?.title || "Unknown Project"
-                        : "Select project (optional)"}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Search projects..." />
-                    <CommandEmpty>No projects found.</CommandEmpty>
-                    <CommandGroup>
-                      {projects.map((project: any) => (
-                        <CommandItem
-                          key={project.id}
-                          value={project.title}
-                          onSelect={() => {
-                            setSelectedProject(project.id);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              project.id === field.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {project.title}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="reference"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Reference Number (Optional)</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="e.g., Check #1234, Transaction ID, etc." 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex justify-end gap-2 pt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onComplete}
+        <div className="flex justify-end space-x-4 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isLoading}
           >
-            Cancel
+            Cancelar
           </Button>
-          <Button 
-            type="submit" 
-            disabled={createMutation.isPending || updateMutation.isPending}
-          >
-            {createMutation.isPending || updateMutation.isPending ? "Saving..." : payment ? "Update Payment" : "Create Payment"}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {payment ? "Actualizar Pago" : "Registrar Pago"}
           </Button>
         </div>
       </form>

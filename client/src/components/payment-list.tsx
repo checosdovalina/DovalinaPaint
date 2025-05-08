@@ -1,31 +1,27 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { 
-  DollarSign, Edit, Trash2, FileText, 
-  CheckCircle2, Clock, XCircle, BadgeHelp, 
-  UserCircle, HardHat, PackageOpen
-} from "lucide-react";
-
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
-import {
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ChevronDown, Edit, Trash2, FileText, AlertCircle } from "lucide-react";
+import { format } from "date-fns";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useState } from "react";
+import { 
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -35,383 +31,289 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+import { es } from "date-fns/locale";
 
-import PaymentForm from "./payment-form";
+type PaymentListProps = {
+  payments: any;
+  isLoading: boolean;
+  projects: any;
+  onEdit: (payment: any) => void;
+  refetch: () => void;
+  filterType: string | null;
+};
 
-export default function PaymentList() {
-  const { toast } = useToast();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+export default function PaymentList({
+  payments,
+  isLoading,
+  projects,
+  onEdit,
+  refetch,
+  filterType,
+}: PaymentListProps) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
-  const [filterStatus, setFilterStatus] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
 
-  // Fetch all payments
-  const { data: payments = [], isLoading } = useQuery({
-    queryKey: ["/api/payments"],
-    staleTime: 30000, // 30 seconds
-  });
+  // Filter payments based on the selected tab
+  const filteredPayments = payments 
+    ? filterType
+      ? payments.filter((payment: any) => payment.recipientType === filterType)
+      : payments
+    : [];
 
-  // Fetch projects for reference
-  const { data: projects = [] } = useQuery({
-    queryKey: ["/api/projects"],
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  });
+  // Get project title by id
+  const getProjectTitle = (projectId: number) => {
+    if (!projects) return "Proyecto no encontrado";
+    const project = projects.find((p: any) => p.id === projectId);
+    return project ? project.title : "Proyecto no encontrado";
+  };
 
-  // Fetch staff for reference
-  const { data: staff = [] } = useQuery({
-    queryKey: ["/api/staff"],
-    staleTime: 10 * 60 * 1000,
-  });
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
 
-  // Fetch subcontractors for reference
-  const { data: subcontractors = [] } = useQuery({
-    queryKey: ["/api/subcontractors"],
-    staleTime: 10 * 60 * 1000,
-  });
+  // Format a date using date-fns
+  const formatDate = (date: string) => {
+    return format(new Date(date), 'dd MMM yyyy', { locale: es });
+  };
 
-  // Fetch suppliers for reference
-  const { data: suppliers = [] } = useQuery({
-    queryKey: ["/api/suppliers"],
-    staleTime: 10 * 60 * 1000,
-  });
+  // Get badge style based on recipient type
+  const getRecipientTypeBadge = (type: string) => {
+    switch (type) {
+      case 'subcontractor':
+        return 'bg-blue-100 text-blue-800';
+      case 'employee':
+        return 'bg-green-100 text-green-800';
+      case 'supplier':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
-  // Delete payment mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const res = await apiRequest("DELETE", `/api/payments/${id}`);
-      if (!res.ok) {
-        throw new Error("Failed to delete payment");
+  // Get recipient type label
+  const getRecipientTypeLabel = (type: string) => {
+    switch (type) {
+      case 'subcontractor':
+        return 'Subcontratista';
+      case 'employee':
+        return 'Empleado';
+      case 'supplier':
+        return 'Proveedor';
+      default:
+        return 'Otro';
+    }
+  };
+
+  // Get payment method label
+  const getPaymentMethodLabel = (method: string) => {
+    switch (method) {
+      case 'cash':
+        return 'Efectivo';
+      case 'check':
+        return 'Cheque';
+      case 'transfer':
+        return 'Transferencia';
+      case 'credit_card':
+        return 'Tarjeta de Crédito';
+      case 'debit_card':
+        return 'Tarjeta de Débito';
+      case 'venmo':
+        return 'Venmo';
+      case 'paypal':
+        return 'PayPal';
+      case 'zelle':
+        return 'Zelle';
+      default:
+        return 'Otro';
+    }
+  };
+
+  const deletePaymentMutation = useMutation({
+    mutationFn: async (paymentId: number) => {
+      const response = await apiRequest(
+        "DELETE",
+        `/api/payments/${paymentId}`
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Error al eliminar el pago");
       }
-      return id;
+      
+      return await response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Payment deleted",
-        description: "The payment has been deleted successfully.",
+        title: "Éxito",
+        description: "Pago eliminado correctamente.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
-      setIsDeleteDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/payments'] });
+      refetch();
+      setShowDeleteDialog(false);
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "No se pudo eliminar el pago. Intente de nuevo.",
         variant: "destructive",
       });
+      setShowDeleteDialog(false);
     },
   });
 
-  // Handle edit button click
-  const handleEdit = (payment: any) => {
+  const handleDeleteClick = (payment: any) => {
     setSelectedPayment(payment);
-    setIsEditDialogOpen(true);
+    setShowDeleteDialog(true);
   };
 
-  // Handle delete button click
-  const handleDelete = (payment: any) => {
-    setSelectedPayment(payment);
-    setIsDeleteDialogOpen(true);
-  };
-
-  // Helper function to get project title
-  const getProjectTitle = (projectId: number) => {
-    const project = projects.find((p: any) => p.id === projectId);
-    return project ? project.title : "Unknown Project";
-  };
-
-  // Helper function to get recipient name
-  const getRecipientName = (recipientType: string, recipientId: number) => {
-    let list;
-    switch (recipientType) {
-      case "staff":
-        list = staff;
-        break;
-      case "subcontractor":
-        list = subcontractors;
-        break;
-      case "supplier":
-        list = suppliers;
-        break;
-      default:
-        return "Unknown Recipient";
-    }
-    
-    const recipient = list.find((r: any) => r.id === recipientId);
-    return recipient ? recipient.name : "Unknown Recipient";
-  };
-
-  // Helper function to get status badge
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <Badge className="bg-green-600"><CheckCircle2 className="w-3 h-3 mr-1" /> Completed</Badge>;
-      case "pending":
-        return <Badge className="bg-yellow-600"><Clock className="w-3 h-3 mr-1" /> Pending</Badge>;
-      case "failed":
-        return <Badge className="bg-red-600"><XCircle className="w-3 h-3 mr-1" /> Failed</Badge>;
-      case "cancelled":
-        return <Badge className="bg-gray-600"><XCircle className="w-3 h-3 mr-1" /> Cancelled</Badge>;
-      default:
-        return <Badge variant="outline"><BadgeHelp className="w-3 h-3 mr-1" /> {status}</Badge>;
+  const confirmDelete = () => {
+    if (selectedPayment) {
+      deletePaymentMutation.mutate(selectedPayment.id);
     }
   };
 
-  // Helper function to get recipient type icon
-  const getRecipientTypeIcon = (type: string) => {
-    switch (type) {
-      case "staff":
-        return <UserCircle className="w-4 h-4 mr-1" />;
-      case "subcontractor":
-        return <HardHat className="w-4 h-4 mr-1" />;
-      case "supplier":
-        return <PackageOpen className="w-4 h-4 mr-1" />;
-      default:
-        return <UserCircle className="w-4 h-4 mr-1" />;
-    }
+  // Calculate the total payments amount
+  const calculateTotal = () => {
+    if (!filteredPayments || filteredPayments.length === 0) return 0;
+    return filteredPayments.reduce((total: number, payment: any) => total + payment.amount, 0);
   };
-
-  // Filter and search payments
-  const filteredPayments = payments.filter((payment: any) => {
-    const matchesStatus = !filterStatus || payment.status === filterStatus;
-    const matchesType = !filterType || payment.recipientType === filterType;
-    const matchesSearch = !searchQuery || 
-      payment.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      getRecipientName(payment.recipientType, payment.recipientId).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (payment.reference && payment.reference.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    return matchesStatus && matchesType && matchesSearch;
-  });
-
-  // Group payments by month
-  const groupedPayments = filteredPayments.reduce((groups: any, payment: any) => {
-    const date = new Date(payment.date);
-    const month = format(date, "MMMM yyyy");
-    
-    if (!groups[month]) {
-      groups[month] = [];
-    }
-    
-    groups[month].push(payment);
-    return groups;
-  }, {});
-
-  // Calculate totals
-  const totalAmount = filteredPayments.reduce((sum: number, payment: any) => 
-    sum + parseFloat(payment.amount), 0);
   
-  // Sort months chronologically (most recent first)
-  const sortedMonths = Object.keys(groupedPayments).sort((a, b) => {
-    // Convert month names to dates for comparison
-    const dateA = new Date(a);
-    const dateB = new Date(b);
-    return dateB.getTime() - dateA.getTime();
-  });
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <Skeleton className="h-8 w-1/4" />
+              <Skeleton className="h-10 w-28" />
+            </div>
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Payments</h2>
-          <p className="text-muted-foreground">
-            Manage payments to staff, subcontractors, and suppliers
-          </p>
-        </div>
-        <Button 
-          onClick={() => setIsCreateDialogOpen(true)} 
-          className="shrink-0"
-        >
-          <DollarSign className="mr-2 h-4 w-4" /> New Payment
-        </Button>
-      </div>
-
+    <div>
       <Card>
-        <CardHeader>
-          <CardTitle>Payment Summary</CardTitle>
-          <CardDescription>Overview of all payments</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <div className="flex-1 flex justify-between items-center p-4 bg-primary-50 rounded-lg">
-              <div>
-                <p className="text-sm font-medium">Total Payments</p>
-                <h3 className="text-2xl font-bold">${totalAmount.toFixed(2)}</h3>
-              </div>
-              <DollarSign className="h-8 w-8 text-primary" />
+        <CardHeader className="py-4">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-xl">
+              {filterType ? `Pagos a ${getRecipientTypeLabel(filterType)}` : "Todos los Pagos"}
+            </CardTitle>
+            <div className="text-lg font-semibold">
+              Total: {formatCurrency(calculateTotal())}
             </div>
           </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {filteredPayments && filteredPayments.length > 0 ? (
+            <div className="border rounded-md overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[120px]">Fecha</TableHead>
+                    <TableHead>Destinatario</TableHead>
+                    {!filterType && <TableHead>Tipo</TableHead>}
+                    <TableHead>Monto</TableHead>
+                    <TableHead>Método</TableHead>
+                    <TableHead>Referencia</TableHead>
+                    <TableHead>Proyecto</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredPayments.map((payment: any) => (
+                    <TableRow key={payment.id}>
+                      <TableCell className="font-medium">
+                        {formatDate(payment.date)}
+                      </TableCell>
+                      <TableCell>{payment.recipientName}</TableCell>
+                      {!filterType && (
+                        <TableCell>
+                          <Badge className={getRecipientTypeBadge(payment.recipientType)}>
+                            {getRecipientTypeLabel(payment.recipientType)}
+                          </Badge>
+                        </TableCell>
+                      )}
+                      <TableCell className="font-medium">
+                        {formatCurrency(payment.amount)}
+                      </TableCell>
+                      <TableCell>{getPaymentMethodLabel(payment.paymentMethod)}</TableCell>
+                      <TableCell>{payment.reference || "—"}</TableCell>
+                      <TableCell>
+                        {payment.projectId ? getProjectTitle(payment.projectId) : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <ChevronDown className="h-4 w-4" />
+                              <span className="sr-only">Acciones</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => onEdit(payment)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteClick(payment)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="py-12 px-4 text-center">
+              <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-1">No hay pagos</h3>
+              <p className="text-gray-500">
+                {filterType
+                  ? `No se encontraron pagos para ${getRecipientTypeLabel(filterType)}.`
+                  : "No se encontraron pagos registrados."}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
-        <div className="flex flex-col sm:flex-row gap-2 sm:items-center w-full">
-          <Input
-            placeholder="Search payments..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-xs"
-          />
-          <div className="flex gap-2">
-            <Select onValueChange={(value) => setFilterStatus(value === "all" ? null : value)}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select onValueChange={(value) => setFilterType(value === "all" ? null : value)}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Recipients</SelectItem>
-                <SelectItem value="staff">Staff</SelectItem>
-                <SelectItem value="subcontractor">Subcontractors</SelectItem>
-                <SelectItem value="supplier">Suppliers</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        {isLoading ? (
-          <Card>
-            <CardContent className="p-8 flex justify-center items-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            </CardContent>
-          </Card>
-        ) : filteredPayments.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">No payments found</p>
-            </CardContent>
-          </Card>
-        ) : (
-          sortedMonths.map((month) => (
-            <Card key={month}>
-              <CardHeader>
-                <CardTitle>{month}</CardTitle>
-                <CardDescription>
-                  {groupedPayments[month].length} payment{groupedPayments[month].length !== 1 ? 's' : ''} - Total: ${groupedPayments[month].reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0).toFixed(2)}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {groupedPayments[month].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((payment: any) => (
-                    <div key={payment.id} className="flex flex-col md:flex-row justify-between p-4 border rounded-lg">
-                      <div className="space-y-1 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{format(new Date(payment.date), "MMM d, yyyy")}</p>
-                          {getStatusBadge(payment.status)}
-                        </div>
-                        <h4 className="text-lg font-semibold">${parseFloat(payment.amount).toFixed(2)}</h4>
-                        <p className="text-muted-foreground">{payment.description}</p>
-                        
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          <div className="flex items-center text-sm">
-                            {getRecipientTypeIcon(payment.recipientType)}
-                            <span className="capitalize">{payment.recipientType}:</span> {getRecipientName(payment.recipientType, payment.recipientId)}
-                          </div>
-                          
-                          {payment.projectId && (
-                            <div className="flex items-center text-sm">
-                              <FileText className="w-4 h-4 mr-1" />
-                              Project: {getProjectTitle(payment.projectId)}
-                            </div>
-                          )}
-                          
-                          {payment.reference && (
-                            <div className="flex items-center text-sm">
-                              <span className="text-muted-foreground">Ref: {payment.reference}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 mt-4 md:mt-0">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(payment)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(payment)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
-
-      {/* Create Payment Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>New Payment</DialogTitle>
-            <DialogDescription>
-              Create a new payment record for staff, subcontractors, or suppliers.
-            </DialogDescription>
-          </DialogHeader>
-          <PaymentForm onComplete={() => setIsCreateDialogOpen(false)} />
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Payment Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Payment</DialogTitle>
-            <DialogDescription>
-              Update payment details.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedPayment && (
-            <PaymentForm 
-              payment={selectedPayment} 
-              onComplete={() => setIsEditDialogOpen(false)} 
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the payment record. This action cannot be undone.
+              Esta acción eliminará permanentemente el pago y no podrá ser recuperado.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteMutation.mutate(selectedPayment.id)}
+            <AlertDialogCancel disabled={deletePaymentMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              disabled={deletePaymentMutation.isPending}
               className="bg-red-600 hover:bg-red-700"
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {deletePaymentMutation.isPending ? 'Eliminando...' : 'Eliminar'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

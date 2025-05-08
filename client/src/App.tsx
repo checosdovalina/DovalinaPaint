@@ -17,6 +17,8 @@ import Reports from "@/pages/reports";
 import Subcontractors from "@/pages/subcontractors";
 import Calendar from "@/pages/calendar";
 import Invoices from "@/pages/invoices";
+import Payments from "@/pages/payments";
+import FinancialReports from "@/pages/financial-reports";
 
 function Router() {
   return (
@@ -31,6 +33,8 @@ function Router() {
       <ProtectedRoute path="/personnel" component={Personnel} />
       <ProtectedRoute path="/subcontractors" component={Subcontractors} />
       <ProtectedRoute path="/invoices" component={Invoices} />
+      <ProtectedRoute path="/payments" component={Payments} />
+      <ProtectedRoute path="/financial-reports" component={FinancialReports} />
       <ProtectedRoute path="/reports" component={Reports} />
       <Route component={NotFound} />
     </Switch>

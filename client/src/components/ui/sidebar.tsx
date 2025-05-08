@@ -16,7 +16,10 @@ import {
   X, 
   PaintbrushVertical,
   Briefcase,
-  Calendar
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  PackageOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -58,7 +61,10 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Calendar", path: "/calendar", icon: <Calendar className="w-5 h-5" /> },
     { name: "Staff Management", path: "/personnel", icon: <UserCog className="w-5 h-5" /> },
     { name: "Subcontractors", path: "/subcontractors", icon: <Briefcase className="w-5 h-5" /> },
+    { name: "Suppliers", path: "/suppliers", icon: <PackageOpen className="w-5 h-5" /> },
     { name: "Invoices", path: "/invoices", icon: <File className="w-5 h-5" /> },
+    { name: "Payments", path: "/payments", icon: <DollarSign className="w-5 h-5" /> },
+    { name: "Financial Reports", path: "/financial-reports", icon: <TrendingUp className="w-5 h-5" /> },
     { name: "Reports & Analytics", path: "/reports", icon: <BarChart className="w-5 h-5" /> },
     { name: "Settings", path: "/settings", icon: <Settings className="w-5 h-5" /> },
   ];
