@@ -63,8 +63,10 @@ import worker4 from "@/assets/images/worker4.svg";
 
 export default function ServiceOrders() {
   const [showServiceOrderForm, setShowServiceOrderForm] = useState(false);
+  const [showServiceOrderDetail, setShowServiceOrderDetail] = useState(false);
   const [serviceOrderToEdit, setServiceOrderToEdit] = useState<ServiceOrder | null>(null);
   const [serviceOrderToDelete, setServiceOrderToDelete] = useState<ServiceOrder | null>(null);
+  const [serviceOrderToView, setServiceOrderToView] = useState<ServiceOrder | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const { toast } = useToast();
@@ -122,6 +124,16 @@ export default function ServiceOrders() {
   const handleCloseForm = () => {
     setShowServiceOrderForm(false);
     setServiceOrderToEdit(null);
+  };
+
+  const handleViewServiceOrder = (serviceOrder: ServiceOrder) => {
+    setServiceOrderToView(serviceOrder);
+    setShowServiceOrderDetail(true);
+  };
+
+  const handleCloseDetail = () => {
+    setShowServiceOrderDetail(false);
+    setServiceOrderToView(null);
   };
 
   const handleDeleteClick = (serviceOrder: ServiceOrder) => {
@@ -394,6 +406,14 @@ export default function ServiceOrders() {
                     onClick={() => handleDeleteClick(serviceOrder)}
                   >
                     <Trash className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => handleViewServiceOrder(serviceOrder)}
+                  >
+                    <Eye className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
