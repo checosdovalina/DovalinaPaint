@@ -418,7 +418,7 @@ export default function Suppliers() {
 
       {/* Add/Edit Supplier Dialog */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingSupplierId ? 'Edit Supplier' : 'Add New Supplier'}</DialogTitle>
             <DialogDescription>
@@ -429,7 +429,7 @@ export default function Suppliers() {
           </DialogHeader>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pb-4">
               <FormField
                 control={form.control}
                 name="name"
