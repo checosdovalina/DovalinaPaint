@@ -49,6 +49,7 @@ type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
 interface InvoiceFormProps {
   invoiceId?: number;
   defaultValues?: Partial<InvoiceFormValues>;
+  duplicateFrom?: Invoice;
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -56,6 +57,7 @@ interface InvoiceFormProps {
 export function InvoiceForm({ 
   invoiceId, 
   defaultValues, 
+  duplicateFrom,
   onSuccess, 
   onCancel 
 }: InvoiceFormProps) {

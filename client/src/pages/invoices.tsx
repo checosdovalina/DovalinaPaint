@@ -19,6 +19,7 @@ export default function InvoicesPage() {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [duplicateInvoiceData, setDuplicateInvoiceData] = useState<Invoice | null>(null);
   const { toast } = useToast();
 
   // Fetch all invoices
@@ -42,6 +43,14 @@ export default function InvoicesPage() {
     setIsCreateModalOpen(false);
     setIsViewModalOpen(false);
     setSelectedInvoiceId(null);
+    setDuplicateInvoiceData(null);
+  };
+  
+  // Handle duplicate invoice
+  const handleDuplicateInvoice = (invoice: Invoice) => {
+    setDuplicateInvoiceData(invoice);
+    setIsViewModalOpen(false);
+    setIsCreateModalOpen(true);
   };
 
   // After successful creation/update, refresh the list
@@ -136,6 +145,7 @@ export default function InvoicesPage() {
                 invoice={selectedInvoice} 
                 onClose={handleCloseModals}
                 onSuccess={handleSuccess}
+                onDuplicate={handleDuplicateInvoice}
               />
             )}
           </div>

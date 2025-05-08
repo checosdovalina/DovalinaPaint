@@ -4,7 +4,7 @@ import { Invoice, Client, Project } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Check, X, CreditCard } from "lucide-react";
+import { Loader2, Check, X, CreditCard, Copy as CopyIcon } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import {
   Card,
@@ -45,9 +45,10 @@ interface InvoiceDetailProps {
   invoice: Invoice;
   onClose: () => void;
   onSuccess: () => void;
+  onDuplicate?: (invoice: Invoice) => void;
 }
 
-export function InvoiceDetail({ invoice, onClose, onSuccess }: InvoiceDetailProps) {
+export function InvoiceDetail({ invoice, onClose, onSuccess, onDuplicate = () => {} }: InvoiceDetailProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
