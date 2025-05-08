@@ -63,17 +63,17 @@ export function InvoiceForm({
 }: InvoiceFormProps) {
   const { toast } = useToast();
   
-  // Initialize the form with default values
+  // Initialize the form with default values or values from duplicated invoice
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
-      clientId: defaultValues?.clientId || 0,
-      projectId: defaultValues?.projectId || 0,
-      totalAmount: defaultValues?.totalAmount || 0,
+      clientId: duplicateFrom?.clientId || defaultValues?.clientId || 0,
+      projectId: duplicateFrom?.projectId || defaultValues?.projectId || 0,
+      totalAmount: duplicateFrom?.totalAmount ? Number(duplicateFrom.totalAmount) : defaultValues?.totalAmount || 0,
       issueDate: defaultValues?.issueDate || new Date(),
       dueDate: defaultValues?.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      status: defaultValues?.status || "draft",
-      notes: defaultValues?.notes || "",
+      status: "draft", // Always start as draft for duplicated invoices
+      notes: duplicateFrom ? `${duplicateFrom.notes || ""}\n(Duplicado de factura #${duplicateFrom.invoiceNumber})` : defaultValues?.notes || "",
     },
   });
   
