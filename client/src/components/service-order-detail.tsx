@@ -223,7 +223,7 @@ export function ServiceOrderDetail({
     signatureMutation.mutate(signatureDataUrl);
   };
 
-  // Function to generate and download PDF
+  // Function to generate and download PDF - super simple approach
   const generatePDF = async () => {
     toast({
       title: "Generating PDF",
@@ -231,116 +231,59 @@ export function ServiceOrderDetail({
     });
     
     try {
-      // Get the printable content element
-      const printableContent = document.getElementById('service-order-printable');
-      if (!printableContent) {
-        throw new Error("Content element not found");
-      }
-      
-      // Store original styles to restore later
-      const originalDisplay = printableContent.style.display;
-      const originalHeight = printableContent.style.height;
-      const originalOverflow = printableContent.style.overflow;
-      const originalPosition = printableContent.style.position;
-      
-      // Make a clone of the content to avoid modifying the original DOM
-      const contentClone = printableContent.cloneNode(true) as HTMLElement;
-      
-      // Set up clone styles for better rendering
-      contentClone.style.position = 'absolute';
-      contentClone.style.top = '0';
-      contentClone.style.left = '0';
-      contentClone.style.width = '210mm'; // A4 width
-      contentClone.style.margin = '0';
-      contentClone.style.padding = '10mm';
-      contentClone.style.visibility = 'hidden';
-      
-      // Add to document body temporarily
-      document.body.appendChild(contentClone);
-      
-      // Add print-specific classes to enhance PDF layout
-      contentClone.classList.add('print-content');
-      
-      // Hide elements that shouldn't be in the PDF
-      const elementsToHide = contentClone.querySelectorAll('.print-hidden');
-      elementsToHide.forEach(el => {
-        (el as HTMLElement).style.display = 'none';
-      });
+      // Create a new PDF document
+      const pdf = new jsPDF();
       
       // Generate a filename for the PDF
-      const filename = `Dovalina_Painting_ServiceOrder_${serviceOrder.id}_${project?.title || 'Project'}.pdf`.replace(/\s+/g, '_');
+      const filename = `ServiceOrder_${serviceOrder.id}.pdf`;
       
-      // Capture the content as an image using html2canvas with improved options
-      const canvas = await html2canvas(contentClone, {
-        scale: 2, // Higher scale for better quality
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: document.documentElement.offsetWidth,
-        windowHeight: document.documentElement.offsetHeight,
-        // Capture the entire element regardless of viewport size
-        height: contentClone.scrollHeight,
-        width: contentClone.scrollWidth,
-        x: 0,
-        y: 0
-      });
+      // Add company header
+      pdf.setFontSize(16);
+      pdf.text("DOVALINA PAINTING LLC", 105, 15, { align: "center" });
       
-      // Create a new PDF document in portrait, using mm units
-      const pdfWidth = 210; // A4 width in mm
-      const pdfHeight = 297; // A4 height in mm
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.setFontSize(10);
+      pdf.text("3731 Aster Drive, Charlotte, N.C. 28227", 105, 20, { align: "center" });
+      pdf.text("704-506-9741 | d-dovalina@hotmail.com", 105, 25, { align: "center" });
       
-      // Create new PDF
-      const pdf = new jsPDF({
-        orientation: 'portrait', // Always use portrait for service orders
-        unit: 'mm',
-        format: 'a4',
-      });
+      // Add title
+      pdf.setFontSize(14);
+      pdf.text(`SERVICE ORDER #${serviceOrder.id}`, 105, 35, { align: "center" });
       
-      // If content is larger than A4, split it into multiple pages
-      if (imgHeight > pdfHeight) {
-        let heightLeft = imgHeight;
-        let position = 0;
-        let page = 1;
+      // Add basic info
+      pdf.setFontSize(10);
+      pdf.text(`Date: ${serviceOrder.createdAt ? format(new Date(serviceOrder.createdAt), "MM/dd/yyyy") : 'N/A'}`, 15, 45);
+      pdf.text(`Status: ${serviceOrder.status || 'Pending'}`, 15, 50);
+      
+      // Project info
+      pdf.setFontSize(12);
+      pdf.text("Project Information:", 15, 60);
+      
+      pdf.setFontSize(10);
+      pdf.text(`Project: ${project?.title || 'N/A'}`, 20, 65);
+      pdf.text(`Address: ${project?.address || 'N/A'}`, 20, 70);
+      
+      // Client info
+      pdf.setFontSize(12);
+      pdf.text("Client Information:", 15, 80);
+      
+      pdf.setFontSize(10);
+      pdf.text(`Name: ${client?.name || 'N/A'}`, 20, 85);
+      pdf.text(`Phone: ${client?.phone || 'N/A'}`, 20, 90);
+      pdf.text(`Email: ${client?.email || 'N/A'}`, 20, 95);
+      
+      // Service details
+      pdf.setFontSize(12);
+      pdf.text("Service Details:", 15, 105);
+      
+      pdf.setFontSize(10);
+      pdf.text(`Assigned To: ${assignedTo || 'Not assigned'}`, 20, 110);
+      
+      if (serviceOrder.details) {
+        pdf.text("Details:", 20, 115);
         
-        while (heightLeft > 0) {
-          // Add page and add content
-          if (page > 1) {
-            pdf.addPage();
-          }
-          
-          // Add image to the page
-          pdf.addImage(
-            canvas.toDataURL('image/jpeg', 1.0), // Higher quality
-            'JPEG',
-            0, // Left margin
-            position, // Top position - negative because we're showing a slice of the image
-            imgWidth,
-            imgHeight
-          );
-          
-          // Move to next page
-          heightLeft -= pdfHeight;
-          position -= pdfHeight;
-          page++;
-        }
-      } else {
-        // Content fits in one page
-        pdf.addImage(
-          canvas.toDataURL('image/jpeg', 1.0),
-          'JPEG',
-          0,
-          0,
-          imgWidth,
-          imgHeight
-        );
+        const lines = pdf.splitTextToSize(serviceOrder.details, 170);
+        pdf.text(lines, 20, 120);
       }
-      
-      // Remove temporary clone from document
-      document.body.removeChild(contentClone);
       
       // Save the PDF file
       pdf.save(filename);
@@ -351,12 +294,6 @@ export function ServiceOrderDetail({
       });
     } catch (error) {
       console.error("PDF generation error:", error);
-      
-      // Clean up any temporary elements that might have been created
-      const contentClone = document.querySelector('body > [id^="service-order-printable"]');
-      if (contentClone) {
-        document.body.removeChild(contentClone);
-      }
       
       toast({
         title: "PDF Generation Failed",
@@ -459,16 +396,17 @@ export function ServiceOrderDetail({
           )}
           
           {/* Project Images */}
-          {(serviceOrder.beforeImages?.length > 0 || serviceOrder.afterImages?.length > 0) && (
+          {(Array.isArray(serviceOrder.beforeImages) && serviceOrder.beforeImages.length > 0 ||
+            Array.isArray(serviceOrder.afterImages) && serviceOrder.afterImages.length > 0) && (
             <Card className="mb-6">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">Project Images</h3>
                 
-                {serviceOrder.beforeImages?.length > 0 && (
+                {Array.isArray(serviceOrder.beforeImages) && serviceOrder.beforeImages.length > 0 && (
                   <div className="mb-4">
                     <h4 className="font-medium mb-2">Before Images</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                      {serviceOrder.beforeImages.map((image, index) => (
+                      {serviceOrder.beforeImages.map((image: string, index: number) => (
                         <div key={`before-${index}`} className="border rounded-md overflow-hidden">
                           <img 
                             src={image} 
@@ -481,11 +419,11 @@ export function ServiceOrderDetail({
                   </div>
                 )}
                 
-                {serviceOrder.afterImages?.length > 0 && (
+                {Array.isArray(serviceOrder.afterImages) && serviceOrder.afterImages.length > 0 && (
                   <div>
                     <h4 className="font-medium mb-2">After Images</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                      {serviceOrder.afterImages.map((image, index) => (
+                      {serviceOrder.afterImages.map((image: string, index: number) => (
                         <div key={`after-${index}`} className="border rounded-md overflow-hidden">
                           <img 
                             src={image} 
