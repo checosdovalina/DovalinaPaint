@@ -223,7 +223,7 @@ export function ServiceOrderDetail({
     signatureMutation.mutate(signatureDataUrl);
   };
 
-  // Function to generate and download PDF - improved visual approach
+  // Function to generate and download PDF - styled to match the reference format
   const generatePDF = async () => {
     toast({
       title: "Generating PDF",
@@ -231,71 +231,91 @@ export function ServiceOrderDetail({
     });
     
     try {
-      // Create a new PDF document with more generous margins
+      // Create a new PDF document
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
+        compress: true
       });
       
       // Generate a filename for the PDF
       const filename = `Dovalina_Painting_ServiceOrder_${serviceOrder.id}.pdf`;
       
-      // Set starting positions
+      // Set margins
       const leftMargin = 15;
-      const topMargin = 15;
-      let yPos = topMargin;
+      const pageWidth = 210 - (leftMargin * 2); // A4 width minus margins
+      let yPos = 15;
       
-      // --- HEADER SECTION ---
+      // --------------------------------------------
+      // HEADER SECTION
+      // --------------------------------------------
       // Company info (left side)
       pdf.setFontSize(16);
       pdf.setFont('helvetica', 'bold');
       pdf.text("DOVALINA PAINTING LLC", leftMargin, yPos);
       
+      // Service order info (right side)
+      const rightColStart = 160;
+      pdf.setFontSize(12);
+      pdf.text(`Service Order #${serviceOrder.id}`, rightColStart, yPos, { align: 'right' });
+      
+      // Company details
       yPos += 5;
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
       pdf.text("3731 Aster Drive", leftMargin, yPos);
       
+      // Order date
+      pdf.text(`Date: ${serviceOrder.createdAt 
+        ? format(new Date(serviceOrder.createdAt), "MMMM do, yyyy", { locale: enUS }) 
+        : 'N/A'}`, 
+        rightColStart, 
+        yPos, 
+        { align: 'right' }
+      );
+      
+      // More company details
       yPos += 5;
       pdf.text("Charlotte, N.C. 28227", leftMargin, yPos);
       
+      // Status
+      pdf.text(`Status: ${serviceOrder.status || 'pending'}`, 
+        rightColStart, 
+        yPos, 
+        { align: 'right' }
+      );
+      
+      // Phone
       yPos += 5;
       pdf.text("704-506-9741", leftMargin, yPos);
       
+      // Due date
+      pdf.text(`Due Date: ${serviceOrder.dueDate 
+        ? format(new Date(serviceOrder.dueDate), "MMMM do, yyyy", { locale: enUS }) 
+        : 'N/A'}`, 
+        rightColStart, 
+        yPos, 
+        { align: 'right' }
+      );
+      
+      // Email
       yPos += 5;
       pdf.text("d-dovalina@hotmail.com", leftMargin, yPos);
       
-      // Service order info (right side)
-      const rightColStart = 140;
-      yPos = topMargin;
-      
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(`Service Order #${serviceOrder.id}`, rightColStart, yPos);
-      
-      yPos += 5;
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(`Date: ${serviceOrder.createdAt ? format(new Date(serviceOrder.createdAt), "MMMM do, yyyy", { locale: enUS }) : 'N/A'}`, rightColStart, yPos);
-      
-      yPos += 5;
-      pdf.text(`Status: ${serviceOrder.status || 'pending'}`, rightColStart, yPos);
-      
-      yPos += 5;
-      pdf.text(`Due Date: ${serviceOrder.dueDate ? format(new Date(serviceOrder.dueDate), "MMMM do, yyyy", { locale: enUS }) : 'N/A'}`, rightColStart, yPos);
-      
       // Add horizontal line separator
-      yPos = 45;
+      yPos += 10;
       pdf.setDrawColor(200, 200, 200);
       pdf.line(leftMargin, yPos, 195, yPos);
       
-      // --- PROJECT INFORMATION SECTION ---
+      // --------------------------------------------
+      // PROJECT & CLIENT INFORMATION SECTIONS
+      // --------------------------------------------
       yPos += 10;
       
-      // Draw light gray background
+      // PROJECT INFORMATION - Left box
       pdf.setFillColor(245, 245, 245);
-      pdf.rect(leftMargin, yPos, 85, 30, 'F');
+      pdf.roundedRect(leftMargin, yPos, 85, 35, 1, 1, 'F');
       
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
@@ -310,133 +330,157 @@ export function ServiceOrderDetail({
       const descSplit = pdf.splitTextToSize(`Description: ${description}`, 75);
       pdf.text(descSplit, leftMargin + 5, yPos + 29);
       
-      // --- CLIENT INFORMATION SECTION ---
-      // Draw light gray background
+      // CLIENT INFORMATION - Right box
       pdf.setFillColor(245, 245, 245);
-      pdf.rect(110, yPos, 85, 30, 'F');
+      pdf.roundedRect(leftMargin + 90, yPos, 85, 35, 1, 1, 'F');
       
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
-      pdf.text("Client Information", 115, yPos + 7);
+      pdf.text("Client Information", leftMargin + 95, yPos + 7);
       
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
-      pdf.text(`Name: ${client?.name || 'N/A'}`, 115, yPos + 15);
-      pdf.text(`Email: ${client?.email || 'N/A'}`, 115, yPos + 22);
-      pdf.text(`Phone: ${client?.phone || 'N/A'}`, 115, yPos + 29);
+      pdf.text(`Name: ${client?.name || 'N/A'}`, leftMargin + 95, yPos + 15);
+      pdf.text(`Email: ${client?.email || 'N/A'}`, leftMargin + 95, yPos + 22);
+      pdf.text(`Phone: ${client?.phone || 'N/A'}`, leftMargin + 95, yPos + 29);
       
-      // --- SERVICE DETAILS SECTION ---
-      yPos += 40;
+      // --------------------------------------------
+      // SERVICE DETAILS SECTION
+      // --------------------------------------------
+      yPos += 45; // Space after the boxes
       
-      // Calculate needed height for details
-      let detailsHeight = 40; // Minimum height
+      // First calculate detailsHeight to see if we need special handling for long text
+      let detailsTextHeight = 0;
       if (serviceOrder.details) {
-        const detailsText = serviceOrder.details || '';
-        const detailsSplit = pdf.splitTextToSize(detailsText, 170);
-        // Each line is about 5mm tall
-        const neededLinesHeight = Math.min(detailsSplit.length * 5, 150); // Cap at 150mm (30 lines)
-        detailsHeight = Math.max(detailsHeight, neededLinesHeight + 30); // Base + content
+        const detailsTextLines = pdf.splitTextToSize(serviceOrder.details, pageWidth - 10);
+        detailsTextHeight = detailsTextLines.length * 5; // Each line ~5mm tall
       }
       
-      // Draw light gray background with calculated height
-      pdf.setFillColor(245, 245, 245);
-      pdf.rect(leftMargin, yPos, 180, detailsHeight, 'F');
+      // Dynamic height for the service details box based on content
+      const baseDetailsHeight = 60; // Minimum height with no details
+      const detailsHeight = Math.max(
+        baseDetailsHeight,
+        detailsTextHeight > 0 ? 45 + detailsTextHeight : baseDetailsHeight
+      );
       
+      // Draw the service details box
+      pdf.setFillColor(245, 245, 245);
+      pdf.roundedRect(leftMargin, yPos, pageWidth, detailsHeight, 1, 1, 'F');
+      
+      // Title
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
       pdf.text("Service Details", leftMargin + 5, yPos + 7);
       
+      // Basic info
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
       pdf.text(`Assigned To: ${assignedTo || 'Not Assigned'}`, leftMargin + 5, yPos + 15);
-      pdf.text(`Start Date: ${serviceOrder.startDate ? format(new Date(serviceOrder.startDate), "MMMM do, yyyy", { locale: enUS }) : 'N/A'}`, leftMargin + 5, yPos + 22);
+      pdf.text(`Start Date: ${serviceOrder.startDate 
+        ? format(new Date(serviceOrder.startDate), "MMMM do, yyyy", { locale: enUS }) 
+        : 'N/A'}`, 
+        leftMargin + 5, 
+        yPos + 22
+      );
       
+      // Details field
+      pdf.text("Details:", leftMargin + 5, yPos + 29);
+      
+      // Handle details text with potential wrapping
       if (serviceOrder.details) {
-        pdf.setFont('helvetica', 'bold');
-        pdf.text("Details:", leftMargin + 5, yPos + 29);
+        const maxDetailsWidth = pageWidth - 10;
+        const detailsLines = pdf.splitTextToSize(serviceOrder.details, maxDetailsWidth);
         
-        pdf.setFont('helvetica', 'normal');
-        // Get full details and handle multi-page if needed
-        const detailsSplit = pdf.splitTextToSize(serviceOrder.details, 170);
-        
-        // Check if we need a new page
-        if (detailsSplit.length > 20) { // If more than ~20 lines, start a new page
-          pdf.addPage();
-          yPos = 15; // Reset Y position on new page
+        // If there are too many lines, we need a new page
+        if (detailsLines.length > 30) { // Arbitrary cutoff for what's too long
+          // First part on this page
+          const firstPageLines = detailsLines.slice(0, 20);
+          pdf.text(firstPageLines, leftMargin + 5, yPos + 35);
           
-          // Add title on new page
+          // Rest on new page
+          pdf.addPage();
+          
+          // Add a header for continuation
           pdf.setFontSize(12);
           pdf.setFont('helvetica', 'bold');
-          pdf.text("Service Details (Continued)", leftMargin, yPos);
+          pdf.text("Service Details (Continued)", leftMargin, 15);
           
-          // Draw light gray background on new page
+          // Add a background for the continued text
           pdf.setFillColor(245, 245, 245);
-          pdf.rect(leftMargin, yPos + 5, 180, 250, 'F');
+          pdf.roundedRect(leftMargin, 20, pageWidth, 200, 1, 1, 'F');
           
-          // Add details on new page
+          // Add the rest of the text
           pdf.setFontSize(10);
           pdf.setFont('helvetica', 'normal');
-          pdf.text(detailsSplit, leftMargin + 5, yPos + 15);
+          const remainingLines = detailsLines.slice(20);
+          pdf.text(remainingLines, leftMargin + 5, 25);
           
-          // Update position for next section (on original page)
-          yPos = 95; // Return to first page position
+          // Now we continue with the next section on the first page
+          yPos += detailsHeight + 10;
         } else {
-          // If it fits on the same page
-          pdf.text(detailsSplit, leftMargin + 5, yPos + 36);
-          
-          // Update position based on content height
-          const contentHeight = Math.min(detailsSplit.length * 5, 150);
-          yPos += contentHeight > 30 ? contentHeight : 30;
+          // Text fits on current page
+          pdf.text(detailsLines, leftMargin + 5, yPos + 35);
+          yPos += detailsHeight + 10; // Move position for next section
         }
       } else {
+        // No details provided
         pdf.setFont('helvetica', 'italic');
-        pdf.text("No specific details provided.", leftMargin + 5, yPos + 29);
-        
-        // Basic position update
-        yPos += 30;
+        pdf.text("No specific details provided.", leftMargin + 5, yPos + 35);
+        yPos += detailsHeight + 10; // Move position for next section
       }
       
-      // --- MATERIALS REQUIRED SECTION ---
+      // --------------------------------------------
+      // MATERIALS REQUIRED SECTION (if present)
+      // --------------------------------------------
       if (serviceOrder.materialsRequired) {
-        yPos += 10;
+        // Ensure spacing after previous section
+        if (yPos > 220) {
+          pdf.addPage();
+          yPos = 15;
+        }
         
-        // Calculate needed height for materials
-        const materialsSplit = pdf.splitTextToSize(serviceOrder.materialsRequired, 170);
-        const materialHeight = Math.min(10 + materialsSplit.length * 5, 60); // Header + content
+        // Calculate needed height for materials text
+        const materialsSplit = pdf.splitTextToSize(serviceOrder.materialsRequired, pageWidth - 10);
+        const materialHeight = Math.min(10 + materialsSplit.length * 5, 60); // Header + content, max 60mm
         
         // Draw light gray background
         pdf.setFillColor(245, 245, 245);
-        pdf.rect(leftMargin, yPos, 180, materialHeight, 'F');
+        pdf.roundedRect(leftMargin, yPos, pageWidth, materialHeight, 1, 1, 'F');
         
+        // Title
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'bold');
         pdf.text("Materials Required", leftMargin + 5, yPos + 7);
         
+        // Content
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
         pdf.text(materialsSplit, leftMargin + 5, yPos + 15);
         
-        yPos += materialHeight + 10; // Add spacing after materials
-      } else {
-        yPos += 10; // Just add some spacing
+        // Update position for next section
+        yPos += materialHeight + 10;
       }
       
-      // --- CLIENT SIGNATURE SECTION ---
+      // --------------------------------------------
+      // CLIENT SIGNATURE SECTION
+      // --------------------------------------------
       // Check if we need to add a new page for signature
       if (yPos > 220) {
         pdf.addPage();
         yPos = 15;
       }
       
-      // Draw light gray background
+      // Draw the client approval section box
       pdf.setFillColor(245, 245, 245);
-      pdf.rect(leftMargin, yPos, 180, 50, 'F'); // Make signature box taller
+      pdf.roundedRect(leftMargin, yPos, pageWidth, 70, 1, 1, 'F');
       
+      // Title
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
       pdf.text("Client Approval", leftMargin + 5, yPos + 7);
       
       if (clientSignature) {
+        // Signature date
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
         pdf.text(
@@ -449,16 +493,17 @@ export function ServiceOrderDetail({
         
         // Add signature image
         try {
-          // The signature is usually wider than tall, so adjust dimensions
-          // to maintain aspect ratio but control the width
-          const sigWidth = 120; // Wider signature image
-          const sigHeight = 30; // Reasonable height
+          // Center the signature horizontally in the box and give it plenty of vertical space
+          const sigWidth = 140; // Width of signature image
+          const sigHeight = 45; // Height of signature image
+          const sigX = leftMargin + 5; // Left aligned
+          const sigY = yPos + 20; // Position below text
           
           pdf.addImage(
             clientSignature,
             'PNG',
-            leftMargin + 5,
-            yPos + 18, // Position it lower in the box
+            sigX,
+            sigY,
             sigWidth,
             sigHeight
           );
