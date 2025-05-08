@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
 import { google } from 'googleapis';
-import { insertClientSchema, insertProjectSchema, insertQuoteSchema, insertServiceOrderSchema, insertStaffSchema, insertActivitySchema, insertSubcontractorSchema, insertInvoiceSchema, insertSupplierSchema } from "@shared/schema";
+import { insertClientSchema, insertProjectSchema, insertQuoteSchema, insertServiceOrderSchema, insertStaffSchema, insertActivitySchema, insertSubcontractorSchema, insertInvoiceSchema, insertSupplierSchema, insertPaymentSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -1133,6 +1133,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Failed to delete supplier" });
       }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Payment Routes
+  app.get("/api/payments", isAuthenticated, async (req, res) => {
+    try {
+      const payments = await storage.getPayments();
+      res.json(payments);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/payments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const payment = await storage.getPayment(id);
+      
+      if (!payment) {
+        return res.status(404).json({ message: "Payment not found" });
+      }
+      
+      res.json(payment);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/payments/project/:projectId", isAuthenticated, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const payments = await storage.getPaymentsByProject(projectId);
+      res.json(payments);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/payments/recipient/:type/:id", isAuthenticated, async (req, res) => {
+    try {
+      const recipientType = req.params.type;
+      const recipientId = parseInt(req.params.id);
+      
+      if (!["staff", "subcontractor", "supplier"].includes(recipientType)) {
+        return res.status(400).json({ message: "Invalid recipient type. Must be 'staff', 'subcontractor', or 'supplier'." });
+      }
+      
+      const payments = await storage.getPaymentsByRecipient(recipientType, recipientId);
+      res.json(payments);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/payments/status/:status", isAuthenticated, async (req, res) => {
+    try {
+      const status = req.params.status;
+      const payments = await storage.getPaymentsByStatus(status);
+      res.json(payments);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/payments", isAuthenticated, async (req, res) => {
+    try {
+      const paymentData = insertPaymentSchema.parse(req.body);
+      const payment = await storage.createPayment(paymentData);
+      
+      // Create activity for payment creation
+      await storage.createActivity({
+        type: "payment_created",
+        description: `Payment of $${payment.amount.toFixed(2)} created for ${payment.recipientType} (ID: ${payment.recipientId})`,
+        userId: req.user.id,
+        clientId: null,
+        projectId: payment.projectId || null
+      });
+      
+      res.status(201).json(payment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid payment data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/payments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const existingPayment = await storage.getPayment(id);
+      
+      if (!existingPayment) {
+        return res.status(404).json({ message: "Payment not found" });
+      }
+      
+      const updateData = req.body;
+      const updatedPayment = await storage.updatePayment(id, updateData);
+      
+      // Create activity for payment update
+      await storage.createActivity({
+        type: "payment_updated",
+        description: `Payment ID ${id} updated`,
+        userId: req.user.id,
+        clientId: null,
+        projectId: existingPayment.projectId || null
+      });
+      
+      res.json(updatedPayment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid payment data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/payments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const payment = await storage.getPayment(id);
+      
+      if (!payment) {
+        return res.status(404).json({ message: "Payment not found" });
+      }
+      
+      const deleted = await storage.deletePayment(id);
+      
+      if (deleted) {
+        // Create activity for payment deletion
+        await storage.createActivity({
+          type: "payment_deleted",
+          description: `Payment ID ${id} deleted`,
+          userId: req.user.id,
+          clientId: null,
+          projectId: payment.projectId || null
+        });
+        
+        res.sendStatus(204);
+      } else {
+        res.status(500).json({ message: "Failed to delete payment" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Financial Reporting Routes
+  app.get("/api/reports/financial/summary", isAuthenticated, async (req, res) => {
+    try {
+      // Get all invoices
+      const invoices = await storage.getInvoices();
+      
+      // Get all payments
+      const payments = await storage.getPayments();
+      
+      // Calculate totals
+      const totalInvoiced = invoices.reduce((sum, invoice) => sum + Number(invoice.totalAmount), 0);
+      const totalPaid = payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+      
+      // Group payments by type
+      const paymentsByType = {
+        staff: payments.filter(p => p.recipientType === 'staff').reduce((sum, p) => sum + Number(p.amount), 0),
+        subcontractor: payments.filter(p => p.recipientType === 'subcontractor').reduce((sum, p) => sum + Number(p.amount), 0),
+        supplier: payments.filter(p => p.recipientType === 'supplier').reduce((sum, p) => sum + Number(p.amount), 0),
+        other: payments.filter(p => !['staff', 'subcontractor', 'supplier'].includes(p.recipientType)).reduce((sum, p) => sum + Number(p.amount), 0)
+      };
+      
+      // Calculate net profit
+      const netProfit = totalInvoiced - totalPaid;
+      
+      res.json({
+        totalInvoiced,
+        totalPaid,
+        netProfit,
+        paymentsByType,
+        profitMargin: totalInvoiced > 0 ? (netProfit / totalInvoiced) * 100 : 0
+      });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
