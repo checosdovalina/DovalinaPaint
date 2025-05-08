@@ -25,6 +25,9 @@ import {
   Calendar as CalendarLucide
 } from 'lucide-react';
 import { SiGoogle } from 'react-icons/si';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface CalendarEvent {
   id: string;
@@ -241,9 +244,14 @@ export function CalendarView({
   // Handle date click (to add new event)
   const handleDateClick = (info: any) => {
     setNewEvent({
-      ...newEvent,
+      title: '',
       start: info.dateStr,
       end: info.dateStr,
+      allDay: false,
+      description: '',
+      location: '',
+      assignedStaff: [],
+      assignedType: 'staff',
     });
     setShowAddEvent(true);
   };
@@ -557,6 +565,108 @@ export function CalendarView({
                 />
               </div>
             </div>
+            
+            {/* Staff Assignment Type */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="assignment-type" className="text-right">
+                Asignar a
+              </Label>
+              <div className="col-span-3">
+                <Select 
+                  value={newEvent.assignedType}
+                  onValueChange={(value) => setNewEvent({...newEvent, assignedType: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="staff">Personal interno</SelectItem>
+                    <SelectItem value="subcontractor">Subcontratista</SelectItem>
+                    <SelectItem value="none">Sin asignar</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            {/* Staff Selection */}
+            {newEvent.assignedType === 'staff' && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="assigned-staff" className="text-right">
+                  Personal
+                </Label>
+                <div className="col-span-3">
+                  <ScrollArea className="h-40 rounded-md border">
+                    <div className="p-4">
+                      {staff.map((staffMember) => (
+                        <div key={staffMember.id} className="flex items-center space-x-2 mb-2">
+                          <Checkbox 
+                            id={`staff-${staffMember.id}`} 
+                            checked={newEvent.assignedStaff.includes(staffMember.name)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setNewEvent({
+                                  ...newEvent, 
+                                  assignedStaff: [...newEvent.assignedStaff, staffMember.name]
+                                });
+                              } else {
+                                setNewEvent({
+                                  ...newEvent, 
+                                  assignedStaff: newEvent.assignedStaff.filter(name => name !== staffMember.name)
+                                });
+                              }
+                            }}
+                          />
+                          <Label htmlFor={`staff-${staffMember.id}`}>{staffMember.name}</Label>
+                        </div>
+                      ))}
+                      {staff.length === 0 && (
+                        <div className="text-center py-2 text-muted-foreground">
+                          No hay personal disponible
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </div>
+            )}
+            
+            {/* Subcontractor Selection */}
+            {newEvent.assignedType === 'subcontractor' && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="assigned-subcontractor" className="text-right">
+                  Subcontratista
+                </Label>
+                <div className="col-span-3">
+                  <Select 
+                    value={newEvent.assignedStaff.length > 0 ? newEvent.assignedStaff[0] : ""}
+                    onValueChange={(value) => {
+                      setNewEvent({
+                        ...newEvent,
+                        assignedStaff: [value]
+                      });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar subcontratista" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {/* Aquí iría un mapeo de subcontratistas si tuviéramos el dato */}
+                      <SelectItem value="Contratista 1">Contratista 1</SelectItem>
+                      <SelectItem value="Contratista 2">Contratista 2</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            
+            {/* No Assignment Message */}
+            {newEvent.assignedType === 'none' && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <div className="col-span-4 text-center py-2 text-muted-foreground">
+                  Este evento no será asignado a ningún miembro del personal o subcontratista.
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddEvent(false)}>
@@ -585,6 +695,7 @@ export function CalendarView({
                     type: 'project', // Default type
                     description: newEvent.description,
                     location: newEvent.location,
+                    staffAssigned: newEvent.assignedStaff.length > 0 ? newEvent.assignedStaff : undefined,
                   },
                 };
                 
