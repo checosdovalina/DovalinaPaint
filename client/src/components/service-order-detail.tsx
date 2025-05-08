@@ -389,25 +389,26 @@ export function ServiceOrderDetail({
       
       // Handle details text with potential wrapping
       if (serviceOrder.details) {
-        // Usar fuente Arial normal para consistencia con el resto del documento
-        pdf.setFontSize(10); // Tamaño de letra similar al resto del PDF
+        // Usar fuente Arial pero con un tamaño más pequeño
+        pdf.setFontSize(8); // Tamaño de letra más pequeño
         pdf.setFont('arial', 'normal');
         
-        // Calculate maximum width for text - provide enough margin
-        const maxDetailsWidth = pageWidth - 20;
+        // Calculate maximum width for text - increase width to reduce wrapping
+        const maxDetailsWidth = pageWidth - 15;
         
-        // Mantener el formato con las comillas al inicio pero usar la fuente Arial
+        // Mantener el formato con las comillas al inicio pero hacerlo más compacto
         const formattedDetails = serviceOrder.details
           .split('\n')
           .map(line => line.trim()) // Clean up each line
           .filter(line => line.length > 0) // Remove empty lines
           .map(line => {
-            // If it already starts with quote marks like in the image, keep it
+            // If it already starts with quote marks, keep it but make it compact
             if (line.startsWith("' ") || line.startsWith("''") || line.startsWith("'  ")) {
-              return line;
+              // Replace with a single quote without extra spaces
+              return "'" + line.substring(line.indexOf(' ')).trim();
             }
-            // Add single quote and space exactly like in the image
-            return "' " + line;
+            // Add single quote without extra spaces
+            return "'" + line;
           })
           .join('\n');
           
@@ -433,8 +434,8 @@ export function ServiceOrderDetail({
           pdf.roundedRect(leftMargin, 20, pageWidth, 200, 1, 1, 'F');
           
           // Add the rest of the text
-          pdf.setFontSize(10);
-          pdf.setFont('arial', 'normal'); // Keep monospaced font consistent
+          pdf.setFontSize(8); // Usar el mismo tamaño pequeño
+          pdf.setFont('arial', 'normal'); // Consistente con la primera página
           const remainingLines = detailsLines.slice(20);
           pdf.text(remainingLines, leftMargin + 5, 25);
           
