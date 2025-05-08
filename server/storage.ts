@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice, suppliers, Supplier, InsertSupplier } from "@shared/schema";
+import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice, suppliers, Supplier, InsertSupplier, payments, Payment, InsertPayment } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { db } from "./db";
@@ -84,6 +84,16 @@ export interface IStorage {
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
   updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined>;
   deleteInvoice(id: number): Promise<boolean>;
+  
+  // Payment methods
+  getPayments(): Promise<Payment[]>;
+  getPayment(id: number): Promise<Payment | undefined>;
+  getPaymentsByProject(projectId: number): Promise<Payment[]>;
+  getPaymentsByRecipient(type: string, id: number): Promise<Payment[]>;
+  getPaymentsByStatus(status: string): Promise<Payment[]>;
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  updatePayment(id: number, payment: Partial<InsertPayment>): Promise<Payment | undefined>;
+  deletePayment(id: number): Promise<boolean>;
   
   // Session store
   sessionStore: any;
@@ -798,6 +808,92 @@ export class DatabaseStorage implements IStorage {
       return false;
     }
   }
+  
+  // Payment methods
+  async getPayments(): Promise<Payment[]> {
+    try {
+      return await db.select().from(payments).orderBy(desc(payments.date));
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      return [];
+    }
+  }
+  
+  async getPayment(id: number): Promise<Payment | undefined> {
+    try {
+      const [payment] = await db.select().from(payments).where(eq(payments.id, id));
+      return payment;
+    } catch (error) {
+      console.error("Error fetching payment:", error);
+      return undefined;
+    }
+  }
+  
+  async getPaymentsByProject(projectId: number): Promise<Payment[]> {
+    try {
+      return await db.select().from(payments).where(eq(payments.projectId, projectId)).orderBy(desc(payments.date));
+    } catch (error) {
+      console.error("Error fetching payments by project:", error);
+      return [];
+    }
+  }
+  
+  async getPaymentsByRecipient(type: string, id: number): Promise<Payment[]> {
+    try {
+      return await db.select().from(payments)
+        .where(and(
+          eq(payments.recipientType, type),
+          eq(payments.recipientId, id)
+        ))
+        .orderBy(desc(payments.date));
+    } catch (error) {
+      console.error("Error fetching payments by recipient:", error);
+      return [];
+    }
+  }
+  
+  async getPaymentsByStatus(status: string): Promise<Payment[]> {
+    try {
+      return await db.select().from(payments).where(eq(payments.status, status)).orderBy(desc(payments.date));
+    } catch (error) {
+      console.error("Error fetching payments by status:", error);
+      return [];
+    }
+  }
+  
+  async createPayment(payment: InsertPayment): Promise<Payment> {
+    try {
+      const [newPayment] = await db.insert(payments).values(payment).returning();
+      return newPayment;
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      throw error;
+    }
+  }
+  
+  async updatePayment(id: number, payment: Partial<InsertPayment>): Promise<Payment | undefined> {
+    try {
+      const [updatedPayment] = await db
+        .update(payments)
+        .set(payment)
+        .where(eq(payments.id, id))
+        .returning();
+      return updatedPayment;
+    } catch (error) {
+      console.error("Error updating payment:", error);
+      return undefined;
+    }
+  }
+  
+  async deletePayment(id: number): Promise<boolean> {
+    try {
+      await db.delete(payments).where(eq(payments.id, id));
+      return true;
+    } catch (error) {
+      console.error("Error deleting payment:", error);
+      return false;
+    }
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -897,6 +993,16 @@ export class MemStorage implements IStorage {
   async createSupplier(supplier: InsertSupplier): Promise<Supplier> { throw new Error("Not implemented"); }
   async updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier | undefined> { return undefined; }
   async deleteSupplier(id: number): Promise<boolean> { return false; }
+  
+  // Payment methods
+  async getPayments(): Promise<Payment[]> { return []; }
+  async getPayment(id: number): Promise<Payment | undefined> { return undefined; }
+  async getPaymentsByProject(projectId: number): Promise<Payment[]> { return []; }
+  async getPaymentsByRecipient(type: string, id: number): Promise<Payment[]> { return []; }
+  async getPaymentsByStatus(status: string): Promise<Payment[]> { return []; }
+  async createPayment(payment: InsertPayment): Promise<Payment> { throw new Error("Not implemented"); }
+  async updatePayment(id: number, payment: Partial<InsertPayment>): Promise<Payment | undefined> { return undefined; }
+  async deletePayment(id: number): Promise<boolean> { return false; }
 }
 
 // Use database storage instead of memory storage

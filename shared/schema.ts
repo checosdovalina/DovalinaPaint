@@ -469,6 +469,60 @@ export const insertSupplierSchema = createInsertSchema(suppliers).pick({
   status: true,
 });
 
+// Payment schema
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  date: timestamp("date").notNull().defaultNow(),
+  description: text("description").notNull(),
+  paymentType: text("payment_type").notNull(), // invoice, subcontractor, staff, supplier
+  status: text("status").notNull().default("pending"), // pending, completed, cancelled
+  recipientType: text("recipient_type").notNull(), // subcontractor, staff, supplier
+  recipientId: integer("recipient_id").notNull(),
+  projectId: integer("project_id").references(() => projects.id),
+  serviceOrderId: integer("service_order_id").references(() => serviceOrders.id),
+  invoiceId: integer("invoice_id").references(() => invoices.id),
+  createdBy: integer("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertPaymentSchema = createInsertSchema(payments).pick({
+  amount: true,
+  date: true,
+  description: true,
+  paymentType: true,
+  status: true,
+  recipientType: true,
+  recipientId: true,
+  projectId: true,
+  serviceOrderId: true,
+  invoiceId: true,
+  createdBy: true,
+});
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  project: one(projects, {
+    fields: [payments.projectId],
+    references: [projects.id],
+  }),
+  serviceOrder: one(serviceOrders, {
+    fields: [payments.serviceOrderId],
+    references: [serviceOrders.id],
+  }),
+  invoice: one(invoices, {
+    fields: [payments.invoiceId],
+    references: [invoices.id],
+  }),
+  createdByUser: one(users, {
+    fields: [payments.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export type Payment = typeof payments.$inferSelect;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+
 // Session schema (para manejar las sesiones de connect-pg-simple)
 export const session = pgTable("session", {
   sid: varchar("sid").primaryKey(),
