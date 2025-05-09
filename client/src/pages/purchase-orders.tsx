@@ -555,7 +555,7 @@ const PurchaseOrderForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {suppliers.map((supplier) => (
+                        {Array.isArray(suppliers) && suppliers.map((supplier) => (
                           <SelectItem key={supplier.id} value={supplier.id.toString()}>
                             {supplier.name}
                           </SelectItem>
@@ -634,8 +634,8 @@ const PurchaseOrderForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        {projects.map((project) => (
+                        <SelectItem key="none-option" value="none">None</SelectItem>
+                        {Array.isArray(projects) && projects.map((project) => (
                           <SelectItem key={project.id} value={project.id.toString()}>
                             {project.title}
                           </SelectItem>
