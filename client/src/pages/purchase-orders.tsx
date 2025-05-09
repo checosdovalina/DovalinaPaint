@@ -236,6 +236,9 @@ const PurchaseOrderForm = ({
   const [items, setItems] = useState(
     editingPurchaseOrder?.items || [{ description: "", quantity: "1", unit: "", price: "0" }]
   );
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
+    editingPurchaseOrder?.projectId || null
+  );
 
   // Query suppliers
   const { data: suppliers = [] } = useQuery({
@@ -247,6 +250,22 @@ const PurchaseOrderForm = ({
   const { data: projects = [] } = useQuery({
     queryKey: ["/api/projects"],
     enabled: isOpen,
+  });
+  
+  // Query quote for selected project
+  const { data: projectQuote } = useQuery({
+    queryKey: ["/api/projects", selectedProjectId, "quote"],
+    queryFn: async () => {
+      if (!selectedProjectId || selectedProjectId === 0) return null;
+      try {
+        const res = await apiRequest("GET", `/api/projects/${selectedProjectId}/quote`);
+        return await res.json();
+      } catch (error) {
+        console.error("Error fetching project quote:", error);
+        return null;
+      }
+    },
+    enabled: !!selectedProjectId && selectedProjectId > 0,
   });
 
   // Form configuration
