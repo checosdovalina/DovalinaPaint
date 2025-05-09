@@ -110,15 +110,20 @@ export default function PaymentForm({
 
   const createPaymentMutation = useMutation({
     mutationFn: async (data: z.infer<typeof paymentFormSchema>) => {
-      // Convert amount from string to number
+      // Prepare payment data according to the expected schema
       const paymentData = {
-        ...data,
-        amount: parseFloat(data.amount),
-        // Convert string IDs to numbers where appropriate
+        // Required fields from schema
+        amount: data.amount, // Keep as string, server will parse it
+        date: data.date, // Date object
+        description: data.description || "Pago registrado",
+        paymentType: data.paymentMethod, // Map paymentMethod to paymentType
+        status: "completed", // Default status
+        recipientType: data.recipientType,
         recipientId: parseInt(data.recipientId),
-        categoryId: parseInt(data.categoryId),
+        // Optional fields
         projectId: data.projectId ? parseInt(data.projectId) : undefined,
         purchaseOrderId: data.purchaseOrderId ? parseInt(data.purchaseOrderId) : undefined,
+        createdBy: 1, // Assuming user ID 1 for now (should be dynamically obtained)
       };
       
       const response = await apiRequest(
@@ -158,15 +163,20 @@ export default function PaymentForm({
 
   const updatePaymentMutation = useMutation({
     mutationFn: async (data: z.infer<typeof paymentFormSchema>) => {
-      // Convert amount from string to number
+      // Prepare payment data according to the expected schema
       const paymentData = {
-        ...data,
-        amount: parseFloat(data.amount),
-        // Convert string IDs to numbers where appropriate
+        // Required fields from schema
+        amount: data.amount, // Keep as string, server will parse it
+        date: data.date, // Date object
+        description: data.description || "Pago actualizado",
+        paymentType: data.paymentMethod, // Map paymentMethod to paymentType
+        status: "completed", // Default status
+        recipientType: data.recipientType,
         recipientId: parseInt(data.recipientId),
-        categoryId: parseInt(data.categoryId),
+        // Optional fields
         projectId: data.projectId ? parseInt(data.projectId) : undefined,
         purchaseOrderId: data.purchaseOrderId ? parseInt(data.purchaseOrderId) : undefined,
+        createdBy: 1, // Assuming user ID 1 for now
       };
       
       const response = await apiRequest(
