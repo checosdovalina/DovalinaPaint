@@ -940,11 +940,30 @@ export class DatabaseStorage implements IStorage {
   
   async createPurchaseOrder(purchaseOrder: InsertPurchaseOrder): Promise<PurchaseOrder> {
     try {
+      // Extraer los items del objeto purchase order si existen
+      const { items, ...purchaseOrderData } = purchaseOrder as any;
+      
+      // Crear la orden de compra
       const [newPurchaseOrder] = await db.insert(purchaseOrders).values({
-        ...purchaseOrder,
-        createdAt: new Date(),
+        ...purchaseOrderData,
         updatedAt: new Date()
       }).returning();
+      
+      // Si hay items, crear cada uno de ellos asociado a la orden de compra
+      if (items && Array.isArray(items) && items.length > 0) {
+        for (const item of items) {
+          await db.insert(purchaseOrderItems).values({
+            purchaseOrderId: newPurchaseOrder.id,
+            description: item.description,
+            quantity: item.quantity,
+            unit: item.unit || 'unit',
+            unitPrice: item.price,
+            totalPrice: (parseFloat(item.price) * parseFloat(item.quantity)).toString(),
+            updatedAt: new Date()
+          });
+        }
+      }
+      
       return newPurchaseOrder;
     } catch (error) {
       console.error("Error creating purchase order:", error);
