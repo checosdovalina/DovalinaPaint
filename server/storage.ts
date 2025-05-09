@@ -534,8 +534,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(activities)
-        .where(eq(activities.clientId, clientId))
-        .orderBy(desc(activities.id));
+        .where(eq(activities.clientId, clientId));
     } catch (error) {
       console.error("Error fetching activities by client:", error);
       return [];
@@ -547,8 +546,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(activities)
-        .where(eq(activities.userId, userId))
-        .orderBy(desc(activities.id));
+        .where(eq(activities.userId, userId));
     } catch (error) {
       console.error("Error fetching activities by user:", error);
       return [];
@@ -625,7 +623,7 @@ export class DatabaseStorage implements IStorage {
   // Invoice methods
   async getInvoices(): Promise<Invoice[]> {
     try {
-      return await db.select().from(invoices).orderBy(desc(invoices.updatedAt));
+      return await db.select().from(invoices);
     } catch (error) {
       console.error("Error fetching invoices:", error);
       return [];
@@ -647,8 +645,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(invoices)
-        .where(eq(invoices.projectId, projectId))
-        .orderBy(desc(invoices.updatedAt));
+        .where(eq(invoices.projectId, projectId));
     } catch (error) {
       console.error("Error fetching invoices by project:", error);
       return [];
@@ -660,8 +657,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(invoices)
-        .where(eq(invoices.clientId, clientId))
-        .orderBy(desc(invoices.updatedAt));
+        .where(eq(invoices.clientId, clientId));
     } catch (error) {
       console.error("Error fetching invoices by client:", error);
       return [];
@@ -673,8 +669,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(invoices)
-        .where(eq(invoices.status, status))
-        .orderBy(desc(invoices.updatedAt));
+        .where(eq(invoices.status, status));
     } catch (error) {
       console.error("Error fetching invoices by status:", error);
       return [];
@@ -788,7 +783,7 @@ export class DatabaseStorage implements IStorage {
   // Payment methods
   async getPayments(): Promise<Payment[]> {
     try {
-      return await db.select().from(payments).orderBy(desc(payments.date));
+      return await db.select().from(payments);
     } catch (error) {
       console.error("Error fetching payments:", error);
       return [];
@@ -810,8 +805,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(payments)
-        .where(eq(payments.projectId, projectId))
-        .orderBy(desc(payments.date));
+        .where(eq(payments.projectId, projectId));
     } catch (error) {
       console.error("Error fetching payments by project:", error);
       return [];
@@ -821,19 +815,18 @@ export class DatabaseStorage implements IStorage {
   async getPaymentsByRecipient(type: string, id: number): Promise<Payment[]> {
     try {
       // Find payments by recipient type and ID
-      const recipientColumn = type === 'subcontractor' ? payments.subcontractorId : 
-                             type === 'supplier' ? payments.supplierId : 
-                             type === 'staff' ? payments.staffId : null;
-      
-      if (!recipientColumn) {
+      if (type === 'subcontractor') {
+        return await db.select().from(payments).where(eq(payments.recipientType, 'subcontractor'))
+          .where(eq(payments.recipientId, id));
+      } else if (type === 'supplier') {
+        return await db.select().from(payments).where(eq(payments.recipientType, 'supplier'))
+          .where(eq(payments.recipientId, id));
+      } else if (type === 'staff') {
+        return await db.select().from(payments).where(eq(payments.recipientType, 'staff'))
+          .where(eq(payments.recipientId, id));
+      } else {
         throw new Error(`Invalid recipient type: ${type}`);
       }
-      
-      return await db
-        .select()
-        .from(payments)
-        .where(eq(recipientColumn, id))
-        .orderBy(desc(payments.date));
     } catch (error) {
       console.error("Error fetching payments by recipient:", error);
       return [];
@@ -845,8 +838,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(payments)
-        .where(eq(payments.status, status))
-        .orderBy(desc(payments.date));
+        .where(eq(payments.status, status));
     } catch (error) {
       console.error("Error fetching payments by status:", error);
       return [];
