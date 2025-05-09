@@ -395,8 +395,14 @@ export default function PaymentForm({
                   <FormLabel>Proyecto (Opcional)</FormLabel>
                   <Select
                     disabled={isLoading || !projects}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    onValueChange={(value) => {
+                      if (value === 'none') {
+                        field.onChange(undefined);
+                      } else {
+                        field.onChange(value);
+                      }
+                    }}
+                    defaultValue={field.value || 'none'}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -404,7 +410,7 @@ export default function PaymentForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Ninguno</SelectItem>
+                      <SelectItem value="none">Ninguno</SelectItem>
                       {projects?.map((project: any) => (
                         <SelectItem key={project.id} value={String(project.id)}>
                           {project.title}
