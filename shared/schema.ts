@@ -621,6 +621,23 @@ export const insertPurchaseOrderItemSchema = createInsertSchema(purchaseOrderIte
   materialId: true,
 });
 
+// Extender el esquema para permitir transformación de tipos
+export const extendedInsertPurchaseOrderItemSchema = insertPurchaseOrderItemSchema.extend({
+  // Permitir string o number para valores numéricos
+  quantity: z.union([
+    z.number(),
+    z.string().transform(val => Number(val) || 0)
+  ]),
+  unitPrice: z.union([
+    z.number(),
+    z.string().transform(val => Number(val) || 0)
+  ]),
+  totalPrice: z.union([
+    z.number(),
+    z.string().transform(val => Number(val) || 0)
+  ]).transform(val => val.toString()), // Asegurar que siempre sea string
+});
+
 // Define relationships
 export const purchaseOrderToSupplier = relations(purchaseOrders, ({ one }) => ({
   supplier: one(suppliers, {

@@ -940,28 +940,50 @@ export class DatabaseStorage implements IStorage {
   
   async createPurchaseOrder(purchaseOrder: InsertPurchaseOrder): Promise<PurchaseOrder> {
     try {
+      console.log("Creating purchase order with data:", JSON.stringify(purchaseOrder, null, 2));
+      
       // Extraer los items del objeto purchase order si existen
       const { items, ...purchaseOrderData } = purchaseOrder as any;
       
       // Crear la orden de compra
       const [newPurchaseOrder] = await db.insert(purchaseOrders).values({
         ...purchaseOrderData,
+        createdAt: new Date(),
         updatedAt: new Date()
       }).returning();
       
-      // Si hay items, crear cada uno de ellos asociado a la orden de compra
+      // Si hay items, crearlos también
       if (items && Array.isArray(items) && items.length > 0) {
+        console.log("Processing items:", items);
+        let totalAmount = 0;
+        
+        // Procesar cada item
         for (const item of items) {
-          await db.insert(purchaseOrderItems).values({
+          console.log("Processing item:", item);
+          // Convertir precios y cantidades de string a number si es necesario
+          const quantity = typeof item.quantity === 'string' ? parseFloat(item.quantity) : item.quantity;
+          const unitPrice = typeof item.price === 'string' ? parseFloat(item.price) : (item.unitPrice || 0);
+          const totalPrice = (quantity || 0) * (unitPrice || 0);
+          
+          // Acumular el total
+          totalAmount += totalPrice;
+          
+          // Crear el item
+          await this.createPurchaseOrderItem({
             purchaseOrderId: newPurchaseOrder.id,
             description: item.description,
-            quantity: item.quantity,
+            quantity: quantity || 0,
             unit: item.unit || 'unit',
-            unitPrice: item.price,
-            totalPrice: (parseFloat(item.price) * parseFloat(item.quantity)).toString(),
-            updatedAt: new Date()
+            unitPrice: unitPrice || 0,
+            totalPrice: totalPrice.toString(), // Convertir a string para el schema
+            materialId: item.materialId
           });
         }
+        
+        // Actualizar el monto total de la orden de compra
+        await this.updatePurchaseOrder(newPurchaseOrder.id, {
+          totalAmount: totalAmount.toString()
+        });
       }
       
       return newPurchaseOrder;
@@ -1024,12 +1046,19 @@ export class DatabaseStorage implements IStorage {
     }
   }
   
-  async createPurchaseOrderItem(item: InsertPurchaseOrderItem): Promise<PurchaseOrderItem> {
+  async createPurchaseOrderItem(item: any): Promise<PurchaseOrderItem> {
     try {
+      console.log("Creating purchase order item with data:", JSON.stringify(item, null, 2));
+      
+      // Parsear item usando el esquema extendido que maneja conversiones de tipo
+      const validatedItem = extendedInsertPurchaseOrderItemSchema.parse(item);
+      
+      console.log("Validated item:", JSON.stringify(validatedItem, null, 2));
+      
       const [newItem] = await db
         .insert(purchaseOrderItems)
         .values({
-          ...item,
+          ...validatedItem,
           createdAt: new Date(),
           updatedAt: new Date()
         })
