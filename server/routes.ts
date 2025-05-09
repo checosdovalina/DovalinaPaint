@@ -254,7 +254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: error.message });
     }
   });
-
+  
   app.get("/api/projects/:projectId/quote", isAuthenticated, async (req, res) => {
     try {
       const projectId = parseInt(req.params.projectId);
