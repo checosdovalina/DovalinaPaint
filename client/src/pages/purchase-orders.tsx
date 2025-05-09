@@ -283,7 +283,7 @@ const PurchaseOrderForm = ({
             : "",
         }
       : {
-          supplierId: 0,
+          supplierId: undefined,
           orderNumber: `PO-${Date.now().toString().slice(-6)}`,
           issueDate: format(new Date(), "yyyy-MM-dd"),
           expectedDeliveryDate: "",
@@ -436,7 +436,7 @@ const PurchaseOrderForm = ({
                     <FormLabel>Supplier*</FormLabel>
                     <Select
                       onValueChange={(value) => field.onChange(parseInt(value))}
-                      defaultValue={field.value?.toString()}
+                      defaultValue={field.value?.toString() || undefined}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -506,9 +506,14 @@ const PurchaseOrderForm = ({
                     <FormLabel>Project (Optional)</FormLabel>
                     <Select
                       onValueChange={(value) => {
-                        const projectId = parseInt(value);
-                        field.onChange(projectId);
-                        setSelectedProjectId(projectId);
+                        if (value === 'none') {
+                          field.onChange(undefined);
+                          setSelectedProjectId(undefined);
+                        } else {
+                          const projectId = parseInt(value);
+                          field.onChange(projectId);
+                          setSelectedProjectId(projectId);
+                        }
                       }}
                       defaultValue={field.value?.toString()}
                     >
@@ -518,7 +523,7 @@ const PurchaseOrderForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="0">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {projects.map((project) => (
                           <SelectItem key={project.id} value={project.id.toString()}>
                             {project.title}
