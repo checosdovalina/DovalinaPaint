@@ -758,13 +758,13 @@ export default function PurchaseOrders() {
         <div className="md:col-span-1">
           <Card className="h-full">
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <CardTitle>Purchase Orders</CardTitle>
-                <div className="relative">
+                <div className="relative w-full sm:w-auto">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search..."
-                    className="pl-8 w-[180px]"
+                    className="pl-8 w-full sm:w-[220px]"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
