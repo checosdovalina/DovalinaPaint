@@ -532,7 +532,12 @@ const PurchaseOrderForm = ({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            // Añadir log para verificar que la función se está ejecutando
+            console.log("Form submit handler called");
+            form.handleSubmit(onSubmit)(e);
+          }} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -765,7 +770,41 @@ const PurchaseOrderForm = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={createMutation.isPending}>
+              <Button 
+                type="button" 
+                onClick={() => {
+                  console.log("Save button clicked - running manual submit");
+                  // Validar que existen campos básicos
+                  if (!form.getValues("supplierId") || !form.getValues("orderNumber") || !form.getValues("issueDate")) {
+                    toast({
+                      title: "Validation Error",
+                      description: "Please fill in all required fields",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  
+                  // Crear datos para enviar
+                  const formData: Record<string, any> = {
+                    supplierId: Number(form.getValues("supplierId")),
+                    orderNumber: String(form.getValues("orderNumber") || ""),
+                    issueDate: String(form.getValues("issueDate") || ""),
+                    deliveryAddress: String(form.getValues("deliveryAddress") || ""),
+                    status: form.getValues("status") || "draft",
+                    expectedDeliveryDate: form.getValues("expectedDeliveryDate") || null,
+                    deliveryConditions: form.getValues("deliveryConditions") || null,
+                    paymentTerms: form.getValues("paymentTerms") || null,
+                    notes: form.getValues("notes") || null,
+                    projectId: form.getValues("projectId") ? Number(form.getValues("projectId")) : null,
+                    quoteId: form.getValues("quoteId") ? Number(form.getValues("quoteId")) : null,
+                    items
+                  };
+                  
+                  console.log("Manual submit with data:", formData);
+                  createMutation.mutate(formData);
+                }}
+                disabled={createMutation.isPending}
+              >
                 {createMutation.isPending ? "Saving..." : "Save Purchase Order"}
               </Button>
             </div>
