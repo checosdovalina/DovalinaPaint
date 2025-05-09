@@ -764,7 +764,7 @@ export default function PurchaseOrders() {
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search..."
-                    className="pl-8 w-full sm:w-[220px]"
+                    className="pl-8 w-full sm:w-[180px]"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
