@@ -523,6 +523,116 @@ export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Supplier = typeof suppliers.$inferSelect;
 export type InsertSupplier = z.infer<typeof insertSupplierSchema>;
 
+// Purchase Order schema
+export const purchaseOrders = pgTable('purchase_orders', {
+  id: serial('id').primaryKey(),
+  supplierId: integer('supplier_id').notNull().references(() => suppliers.id),
+  orderNumber: text('order_number').notNull(),
+  issueDate: timestamp('issue_date').notNull().defaultNow(),
+  projectId: integer('project_id').references(() => projects.id),
+  quoteId: integer('quote_id').references(() => quotes.id),
+  deliveryConditions: text('delivery_conditions'),
+  paymentTerms: text('payment_terms'),
+  approvalSignature: text('approval_signature'),
+  deliveryAddress: text('delivery_address').notNull(),
+  status: text('status').notNull().default('draft'),
+  notes: text('notes'),
+  totalAmount: decimal('total_amount', { precision: 10, scale: 2 }).notNull().default('0'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at'),
+});
+
+// Purchase Order Items schema
+export const purchaseOrderItems = pgTable('purchase_order_items', {
+  id: serial('id').primaryKey(),
+  purchaseOrderId: integer('purchase_order_id').notNull().references(() => purchaseOrders.id, { onDelete: 'cascade' }),
+  description: text('description').notNull(),
+  quantity: decimal('quantity', { precision: 10, scale: 2 }).notNull(),
+  unit: text('unit'),
+  unitPrice: decimal('unit_price', { precision: 10, scale: 2 }).notNull(),
+  totalPrice: decimal('total_price', { precision: 10, scale: 2 }).notNull(),
+  materialId: integer('material_id'), // Optional reference to a material in quote materials
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at'),
+});
+
+// Esquema base para órdenes de compra
+const basePurchaseOrderSchema = createInsertSchema(purchaseOrders).pick({
+  supplierId: true,
+  orderNumber: true,
+  projectId: true,
+  quoteId: true,
+  deliveryConditions: true,
+  paymentTerms: true,
+  approvalSignature: true,
+  deliveryAddress: true,
+  status: true,
+  notes: true,
+  totalAmount: true,
+});
+
+// Añadir validación personalizada para fechas
+export const insertPurchaseOrderSchema = basePurchaseOrderSchema.extend({
+  issueDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "Issue date must be valid"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+});
+
+// Esquema para items de órdenes de compra
+export const insertPurchaseOrderItemSchema = createInsertSchema(purchaseOrderItems).pick({
+  purchaseOrderId: true,
+  description: true,
+  quantity: true,
+  unit: true,
+  unitPrice: true,
+  totalPrice: true,
+  materialId: true,
+});
+
+// Define relationships
+export const purchaseOrderToSupplier = relations(purchaseOrders, ({ one }) => ({
+  supplier: one(suppliers, {
+    fields: [purchaseOrders.supplierId],
+    references: [suppliers.id]
+  })
+}));
+
+export const purchaseOrderToProject = relations(purchaseOrders, ({ one }) => ({
+  project: one(projects, {
+    fields: [purchaseOrders.projectId],
+    references: [projects.id]
+  })
+}));
+
+export const purchaseOrderToQuote = relations(purchaseOrders, ({ one }) => ({
+  quote: one(quotes, {
+    fields: [purchaseOrders.quoteId],
+    references: [quotes.id]
+  })
+}));
+
+export const purchaseOrderToItems = relations(purchaseOrders, ({ many }) => ({
+  items: many(purchaseOrderItems)
+}));
+
+export const purchaseOrderItemToPurchaseOrder = relations(purchaseOrderItems, ({ one }) => ({
+  purchaseOrder: one(purchaseOrders, {
+    fields: [purchaseOrderItems.purchaseOrderId],
+    references: [purchaseOrders.id]
+  })
+}));
+
+export type PurchaseOrder = typeof purchaseOrders.$inferSelect;
+export type InsertPurchaseOrder = z.infer<typeof insertPurchaseOrderSchema>;
+
+export type PurchaseOrderItem = typeof purchaseOrderItems.$inferSelect;
+export type InsertPurchaseOrderItem = z.infer<typeof insertPurchaseOrderItemSchema>;
+
 // Session schema (para manejar las sesiones de connect-pg-simple)
 export const session = pgTable("session", {
   sid: varchar("sid").primaryKey(),

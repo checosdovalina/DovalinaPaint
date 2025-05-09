@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice, suppliers, Supplier, InsertSupplier, payments, Payment, InsertPayment } from "@shared/schema";
+import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice, suppliers, Supplier, InsertSupplier, payments, Payment, InsertPayment, purchaseOrders, PurchaseOrder, InsertPurchaseOrder, purchaseOrderItems, PurchaseOrderItem, InsertPurchaseOrderItem } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { db } from "./db";
@@ -94,6 +94,23 @@ export interface IStorage {
   createPayment(payment: InsertPayment): Promise<Payment>;
   updatePayment(id: number, payment: Partial<InsertPayment>): Promise<Payment | undefined>;
   deletePayment(id: number): Promise<boolean>;
+  
+  // Purchase Order methods
+  getPurchaseOrders(): Promise<PurchaseOrder[]>;
+  getPurchaseOrder(id: number): Promise<PurchaseOrder | undefined>;
+  getPurchaseOrdersBySupplier(supplierId: number): Promise<PurchaseOrder[]>;
+  getPurchaseOrdersByProject(projectId: number): Promise<PurchaseOrder[]>;
+  getPurchaseOrdersByStatus(status: string): Promise<PurchaseOrder[]>;
+  createPurchaseOrder(purchaseOrder: InsertPurchaseOrder): Promise<PurchaseOrder>;
+  updatePurchaseOrder(id: number, purchaseOrder: Partial<InsertPurchaseOrder>): Promise<PurchaseOrder | undefined>;
+  deletePurchaseOrder(id: number): Promise<boolean>;
+  
+  // Purchase Order Items methods
+  getPurchaseOrderItems(purchaseOrderId: number): Promise<PurchaseOrderItem[]>;
+  getPurchaseOrderItem(id: number): Promise<PurchaseOrderItem | undefined>;
+  createPurchaseOrderItem(item: InsertPurchaseOrderItem): Promise<PurchaseOrderItem>;
+  updatePurchaseOrderItem(id: number, item: Partial<InsertPurchaseOrderItem>): Promise<PurchaseOrderItem | undefined>;
+  deletePurchaseOrderItem(id: number): Promise<boolean>;
   
   // Session store
   sessionStore: any;
@@ -1003,7 +1020,192 @@ export class MemStorage implements IStorage {
   async createPayment(payment: InsertPayment): Promise<Payment> { throw new Error("Not implemented"); }
   async updatePayment(id: number, payment: Partial<InsertPayment>): Promise<Payment | undefined> { return undefined; }
   async deletePayment(id: number): Promise<boolean> { return false; }
+  
+  // Purchase Order methods
+  async getPurchaseOrders(): Promise<PurchaseOrder[]> {
+    try {
+      return await db.select().from(purchaseOrders);
+    } catch (error) {
+      console.error("Error fetching purchase orders:", error);
+      return [];
+    }
+  }
+  
+  async getPurchaseOrder(id: number): Promise<PurchaseOrder | undefined> {
+    try {
+      const [purchaseOrder] = await db.select().from(purchaseOrders).where(eq(purchaseOrders.id, id));
+      return purchaseOrder;
+    } catch (error) {
+      console.error("Error fetching purchase order:", error);
+      return undefined;
+    }
+  }
+  
+  async getPurchaseOrdersBySupplier(supplierId: number): Promise<PurchaseOrder[]> {
+    try {
+      return await db.select().from(purchaseOrders).where(eq(purchaseOrders.supplierId, supplierId));
+    } catch (error) {
+      console.error("Error fetching purchase orders by supplier:", error);
+      return [];
+    }
+  }
+  
+  async getPurchaseOrdersByProject(projectId: number): Promise<PurchaseOrder[]> {
+    try {
+      return await db.select().from(purchaseOrders).where(eq(purchaseOrders.projectId, projectId));
+    } catch (error) {
+      console.error("Error fetching purchase orders by project:", error);
+      return [];
+    }
+  }
+  
+  async getPurchaseOrdersByStatus(status: string): Promise<PurchaseOrder[]> {
+    try {
+      return await db.select().from(purchaseOrders).where(eq(purchaseOrders.status, status));
+    } catch (error) {
+      console.error("Error fetching purchase orders by status:", error);
+      return [];
+    }
+  }
+  
+  async createPurchaseOrder(purchaseOrder: InsertPurchaseOrder): Promise<PurchaseOrder> {
+    try {
+      const [newPurchaseOrder] = await db.insert(purchaseOrders).values(purchaseOrder).returning();
+      return newPurchaseOrder;
+    } catch (error) {
+      console.error("Error creating purchase order:", error);
+      throw error;
+    }
+  }
+  
+  async updatePurchaseOrder(id: number, purchaseOrder: Partial<InsertPurchaseOrder>): Promise<PurchaseOrder | undefined> {
+    try {
+      const [updatedPurchaseOrder] = await db
+        .update(purchaseOrders)
+        .set({
+          ...purchaseOrder,
+          updatedAt: new Date()
+        })
+        .where(eq(purchaseOrders.id, id))
+        .returning();
+      return updatedPurchaseOrder;
+    } catch (error) {
+      console.error("Error updating purchase order:", error);
+      return undefined;
+    }
+  }
+  
+  async deletePurchaseOrder(id: number): Promise<boolean> {
+    try {
+      await db.delete(purchaseOrders).where(eq(purchaseOrders.id, id));
+      return true;
+    } catch (error) {
+      console.error("Error deleting purchase order:", error);
+      return false;
+    }
+  }
+  
+  // Purchase Order Items methods
+  async getPurchaseOrderItems(purchaseOrderId: number): Promise<PurchaseOrderItem[]> {
+    try {
+      return await db
+        .select()
+        .from(purchaseOrderItems)
+        .where(eq(purchaseOrderItems.purchaseOrderId, purchaseOrderId));
+    } catch (error) {
+      console.error("Error fetching purchase order items:", error);
+      return [];
+    }
+  }
+  
+  async getPurchaseOrderItem(id: number): Promise<PurchaseOrderItem | undefined> {
+    try {
+      const [item] = await db
+        .select()
+        .from(purchaseOrderItems)
+        .where(eq(purchaseOrderItems.id, id));
+      return item;
+    } catch (error) {
+      console.error("Error fetching purchase order item:", error);
+      return undefined;
+    }
+  }
+  
+  async createPurchaseOrderItem(item: InsertPurchaseOrderItem): Promise<PurchaseOrderItem> {
+    try {
+      const [newItem] = await db
+        .insert(purchaseOrderItems)
+        .values(item)
+        .returning();
+      
+      // Update the total amount of the parent purchase order
+      const items = await this.getPurchaseOrderItems(item.purchaseOrderId);
+      const totalAmount = items.reduce((sum, item) => sum + Number(item.totalPrice), 0);
+      
+      await this.updatePurchaseOrder(item.purchaseOrderId, {
+        totalAmount: totalAmount.toString()
+      });
+      
+      return newItem;
+    } catch (error) {
+      console.error("Error creating purchase order item:", error);
+      throw error;
+    }
+  }
+  
+  async updatePurchaseOrderItem(id: number, item: Partial<InsertPurchaseOrderItem>): Promise<PurchaseOrderItem | undefined> {
+    try {
+      const [updatedItem] = await db
+        .update(purchaseOrderItems)
+        .set({
+          ...item,
+          updatedAt: new Date()
+        })
+        .where(eq(purchaseOrderItems.id, id))
+        .returning();
+      
+      // If the price changed, update the total amount of the parent purchase order
+      if (item.totalPrice || item.unitPrice || item.quantity) {
+        const items = await this.getPurchaseOrderItems(updatedItem.purchaseOrderId);
+        const totalAmount = items.reduce((sum, item) => sum + Number(item.totalPrice), 0);
+        
+        await this.updatePurchaseOrder(updatedItem.purchaseOrderId, {
+          totalAmount: totalAmount.toString()
+        });
+      }
+      
+      return updatedItem;
+    } catch (error) {
+      console.error("Error updating purchase order item:", error);
+      return undefined;
+    }
+  }
+  
+  async deletePurchaseOrderItem(id: number): Promise<boolean> {
+    try {
+      // Get the item before deleting it to know its parent purchase order
+      const item = await this.getPurchaseOrderItem(id);
+      if (!item) {
+        return false;
+      }
+      
+      // Delete the item
+      await db.delete(purchaseOrderItems).where(eq(purchaseOrderItems.id, id));
+      
+      // Update the total amount of the parent purchase order
+      const items = await this.getPurchaseOrderItems(item.purchaseOrderId);
+      const totalAmount = items.reduce((sum, item) => sum + Number(item.totalPrice), 0);
+      
+      await this.updatePurchaseOrder(item.purchaseOrderId, {
+        totalAmount: totalAmount.toString()
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting purchase order item:", error);
+      return false;
+    }
+  }
 }
 
-// Use database storage instead of memory storage
 export const storage = new DatabaseStorage();

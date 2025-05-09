@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
 import { google } from 'googleapis';
-import { insertClientSchema, insertProjectSchema, insertQuoteSchema, insertServiceOrderSchema, insertStaffSchema, insertActivitySchema, insertSubcontractorSchema, insertInvoiceSchema, insertSupplierSchema, insertPaymentSchema } from "@shared/schema";
+import { insertClientSchema, insertProjectSchema, insertQuoteSchema, insertServiceOrderSchema, insertStaffSchema, insertActivitySchema, insertSubcontractorSchema, insertInvoiceSchema, insertSupplierSchema, insertPaymentSchema, insertPurchaseOrderSchema, insertPurchaseOrderItemSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -1313,6 +1313,247 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentsByType,
         profitMargin: totalInvoiced > 0 ? (netProfit / totalInvoiced) * 100 : 0
       });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Purchase Order routes
+  app.get("/api/purchase-orders", isAuthenticated, async (req, res) => {
+    try {
+      let purchaseOrders;
+      
+      if (req.query.supplierId) {
+        purchaseOrders = await storage.getPurchaseOrdersBySupplier(parseInt(req.query.supplierId as string));
+      } else if (req.query.projectId) {
+        purchaseOrders = await storage.getPurchaseOrdersByProject(parseInt(req.query.projectId as string));
+      } else if (req.query.status) {
+        purchaseOrders = await storage.getPurchaseOrdersByStatus(req.query.status as string);
+      } else {
+        purchaseOrders = await storage.getPurchaseOrders();
+      }
+      
+      res.json(purchaseOrders);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/purchase-orders/:id", isAuthenticated, async (req, res) => {
+    try {
+      const purchaseOrder = await storage.getPurchaseOrder(parseInt(req.params.id));
+      if (!purchaseOrder) {
+        return res.status(404).json({ message: "Purchase order not found" });
+      }
+      
+      // Get items associated with this purchase order
+      const items = await storage.getPurchaseOrderItems(purchaseOrder.id);
+      
+      // Get supplier details
+      const supplier = await storage.getSupplier(purchaseOrder.supplierId);
+      
+      // Get project details if available
+      let project = null;
+      if (purchaseOrder.projectId) {
+        project = await storage.getProject(purchaseOrder.projectId);
+      }
+      
+      // Get quote details if available
+      let quote = null;
+      if (purchaseOrder.quoteId) {
+        quote = await storage.getQuote(purchaseOrder.quoteId);
+      }
+      
+      // Return the complete data
+      res.json({
+        ...purchaseOrder,
+        items,
+        supplier,
+        project,
+        quote
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/purchase-orders", isAuthenticated, async (req, res) => {
+    try {
+      // Create a unique order number based on date and random string
+      // Format: PO-YYYYMMDD-XXXX where XXXX is a random string
+      const date = new Date();
+      const dateStr = date.getFullYear().toString() +
+                    (date.getMonth() + 1).toString().padStart(2, '0') +
+                    date.getDate().toString().padStart(2, '0');
+      const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const orderNumber = `PO-${dateStr}-${randomStr}`;
+      
+      // Parse and validate the purchase order data
+      const purchaseOrderData = insertPurchaseOrderSchema.parse({
+        ...req.body,
+        orderNumber,
+        issueDate: date,
+        status: req.body.status || 'draft'
+      });
+      
+      const purchaseOrder = await storage.createPurchaseOrder(purchaseOrderData);
+      
+      // If there are items in the request, add them to the purchase order
+      if (req.body.items && Array.isArray(req.body.items)) {
+        for (const item of req.body.items) {
+          await storage.createPurchaseOrderItem({
+            ...item,
+            purchaseOrderId: purchaseOrder.id
+          });
+        }
+      }
+      
+      // Get the complete purchase order with items
+      const items = await storage.getPurchaseOrderItems(purchaseOrder.id);
+      
+      // Create activity for purchase order creation
+      await storage.createActivity({
+        type: "purchase_order_created",
+        description: `New purchase order ${purchaseOrder.orderNumber} created`,
+        userId: req.user.id,
+        projectId: purchaseOrder.projectId,
+        clientId: null
+      });
+      
+      res.status(201).json({
+        ...purchaseOrder,
+        items
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid purchase order data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/purchase-orders/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const purchaseOrderData = insertPurchaseOrderSchema.partial().parse(req.body);
+      
+      const updatedPurchaseOrder = await storage.updatePurchaseOrder(id, purchaseOrderData);
+      
+      if (!updatedPurchaseOrder) {
+        return res.status(404).json({ message: "Purchase order not found" });
+      }
+      
+      // Create activity for purchase order update
+      await storage.createActivity({
+        type: "purchase_order_updated",
+        description: `Purchase order ${updatedPurchaseOrder.orderNumber} updated`,
+        userId: req.user.id,
+        projectId: updatedPurchaseOrder.projectId,
+        clientId: null
+      });
+      
+      // Get the updated items
+      const items = await storage.getPurchaseOrderItems(updatedPurchaseOrder.id);
+      
+      res.json({
+        ...updatedPurchaseOrder,
+        items
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid purchase order data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/purchase-orders/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const purchaseOrder = await storage.getPurchaseOrder(id);
+      
+      if (!purchaseOrder) {
+        return res.status(404).json({ message: "Purchase order not found" });
+      }
+      
+      const deleted = await storage.deletePurchaseOrder(id);
+      
+      if (deleted) {
+        // Create activity for purchase order deletion
+        await storage.createActivity({
+          type: "purchase_order_deleted",
+          description: `Purchase order ${purchaseOrder.orderNumber} deleted`,
+          userId: req.user.id,
+          projectId: purchaseOrder.projectId,
+          clientId: null
+        });
+        
+        res.sendStatus(204);
+      } else {
+        res.status(500).json({ message: "Failed to delete purchase order" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Purchase Order Items routes
+  app.get("/api/purchase-orders/:orderId/items", isAuthenticated, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const items = await storage.getPurchaseOrderItems(orderId);
+      
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/purchase-order-items", isAuthenticated, async (req, res) => {
+    try {
+      const itemData = insertPurchaseOrderItemSchema.parse(req.body);
+      const item = await storage.createPurchaseOrderItem(itemData);
+      
+      res.status(201).json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid purchase order item data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/purchase-order-items/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const itemData = insertPurchaseOrderItemSchema.partial().parse(req.body);
+      
+      const updatedItem = await storage.updatePurchaseOrderItem(id, itemData);
+      
+      if (!updatedItem) {
+        return res.status(404).json({ message: "Purchase order item not found" });
+      }
+      
+      res.json(updatedItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid purchase order item data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/purchase-order-items/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const deleted = await storage.deletePurchaseOrderItem(id);
+      
+      if (deleted) {
+        res.sendStatus(204);
+      } else {
+        res.status(500).json({ message: "Failed to delete purchase order item" });
+      }
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
