@@ -234,7 +234,7 @@ const PurchaseOrderForm = ({
 }) => {
   const { toast } = useToast();
   const [items, setItems] = useState(
-    editingPurchaseOrder?.items || [{ description: "", quantity: "1", unit: "", price: "0" }]
+    editingPurchaseOrder?.items || [{ description: "", quantity: "1", unit: "unit", price: "0" }]
   );
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
     editingPurchaseOrder?.projectId || null
@@ -290,13 +290,13 @@ const PurchaseOrderForm = ({
           deliveryAddress: "",
           deliveryConditions: "",
           paymentTerms: "Net 30",
-          items: [{ description: "", quantity: "1", unit: "", price: "0" }],
+          items: [{ description: "", quantity: "1", unit: "unit", price: "0" }],
         },
   });
 
   // Add item to order
   const addItem = () => {
-    setItems([...items, { description: "", quantity: "1", unit: "", price: "0" }]);
+    setItems([...items, { description: "", quantity: "1", unit: "unit", price: "0" }]);
   };
 
   // Remove item from order
