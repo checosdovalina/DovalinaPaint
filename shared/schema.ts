@@ -180,6 +180,7 @@ export const serviceOrders = pgTable("service_orders", {
   projectId: integer("project_id").notNull(),
   details: text("details").notNull(),
   assignedStaff: jsonb("assigned_staff"),
+  assignedSubcontractors: jsonb("assigned_subcontractors"), // Lista de subcontratistas asignados
   assignedSubcontractorId: integer("assigned_subcontractor_id"), // ID del subcontratista principal
   supervisorId: integer("supervisor_id"), // ID del miembro del personal que supervisa
   startDate: timestamp("start_date"),
@@ -204,6 +205,7 @@ const baseServiceOrderSchema = createInsertSchema(serviceOrders).pick({
   projectId: true,
   details: true,
   assignedStaff: true,
+  assignedSubcontractors: true, // Lista de subcontratistas asignados
   assignedSubcontractorId: true,
   supervisorId: true,
   status: true,
