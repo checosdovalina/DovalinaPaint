@@ -957,27 +957,34 @@ export class DatabaseStorage implements IStorage {
         console.log("Processing items:", items);
         let totalAmount = 0;
         
-        // Procesar cada item
+        // Procesar cada item usando el esquema extendido para validación y conversión de tipos
         for (const item of items) {
           console.log("Processing item:", item);
-          // Convertir precios y cantidades de string a number si es necesario
-          const quantity = typeof item.quantity === 'string' ? parseFloat(item.quantity) : item.quantity;
-          const unitPrice = typeof item.price === 'string' ? parseFloat(item.price) : (item.unitPrice || 0);
-          const totalPrice = (quantity || 0) * (unitPrice || 0);
           
-          // Acumular el total
-          totalAmount += totalPrice;
-          
-          // Crear el item
-          await this.createPurchaseOrderItem({
+          // Crear objeto base para el item
+          const itemData = {
             purchaseOrderId: newPurchaseOrder.id,
             description: item.description,
-            quantity: quantity || 0,
+            // Usar el precio unitario del item o el campo price si está disponible
+            unitPrice: item.unitPrice || item.price || 0,
+            // Garantizar que la cantidad es un valor numérico
+            quantity: item.quantity || 0,
+            // Asegurar que siempre hay una unidad
             unit: item.unit || 'unit',
-            unitPrice: unitPrice || 0,
-            totalPrice: totalPrice.toString(), // Convertir a string para el schema
+            // Calcular el precio total o usar el proporcionado
+            totalPrice: item.totalPrice || ((parseFloat(item.quantity || '0') * parseFloat(item.unitPrice || item.price || '0'))).toString(),
+            // Asignar materialId si existe
             materialId: item.materialId
-          });
+          };
+          
+          console.log("Item data prepared:", itemData);
+          
+          // El esquema extendido se encargará de las conversiones de tipo
+          const newItem = await this.createPurchaseOrderItem(itemData);
+          
+          // Acumular el total usando el precio total del item creado
+          const itemTotal = parseFloat(newItem.totalPrice);
+          totalAmount += isNaN(itemTotal) ? 0 : itemTotal;
         }
         
         // Actualizar el monto total de la orden de compra
