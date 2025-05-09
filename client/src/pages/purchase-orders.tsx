@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { PurchaseOrder as PurchaseOrderType, insertPurchaseOrderSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -358,6 +358,63 @@ const PurchaseOrderForm = ({
     newItems[index] = { ...newItems[index], [field]: value };
     setItems(newItems);
   };
+  
+  // Load materials from quote when available
+  useEffect(() => {
+    if (!projectQuote) return;
+    
+    try {
+      // Handle different ways materials might be stored
+      let materials;
+      if (projectQuote.materials_estimate) {
+        materials = typeof projectQuote.materials_estimate === 'string' 
+          ? JSON.parse(projectQuote.materials_estimate) 
+          : projectQuote.materials_estimate;
+      } else if (projectQuote.materials) {
+        materials = typeof projectQuote.materials === 'string' 
+          ? JSON.parse(projectQuote.materials) 
+          : projectQuote.materials;
+      }
+          
+      if (Array.isArray(materials) && materials.length > 0) {
+        // Convert quote materials to purchase order items format
+        const materialItems = materials.map(material => ({
+          description: material.name || "",
+          quantity: material.quantity?.toString() || "1",
+          unit: material.unit || "unit",
+          price: material.unitPrice?.toString() || "0"
+        }));
+        
+        // Ask user before replacing existing items if there are any non-empty ones
+        const hasNonEmptyItems = items.some(item => 
+          item.description.trim() !== "" && 
+          item.description !== "0" && 
+          parseFloat(item.price) > 0
+        );
+        
+        if (hasNonEmptyItems) {
+          if (confirm("Would you like to load materials from the associated quote? This will replace your current items.")) {
+            setItems(materialItems);
+          }
+        } else {
+          // If no substantive items exist, just load the materials
+          setItems(materialItems);
+          
+          toast({
+            title: "Materials Loaded",
+            description: `${materialItems.length} materials loaded from the quote.`,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error processing materials from quote:", error);
+      toast({
+        title: "Error Loading Materials",
+        description: "Could not load materials from the quote. Please add them manually.",
+        variant: "destructive",
+      });
+    }
+  }, [projectQuote, toast, items]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -448,7 +505,11 @@ const PurchaseOrderForm = ({
                   <FormItem>
                     <FormLabel>Project (Optional)</FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      onValueChange={(value) => {
+                        const projectId = parseInt(value);
+                        field.onChange(projectId);
+                        setSelectedProjectId(projectId);
+                      }}
                       defaultValue={field.value?.toString()}
                     >
                       <FormControl>
