@@ -215,7 +215,7 @@ export class DatabaseStorage implements IStorage {
   // Project methods
   async getProjects(): Promise<Project[]> {
     try {
-      return await db.select().from(projects).orderBy(desc(projects.updatedAt));
+      return await db.select().from(projects);
     } catch (error) {
       console.error("Error fetching projects:", error);
       return [];
@@ -237,8 +237,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(projects)
-        .where(eq(projects.clientId, clientId))
-        .orderBy(desc(projects.updatedAt));
+        .where(eq(projects.clientId, clientId));
     } catch (error) {
       console.error("Error fetching projects by client:", error);
       return [];
@@ -250,8 +249,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(projects)
-        .where(eq(projects.status, status))
-        .orderBy(desc(projects.updatedAt));
+        .where(eq(projects.status, status));
     } catch (error) {
       console.error("Error fetching projects by status:", error);
       return [];
@@ -302,7 +300,7 @@ export class DatabaseStorage implements IStorage {
   // Quote methods
   async getQuotes(): Promise<Quote[]> {
     try {
-      return await db.select().from(quotes).orderBy(desc(quotes.updatedAt));
+      return await db.select().from(quotes);
     } catch (error) {
       console.error("Error fetching quotes:", error);
       return [];
@@ -373,7 +371,7 @@ export class DatabaseStorage implements IStorage {
   // Service Order methods
   async getServiceOrders(): Promise<ServiceOrder[]> {
     try {
-      return await db.select().from(serviceOrders).orderBy(desc(serviceOrders.updatedAt));
+      return await db.select().from(serviceOrders);
     } catch (error) {
       console.error("Error fetching service orders:", error);
       return [];
@@ -395,8 +393,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(serviceOrders)
-        .where(eq(serviceOrders.projectId, projectId))
-        .orderBy(desc(serviceOrders.updatedAt));
+        .where(eq(serviceOrders.projectId, projectId));
     } catch (error) {
       console.error("Error fetching service orders by project:", error);
       return [];
@@ -503,8 +500,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db
         .select()
-        .from(activities)
-        .orderBy(desc(activities.timestamp));
+        .from(activities);
     } catch (error) {
       console.error("Error fetching activities:", error);
       return [];
@@ -526,8 +522,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(activities)
-        .where(eq(activities.projectId, projectId))
-        .orderBy(desc(activities.timestamp));
+        .where(eq(activities.projectId, projectId));
     } catch (error) {
       console.error("Error fetching activities by project:", error);
       return [];
@@ -540,7 +535,7 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(activities)
         .where(eq(activities.clientId, clientId))
-        .orderBy(desc(activities.timestamp));
+        .orderBy(desc(activities.id));
     } catch (error) {
       console.error("Error fetching activities by client:", error);
       return [];
@@ -553,7 +548,7 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(activities)
         .where(eq(activities.userId, userId))
-        .orderBy(desc(activities.timestamp));
+        .orderBy(desc(activities.id));
     } catch (error) {
       console.error("Error fetching activities by user:", error);
       return [];
@@ -564,7 +559,7 @@ export class DatabaseStorage implements IStorage {
     try {
       const [newActivity] = await db.insert(activities).values({
         ...activity,
-        timestamp: new Date()
+        createdAt: new Date()
       }).returning();
       return newActivity;
     } catch (error) {
