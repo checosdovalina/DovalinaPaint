@@ -744,32 +744,33 @@ export default function PurchaseOrders() {
 
   return (
     <Layout>
-      <PageHeader
-        title="Purchase Orders"
-        description="Manage purchase orders to suppliers"
-        actions={
-        <Button onClick={handleCreateNew}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          New Purchase Order
-        </Button>}
-      />
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 pb-4 mb-4 border-b">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Purchase Orders</h1>
+          <p className="mt-1 text-lg text-muted-foreground">Manage purchase orders to suppliers</p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div className="relative w-full md:w-auto">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search..."
+              className="pl-8 w-full md:w-[180px]"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button onClick={handleCreateNew}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            New Purchase Order
+          </Button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1">
           <Card className="h-full">
             <CardHeader className="pb-3">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                <CardTitle>Purchase Orders</CardTitle>
-                <div className="relative w-full sm:w-auto">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search..."
-                    className="pl-8 w-full sm:w-[180px]"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </div>
+              <CardTitle>Purchase Orders</CardTitle>
             </CardHeader>
             <CardContent className="h-[calc(100vh-13rem)] overflow-auto">
               {isLoading ? (
