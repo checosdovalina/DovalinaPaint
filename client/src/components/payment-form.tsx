@@ -43,6 +43,7 @@ const paymentFormSchema = z.object({
   description: z.string().optional(),
   reference: z.string().optional(),
   paymentMethod: z.string().min(1, "El método de pago es requerido."),
+  purchaseOrderId: z.string().optional(),
 });
 
 const paymentMethods = [
@@ -84,7 +85,11 @@ export default function PaymentForm({
   const [selectedRecipientType, setSelectedRecipientType] = useState<string>(
     payment?.recipientType || ""
   );
+  const [selectedRecipientId, setSelectedRecipientId] = useState<number | null>(
+    payment?.recipientId ? Number(payment.recipientId) : null
+  );
   const [filteredRecipients, setFilteredRecipients] = useState<any[]>([]);
+  const [supplierPurchaseOrders, setSupplierPurchaseOrders] = useState<any[]>([]);
 
   // Initialize the form with default values or payment data if editing
   const form = useForm<z.infer<typeof paymentFormSchema>>({
@@ -174,6 +179,26 @@ export default function PaymentForm({
       setFilteredRecipients([]);
     }
   }, [selectedRecipientType, recipients]);
+  
+  // Cuando se selecciona un proveedor, cargar sus órdenes de compra pendientes
+  useEffect(() => {
+    const fetchPurchaseOrders = async () => {
+      if (selectedRecipientType === 'supplier' && selectedRecipientId) {
+        try {
+          const response = await apiRequest('GET', `/api/purchase-orders?supplierId=${selectedRecipientId}&status=draft`);
+          const data = await response.json();
+          setSupplierPurchaseOrders(data || []);
+        } catch (error) {
+          console.error('Error fetching purchase orders:', error);
+          setSupplierPurchaseOrders([]);
+        }
+      } else {
+        setSupplierPurchaseOrders([]);
+      }
+    };
+
+    fetchPurchaseOrders();
+  }, [selectedRecipientType, selectedRecipientId]);
 
   // Handle form submission
   const onFormSubmit = (data: z.infer<typeof paymentFormSchema>) => {
@@ -187,7 +212,19 @@ export default function PaymentForm({
   // Handle recipient type change
   const handleRecipientTypeChange = (value: string) => {
     setSelectedRecipientType(value);
+    setSelectedRecipientId(null);
     form.setValue("recipientId", "");
+    form.setValue("purchaseOrderId", undefined);
+  };
+  
+  // Handle recipient selection
+  const handleRecipientChange = (value: string) => {
+    const recipientId = parseInt(value);
+    setSelectedRecipientId(recipientId);
+    form.setValue("recipientId", value);
+    
+    // Resetear la orden de compra si cambia el destinatario
+    form.setValue("purchaseOrderId", undefined);
   };
 
   const isLoading = createPaymentMutation.isPending || updatePaymentMutation.isPending;
@@ -422,6 +459,55 @@ export default function PaymentForm({
                 </FormItem>
               )}
             />
+            
+            {selectedRecipientType === 'supplier' && supplierPurchaseOrders.length > 0 && (
+              <FormField
+                control={form.control}
+                name="purchaseOrderId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Orden de Compra</FormLabel>
+                    <Select
+                      disabled={isLoading || !supplierPurchaseOrders.length}
+                      onValueChange={(value) => {
+                        if (value === 'none') {
+                          field.onChange(undefined);
+                        } else {
+                          field.onChange(value);
+                          // Si seleccionamos una orden de compra, establecer el monto automáticamente
+                          const selectedOrder = supplierPurchaseOrders.find(
+                            (order) => String(order.id) === value
+                          );
+                          if (selectedOrder) {
+                            form.setValue("amount", String(selectedOrder.total || 0));
+                            form.setValue("description", `Pago por orden de compra #${selectedOrder.orderNumber}`);
+                          }
+                        }
+                      }}
+                      defaultValue={field.value || 'none'}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar orden de compra" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Ninguna</SelectItem>
+                        {supplierPurchaseOrders.map((order: any) => (
+                          <SelectItem key={order.id} value={String(order.id)}>
+                            #{order.orderNumber} - ${order.total || 0} ({new Date(order.issueDate).toLocaleDateString()})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Al seleccionar una orden de compra, se marcará como pagada.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
         </div>
 
