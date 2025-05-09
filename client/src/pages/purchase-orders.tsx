@@ -352,48 +352,85 @@ const PurchaseOrderForm = ({
   });
 
   const onSubmit = (data: PurchaseOrderFormValues) => {
-    // Validar que los items tengan datos válidos
-    if (!items || items.length === 0) {
-      toast({
-        title: "Error",
-        description: "At least one item is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validar cada item
-    const invalidItems = items.filter(item => 
-      !item.description || 
-      !item.quantity || 
-      !item.unit || 
-      !item.price
-    );
-
-    if (invalidItems.length > 0) {
-      toast({
-        title: "Error",
-        description: "All items must have description, quantity, unit and price",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    console.log("Form data before submit:", {
-      ...data,
-      items
-    });
-
-    // Update the items with current state before submitting
-    const formData = {
-      ...data,
-      items: items,
-      // Asegurar que fields numéricos sean string para evitar problemas de tipo
-      projectId: data.projectId || undefined,
-      quoteId: data.quoteId || undefined
-    };
+    console.log("Form submission started with data:", data);
     
-    createMutation.mutate(formData);
+    try {
+      // Validar que exista supplierId
+      if (!data.supplierId) {
+        console.error("Missing supplierId in form data");
+        toast({
+          title: "Error",
+          description: "Please select a supplier",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validar que los items tengan datos válidos
+      if (!items || items.length === 0) {
+        console.error("No items in form data");
+        toast({
+          title: "Error",
+          description: "At least one item is required",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validar cada item
+      const invalidItems = items.filter(item => 
+        !item.description || 
+        !item.quantity || 
+        !item.unit || 
+        !item.price
+      );
+
+      if (invalidItems.length > 0) {
+        console.error("Invalid items found:", invalidItems);
+        toast({
+          title: "Error",
+          description: "All items must have description, quantity, unit and price",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Preparar los datos para envío
+      const formData = {
+        supplierId: data.supplierId,
+        orderNumber: data.orderNumber,
+        issueDate: data.issueDate,
+        expectedDeliveryDate: data.expectedDeliveryDate || undefined,
+        deliveryAddress: data.deliveryAddress,
+        deliveryConditions: data.deliveryConditions || undefined,
+        paymentTerms: data.paymentTerms || undefined,
+        status: data.status || "draft",
+        notes: data.notes || undefined,
+        projectId: data.projectId || undefined,
+        quoteId: data.quoteId || undefined,
+        items: items.map(item => ({
+          description: item.description,
+          quantity: item.quantity,
+          unit: item.unit || "unit",
+          price: item.price,
+          // Si hay materialId, incluirlo
+          ...(item.materialId && { materialId: item.materialId })
+        }))
+      };
+
+      console.log("Prepared form data for submission:", formData);
+      
+      // Ejecutar la mutación
+      createMutation.mutate(formData);
+      
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      toast({
+        title: "Error",
+        description: "There was an error processing your form data",
+        variant: "destructive",
+      });
+    }
   };
 
   // Update items when form values change

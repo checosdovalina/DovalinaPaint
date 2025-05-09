@@ -671,7 +671,26 @@ export const purchaseOrderItemToPurchaseOrder = relations(purchaseOrderItems, ({
   })
 }));
 
-export type PurchaseOrder = typeof purchaseOrders.$inferSelect;
+// El tipo PurchaseOrder base que viene de la base de datos
+type BasePurchaseOrder = typeof purchaseOrders.$inferSelect;
+
+// El tipo extendido que incluye los campos adicionales para la UI
+export type PurchaseOrder = BasePurchaseOrder & {
+  items?: Array<{
+    description: string;
+    quantity: string;
+    unit: string;
+    price: string;
+    materialId?: number;
+  }>;
+  supplierName?: string;
+  supplierContact?: string;
+  supplierPhone?: string;
+  supplierEmail?: string;
+  expectedDeliveryDate?: string | Date | null;
+  approvalDate?: string | Date | null;
+};
+
 export type InsertPurchaseOrder = z.infer<typeof insertPurchaseOrderSchema>;
 
 export type PurchaseOrderItem = typeof purchaseOrderItems.$inferSelect;
