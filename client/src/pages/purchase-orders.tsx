@@ -267,6 +267,10 @@ const PurchaseOrderForm = ({
       if (!selectedProjectId || selectedProjectId === 0) return null;
       try {
         const res = await apiRequest("GET", `/api/projects/${selectedProjectId}/quote`);
+        if (res.status === 404) {
+          console.info("No quote found for project:", selectedProjectId);
+          return null;
+        }
         return await res.json();
       } catch (error) {
         console.error("Error fetching project quote:", error);
@@ -274,6 +278,7 @@ const PurchaseOrderForm = ({
       }
     },
     enabled: !!selectedProjectId && selectedProjectId > 0,
+    retry: false // No reintentar si falla
   });
 
   // Form configuration
