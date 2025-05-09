@@ -65,9 +65,17 @@ const purchaseOrderFormSchema = insertPurchaseOrderSchema.extend({
     quantity: z.string().min(1, "Quantity is required"),
     unit: z.string().min(1, "Unit is required"),
     price: z.string().min(1, "Price is required"),
-  })),
-  projectId: z.number().optional(),
-  quoteId: z.number().optional(),
+    materialId: z.number().optional(),
+  })).min(1, "At least one item is required"),
+  projectId: z.union([z.number(), z.undefined()]).optional(),
+  quoteId: z.union([z.number(), z.undefined()]).optional(),
+  supplierId: z.number({
+    required_error: "Supplier is required",
+    invalid_type_error: "Supplier must be a number"
+  }),
+  deliveryAddress: z.string().min(1, "Delivery address is required"),
+  orderNumber: z.string().min(1, "Order number is required"),
+  issueDate: z.string().min(1, "Issue date is required"),
 });
 
 type PurchaseOrderFormValues = z.infer<typeof purchaseOrderFormSchema>;
@@ -344,11 +352,47 @@ const PurchaseOrderForm = ({
   });
 
   const onSubmit = (data: PurchaseOrderFormValues) => {
+    // Validar que los items tengan datos válidos
+    if (!items || items.length === 0) {
+      toast({
+        title: "Error",
+        description: "At least one item is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validar cada item
+    const invalidItems = items.filter(item => 
+      !item.description || 
+      !item.quantity || 
+      !item.unit || 
+      !item.price
+    );
+
+    if (invalidItems.length > 0) {
+      toast({
+        title: "Error",
+        description: "All items must have description, quantity, unit and price",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log("Form data before submit:", {
+      ...data,
+      items
+    });
+
     // Update the items with current state before submitting
     const formData = {
       ...data,
       items: items,
+      // Asegurar que fields numéricos sean string para evitar problemas de tipo
+      projectId: data.projectId || undefined,
+      quoteId: data.quoteId || undefined
     };
+    
     createMutation.mutate(formData);
   };
 
