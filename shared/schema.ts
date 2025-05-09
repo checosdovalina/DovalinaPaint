@@ -481,6 +481,7 @@ export const payments = pgTable("payments", {
   projectId: integer("project_id").references(() => projects.id),
   serviceOrderId: integer("service_order_id").references(() => serviceOrders.id),
   invoiceId: integer("invoice_id").references(() => invoices.id),
+  purchaseOrderId: integer("purchase_order_id").references(() => purchaseOrders.id),
   createdBy: integer("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -497,6 +498,7 @@ export const insertPaymentSchema = createInsertSchema(payments).pick({
   projectId: true,
   serviceOrderId: true,
   invoiceId: true,
+  purchaseOrderId: true,
   createdBy: true,
 });
 
@@ -512,6 +514,10 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   invoice: one(invoices, {
     fields: [payments.invoiceId],
     references: [invoices.id],
+  }),
+  purchaseOrder: one(purchaseOrders, {
+    fields: [payments.purchaseOrderId],
+    references: [purchaseOrders.id],
   }),
   createdByUser: one(users, {
     fields: [payments.createdBy],

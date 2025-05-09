@@ -1428,6 +1428,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/purchase-orders/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const purchaseOrderData = req.body;
+      
+      // Validate that we're only updating allowed fields for PATCH operations
+      if (!purchaseOrderData || Object.keys(purchaseOrderData).length === 0) {
+        return res.status(400).json({ message: "No data provided for update" });
+      }
+      
+      // Get the existing purchase order
+      const existingPurchaseOrder = await storage.getPurchaseOrder(id);
+      if (!existingPurchaseOrder) {
+        return res.status(404).json({ message: "Purchase order not found" });
+      }
+
+      // Update the purchase order
+      const updatedPurchaseOrder = await storage.updatePurchaseOrder(id, purchaseOrderData);
+      
+      if (!updatedPurchaseOrder) {
+        return res.status(500).json({ message: "Failed to update purchase order" });
+      }
+      
+      // Create activity for purchase order status update
+      const activityDescription = purchaseOrderData.status
+        ? `Purchase order ${updatedPurchaseOrder.orderNumber} status changed to ${purchaseOrderData.status}`
+        : `Purchase order ${updatedPurchaseOrder.orderNumber} updated`;
+      
+      await storage.createActivity({
+        type: "purchase_order_updated",
+        description: activityDescription,
+        userId: req.user.id,
+        projectId: updatedPurchaseOrder.projectId,
+        clientId: null
+      });
+      
+      res.json(updatedPurchaseOrder);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.put("/api/purchase-orders/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
