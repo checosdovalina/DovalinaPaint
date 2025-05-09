@@ -1138,6 +1138,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payment Recipients endpoint
+  app.get("/api/payment-recipients", isAuthenticated, async (req, res) => {
+    try {
+      const result = [];
+      
+      // Agregar subcontratistas como destinatarios
+      const subcontractors = await storage.getSubcontractors();
+      subcontractors.forEach(subcontractor => {
+        result.push({
+          id: subcontractor.id,
+          name: subcontractor.name,
+          type: "subcontractor"
+        });
+      });
+      
+      // Agregar empleados como destinatarios
+      const employees = await storage.getStaff();
+      employees.forEach(employee => {
+        result.push({
+          id: employee.id,
+          name: employee.name,
+          type: "employee"
+        });
+      });
+      
+      // Agregar proveedores como destinatarios
+      const suppliers = await storage.getSuppliers();
+      suppliers.forEach(supplier => {
+        result.push({
+          id: supplier.id,
+          name: supplier.name,
+          type: "supplier"
+        });
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching payment recipients:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Payment Categories endpoint
+  app.get("/api/payment-categories", isAuthenticated, async (req, res) => {
+    try {
+      // Categorías predefinidas para pagos
+      const categories = [
+        { id: 1, name: "Materiales", description: "Pago por materiales de construcción" },
+        { id: 2, name: "Mano de Obra", description: "Pago por servicios de mano de obra" },
+        { id: 3, name: "Transporte", description: "Pago por servicios de transporte" },
+        { id: 4, name: "Herramientas", description: "Pago por herramientas y equipos" },
+        { id: 5, name: "Servicios", description: "Pago por servicios adicionales" },
+        { id: 6, name: "Impuestos", description: "Pago de impuestos" },
+        { id: 7, name: "Seguros", description: "Pago de seguros" },
+        { id: 8, name: "Otros", description: "Otros pagos no categorizados" }
+      ];
+      
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Payment Routes
   app.get("/api/payments", isAuthenticated, async (req, res) => {
     try {
