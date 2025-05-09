@@ -573,7 +573,7 @@ const basePurchaseOrderSchema = createInsertSchema(purchaseOrders).pick({
   totalAmount: true,
 });
 
-// Añadir validación personalizada para fechas
+// Añadir validación personalizada para fechas y items
 export const insertPurchaseOrderSchema = basePurchaseOrderSchema.extend({
   issueDate: z.union([
     z.date(),
@@ -583,6 +583,31 @@ export const insertPurchaseOrderSchema = basePurchaseOrderSchema.extend({
     z.null(),
     z.undefined()
   ]).optional(),
+  expectedDeliveryDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "Expected delivery date must be valid"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  approvalDate: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "Approval date must be valid"
+    }).transform(val => new Date(val)),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  // Definir schema para items del frontend
+  items: z.array(
+    z.object({
+      description: z.string(),
+      quantity: z.string(),
+      unit: z.string().default("unit"),
+      price: z.string()
+    })
+  ).optional(),
 });
 
 // Esquema para items de órdenes de compra

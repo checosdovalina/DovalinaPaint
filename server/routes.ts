@@ -1379,47 +1379,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/purchase-orders", isAuthenticated, async (req, res) => {
     try {
-      // Create a unique order number based on date and random string
-      // Format: PO-YYYYMMDD-XXXX where XXXX is a random string
-      const date = new Date();
-      const dateStr = date.getFullYear().toString() +
-                    (date.getMonth() + 1).toString().padStart(2, '0') +
-                    date.getDate().toString().padStart(2, '0');
-      const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
-      const orderNumber = `PO-${dateStr}-${randomStr}`;
+      console.log("Creating purchase order with data:", JSON.stringify(req.body, null, 2));
+      
+      // Create a unique order number based on date and random string if not provided
+      let orderNumber = req.body.orderNumber;
+      if (!orderNumber) {
+        const date = new Date();
+        const dateStr = date.getFullYear().toString() +
+                      (date.getMonth() + 1).toString().padStart(2, '0') +
+                      date.getDate().toString().padStart(2, '0');
+        const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+        orderNumber = `PO-${dateStr}-${randomStr}`;
+      }
       
       // Parse and validate the purchase order data
       const purchaseOrderData = insertPurchaseOrderSchema.parse({
         ...req.body,
         orderNumber,
-        issueDate: date,
+        issueDate: req.body.issueDate || new Date(),
         status: req.body.status || 'draft'
       });
       
+      // Crear la orden de compra (el manejo de items se hace en storage.ts)
       const purchaseOrder = await storage.createPurchaseOrder(purchaseOrderData);
       
-      // If there are items in the request, add them to the purchase order
-      if (req.body.items && Array.isArray(req.body.items)) {
-        for (const item of req.body.items) {
-          await storage.createPurchaseOrderItem({
-            ...item,
-            purchaseOrderId: purchaseOrder.id
-          });
-        }
-      }
-      
-      // Get the complete purchase order with items
+      // Obtener los items recién creados
       const items = await storage.getPurchaseOrderItems(purchaseOrder.id);
       
-      // Create activity for purchase order creation
+      // Crear actividad para la orden de compra
       await storage.createActivity({
         type: "purchase_order_created",
         description: `New purchase order ${purchaseOrder.orderNumber} created`,
         userId: req.user.id,
-        projectId: purchaseOrder.projectId,
+        projectId: purchaseOrder.projectId || undefined,
         clientId: null
       });
       
+      // Devolver la orden de compra completa con sus items
       res.status(201).json({
         ...purchaseOrder,
         items
