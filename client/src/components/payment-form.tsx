@@ -118,6 +118,7 @@ export default function PaymentForm({
         recipientId: parseInt(data.recipientId),
         categoryId: parseInt(data.categoryId),
         projectId: data.projectId ? parseInt(data.projectId) : undefined,
+        purchaseOrderId: data.purchaseOrderId ? parseInt(data.purchaseOrderId) : undefined,
       };
       
       const response = await apiRequest(
@@ -129,6 +130,22 @@ export default function PaymentForm({
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Error al crear el pago");
+      }
+      
+      // Si el pago está asociado a una orden de compra, también actualizar el estado de la orden
+      if (data.purchaseOrderId) {
+        try {
+          await apiRequest(
+            "PATCH",
+            `/api/purchase-orders/${data.purchaseOrderId}`,
+            { status: "paid" }
+          );
+          
+          // Invalidar también la caché de órdenes de compra
+          queryClient.invalidateQueries({ queryKey: ['/api/purchase-orders'] });
+        } catch (error) {
+          console.error("Error al actualizar el estado de la orden de compra:", error);
+        }
       }
       
       return await response.json();
@@ -149,6 +166,7 @@ export default function PaymentForm({
         recipientId: parseInt(data.recipientId),
         categoryId: parseInt(data.categoryId),
         projectId: data.projectId ? parseInt(data.projectId) : undefined,
+        purchaseOrderId: data.purchaseOrderId ? parseInt(data.purchaseOrderId) : undefined,
       };
       
       const response = await apiRequest(
@@ -160,6 +178,22 @@ export default function PaymentForm({
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Error al actualizar el pago");
+      }
+      
+      // Si el pago está asociado a una orden de compra, también actualizar el estado de la orden
+      if (data.purchaseOrderId) {
+        try {
+          await apiRequest(
+            "PATCH",
+            `/api/purchase-orders/${data.purchaseOrderId}`,
+            { status: "paid" }
+          );
+          
+          // Invalidar también la caché de órdenes de compra
+          queryClient.invalidateQueries({ queryKey: ['/api/purchase-orders'] });
+        } catch (error) {
+          console.error("Error al actualizar el estado de la orden de compra:", error);
+        }
       }
       
       return await response.json();
