@@ -29,6 +29,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 // Define the form validation schema
 const paymentFormSchema = z.object({
@@ -82,6 +83,7 @@ export default function PaymentForm({
   onSubmit,
   onCancel,
 }: PaymentFormProps) {
+  const { user } = useAuth(); // Get the authenticated user
   const [selectedRecipientType, setSelectedRecipientType] = useState<string>(
     payment?.recipientType || ""
   );
@@ -111,6 +113,11 @@ export default function PaymentForm({
   const createPaymentMutation = useMutation({
     mutationFn: async (data: z.infer<typeof paymentFormSchema>) => {
       // Prepare payment data according to the expected schema
+      // Only proceed if user is available
+      if (!user) {
+        throw new Error("No hay un usuario autenticado.");
+      }
+      
       const paymentData = {
         // Required fields from schema
         amount: data.amount, // Keep as string, server will parse it
@@ -123,7 +130,7 @@ export default function PaymentForm({
         // Optional fields
         projectId: data.projectId ? parseInt(data.projectId) : undefined,
         purchaseOrderId: data.purchaseOrderId ? parseInt(data.purchaseOrderId) : undefined,
-        createdBy: 1, // Assuming user ID 1 for now (should be dynamically obtained)
+        createdBy: user.id, // Use authenticated user ID
       };
       
       const response = await apiRequest(
@@ -164,6 +171,11 @@ export default function PaymentForm({
   const updatePaymentMutation = useMutation({
     mutationFn: async (data: z.infer<typeof paymentFormSchema>) => {
       // Prepare payment data according to the expected schema
+      // Only proceed if user is available
+      if (!user) {
+        throw new Error("No hay un usuario autenticado.");
+      }
+      
       const paymentData = {
         // Required fields from schema
         amount: data.amount, // Keep as string, server will parse it
@@ -176,7 +188,7 @@ export default function PaymentForm({
         // Optional fields
         projectId: data.projectId ? parseInt(data.projectId) : undefined,
         purchaseOrderId: data.purchaseOrderId ? parseInt(data.purchaseOrderId) : undefined,
-        createdBy: 1, // Assuming user ID 1 for now
+        createdBy: user.id, // Use authenticated user ID
       };
       
       const response = await apiRequest(
