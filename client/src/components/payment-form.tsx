@@ -40,10 +40,10 @@ const paymentFormSchema = z.object({
   recipientId: z.string().min(1, "El destinatario es requerido."),
   categoryId: z.string().min(1, "La categoría es requerida."),
   projectId: z.string().optional(),
+  purchaseOrderId: z.string().optional(),
   description: z.string().optional(),
   reference: z.string().optional(),
   paymentMethod: z.string().min(1, "El método de pago es requerido."),
-  purchaseOrderId: z.string().optional(),
 });
 
 const paymentMethods = [
@@ -101,6 +101,7 @@ export default function PaymentForm({
       recipientId: payment ? String(payment.recipientId) : "",
       categoryId: payment ? String(payment.categoryId) : "",
       projectId: payment?.projectId ? String(payment.projectId) : undefined,
+      purchaseOrderId: payment?.purchaseOrderId ? String(payment.purchaseOrderId) : undefined,
       description: payment?.description || "",
       reference: payment?.reference || "",
       paymentMethod: payment?.paymentMethod || "",
@@ -374,7 +375,10 @@ export default function PaymentForm({
                     disabled={
                       isLoading || !selectedRecipientType || filteredRecipients.length === 0
                     }
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      handleRecipientChange(value);
+                    }}
                     defaultValue={field.value}
                   >
                     <FormControl>
