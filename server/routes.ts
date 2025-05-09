@@ -1204,10 +1204,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paymentData = insertPaymentSchema.parse(req.body);
       const payment = await storage.createPayment(paymentData);
       
+      // If this payment is associated with a purchase order, update its status to "paid"
+      if (payment.purchaseOrderId) {
+        try {
+          const updatedPurchaseOrder = await storage.updatePurchaseOrder(payment.purchaseOrderId, {
+            status: "paid"
+          });
+          
+          if (updatedPurchaseOrder) {
+            // Create activity for purchase order payment
+            await storage.createActivity({
+              type: "purchase_order_paid",
+              description: `Purchase order ${updatedPurchaseOrder.orderNumber} marked as paid`,
+              userId: req.user.id,
+              clientId: null,
+              projectId: updatedPurchaseOrder.projectId
+            });
+          }
+        } catch (poError) {
+          console.error("Error updating purchase order status:", poError);
+          // Continue even if purchase order update fails
+        }
+      }
+      
       // Create activity for payment creation
       await storage.createActivity({
         type: "payment_created",
-        description: `Payment of $${payment.amount.toFixed(2)} created for ${payment.recipientType} (ID: ${payment.recipientId})`,
+        description: `Payment of $${typeof payment.amount === 'string' 
+          ? parseFloat(payment.amount).toFixed(2) 
+          : payment.amount.toFixed(2)} created for ${payment.recipientType} (ID: ${payment.recipientId})`,
         userId: req.user.id,
         clientId: null,
         projectId: payment.projectId || null
@@ -1233,6 +1258,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const updateData = req.body;
       const updatedPayment = await storage.updatePayment(id, updateData);
+      
+      // If the payment is getting a purchase order ID and didn't have one before,
+      // or if the purchase order ID changed, update the purchase order status
+      if (updateData.purchaseOrderId && 
+         (!existingPayment.purchaseOrderId || 
+          existingPayment.purchaseOrderId !== updateData.purchaseOrderId)) {
+        try {
+          const updatedPurchaseOrder = await storage.updatePurchaseOrder(updateData.purchaseOrderId, {
+            status: "paid"
+          });
+          
+          if (updatedPurchaseOrder) {
+            // Create activity for purchase order payment
+            await storage.createActivity({
+              type: "purchase_order_paid",
+              description: `Purchase order ${updatedPurchaseOrder.orderNumber} marked as paid`,
+              userId: req.user.id,
+              clientId: null,
+              projectId: updatedPurchaseOrder.projectId
+            });
+          }
+        } catch (poError) {
+          console.error("Error updating purchase order status:", poError);
+          // Continue even if purchase order update fails
+        }
+      }
       
       // Create activity for payment update
       await storage.createActivity({
