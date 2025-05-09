@@ -517,7 +517,7 @@ export default function PaymentForm({
                             (order) => String(order.id) === value
                           );
                           if (selectedOrder) {
-                            form.setValue("amount", String(selectedOrder.total || 0));
+                            form.setValue("amount", String(selectedOrder.totalAmount || 0));
                             form.setValue("description", `Pago por orden de compra #${selectedOrder.orderNumber}`);
                           }
                         }
@@ -533,7 +533,7 @@ export default function PaymentForm({
                         <SelectItem value="none">Ninguna</SelectItem>
                         {supplierPurchaseOrders.map((order: any) => (
                           <SelectItem key={order.id} value={String(order.id)}>
-                            #{order.orderNumber} - ${order.total || 0} ({new Date(order.issueDate).toLocaleDateString()})
+                            #{order.orderNumber} - ${order.totalAmount || 0} ({new Date(order.issueDate).toLocaleDateString()})
                           </SelectItem>
                         ))}
                       </SelectContent>
