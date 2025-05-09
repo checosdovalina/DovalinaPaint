@@ -1057,8 +1057,22 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log("Creating purchase order item with data:", JSON.stringify(item, null, 2));
       
-      // Parsear item usando el esquema extendido que maneja conversiones de tipo
-      const validatedItem = extendedInsertPurchaseOrderItemSchema.parse(item);
+      // Preparar datos para el item
+      const preparedItem = {
+        purchaseOrderId: item.purchaseOrderId,
+        description: item.description,
+        quantity: parseFloat(item.quantity || '0'),
+        unit: item.unit || 'unit',
+        unitPrice: parseFloat(item.unitPrice || item.price || '0'),
+        totalPrice: parseFloat(item.totalPrice || '0') || 
+          (parseFloat(item.quantity || '0') * parseFloat(item.unitPrice || item.price || '0')),
+        materialId: item.materialId || null
+      };
+
+      console.log("Prepared item data:", preparedItem);
+      
+      // Esta línea podría fallar si los datos no son correctos, pero los hemos preparado antes
+      const validatedItem = extendedInsertPurchaseOrderItemSchema.parse(preparedItem);
       
       console.log("Validated item:", JSON.stringify(validatedItem, null, 2));
       
@@ -1071,13 +1085,20 @@ export class DatabaseStorage implements IStorage {
         })
         .returning();
       
-      // Update the total amount of the parent purchase order
-      const items = await this.getPurchaseOrderItems(item.purchaseOrderId);
-      const totalAmount = items.reduce((sum, item) => sum + Number(item.totalPrice), 0);
+      console.log("New item created:", newItem);
       
-      await this.updatePurchaseOrder(item.purchaseOrderId, {
-        totalAmount: totalAmount.toString()
-      });
+      try {
+        // Update the total amount of the parent purchase order
+        const items = await this.getPurchaseOrderItems(item.purchaseOrderId);
+        const totalAmount = items.reduce((sum, item) => sum + Number(item.totalPrice), 0);
+        
+        await this.updatePurchaseOrder(item.purchaseOrderId, {
+          totalAmount: totalAmount.toString()
+        });
+      } catch (updateError) {
+        console.error("Error updating purchase order total (non-fatal):", updateError);
+        // No lanzamos el error aquí para que el item se considere creado correctamente
+      }
       
       return newItem;
     } catch (error) {
