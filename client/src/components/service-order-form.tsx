@@ -49,6 +49,8 @@ const formSchema = insertServiceOrderSchema
     safetyRequirements: z.union([z.string(), z.null()]).nullable().optional(),
     assignedTo: z.union([z.number(), z.null()]).nullable().optional(),
     assignedType: z.enum(["staff", "subcontractor"]).optional(),
+    beforeImages: z.array(z.string()).optional(),
+    afterImages: z.array(z.string()).optional(),
   })
   .omit({ assignedStaff: true });
 
@@ -152,7 +154,13 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
   });
 
   const onSubmit = (data: ServiceOrderFormValues) => {
-    mutation.mutate(data);
+    // Include the image data with the form submission
+    const submissionData = {
+      ...data,
+      beforeImages,
+      afterImages,
+    };
+    mutation.mutate(submissionData);
   };
 
   return (
