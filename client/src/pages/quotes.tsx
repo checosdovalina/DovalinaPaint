@@ -211,13 +211,13 @@ export default function Quotes() {
   };
 
   return (
-    <Layout title="Presupuestos">
+    <Layout title="Quotes">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-2 w-full max-w-md">
           <div className="relative w-full">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Buscar presupuestos..."
+              placeholder="Search quotes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8"
@@ -228,20 +228,20 @@ export default function Quotes() {
             onValueChange={setStatusFilter}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filtrar por estado" />
+              <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="draft">Borrador</SelectItem>
-              <SelectItem value="sent">Enviado</SelectItem>
-              <SelectItem value="approved">Aprobado</SelectItem>
-              <SelectItem value="rejected">Rechazado</SelectItem>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="sent">Sent</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <Button onClick={handleNewQuote}>
           <Plus className="h-4 w-4 mr-2" />
-          Nuevo Presupuesto
+          New Quote
         </Button>
       </div>
 
@@ -296,7 +296,7 @@ export default function Quotes() {
                       onClick={() => handleUpdateStatus(quote, "approved")}
                     >
                       <Check className="h-4 w-4 mr-1" />
-                      Aprobar
+                      Approve
                     </Button>
                     <Button
                       size="sm"
@@ -305,7 +305,7 @@ export default function Quotes() {
                       onClick={() => handleUpdateStatus(quote, "rejected")}
                     >
                       <X className="h-4 w-4 mr-1" />
-                      Rechazar
+                      Reject
                     </Button>
                   </div>
                 )}
