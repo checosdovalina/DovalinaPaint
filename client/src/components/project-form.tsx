@@ -419,10 +419,9 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
           <FormLabel className="text-base font-semibold">Imágenes del Proyecto</FormLabel>
           <div className="grid gap-4">
             <ImageUpload
-              images={images}
-              onImagesChange={setImages}
+              value={images}
+              onChange={setImages}
               label="Agregar imágenes"
-              maxImages={10}
             />
           </div>
         </div>
