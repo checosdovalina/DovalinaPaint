@@ -341,10 +341,10 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-xl font-semibold">
-                {initialData?.id ? "Editar Cotización" : "Crear Nueva Cotización"}
+                {initialData?.id ? "Edit Quote" : "Create New Quote"}
               </h2>
               <p className="text-gray-600 mt-1">
-                Completa los detalles para la cotización del cliente
+                Complete the details for the client quote
               </p>
             </div>
             {initialData?.id && (
@@ -356,7 +356,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                   className="flex items-center gap-2"
                 >
                   <FileDown className="h-4 w-4" />
-                  Descargar PDF
+                  Download PDF
                 </Button>
                 <Button 
                   type="button" 
@@ -365,7 +365,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                   className="flex items-center gap-2"
                 >
                   <Printer className="h-4 w-4" />
-                  Imprimir
+                  Print
                 </Button>
               </div>
             )}

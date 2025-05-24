@@ -343,8 +343,8 @@ export default function Quotes() {
       ) : (
         <div className="text-center py-20 text-gray-500">
           {searchTerm || statusFilter !== "all"
-            ? "No se encontraron presupuestos con los filtros aplicados"
-            : "No hay presupuestos registrados. Cree uno nuevo haciendo clic en 'Nuevo Presupuesto'"}
+            ? "No quotes found with the applied filters"
+            : "No quotes registered. Create a new one by clicking 'New Quote'"}
         </div>
       )}
 
@@ -353,12 +353,12 @@ export default function Quotes() {
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>
-              {quoteToEdit ? "Editar Presupuesto" : "Nuevo Presupuesto"}
+              {quoteToEdit ? "Edit Quote" : "New Quote"}
             </DialogTitle>
             <DialogDescription>
               {quoteToEdit
-                ? "Modifique los detalles del presupuesto según sea necesario"
-                : "Complete el formulario para crear un nuevo presupuesto"}
+                ? "Modify the quote details as necessary"
+                : "Complete the form to create a new quote"}
             </DialogDescription>
           </DialogHeader>
           <QuoteForm
@@ -375,18 +375,18 @@ export default function Quotes() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar Presupuesto?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Quote?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. El presupuesto será eliminado permanentemente del sistema.
+              This action cannot be undone. The quote will be permanently deleted from the system.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Eliminar
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
