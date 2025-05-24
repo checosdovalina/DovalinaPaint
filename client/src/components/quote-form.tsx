@@ -377,14 +377,14 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
               name="projectId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Proyecto</FormLabel>
+                  <FormLabel>Project</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(parseInt(value))}
                     defaultValue={field.value?.toString()}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccione un proyecto" />
+                        <SelectValue placeholder="Select a project" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -405,21 +405,21 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Estado</FormLabel>
+                  <FormLabel>Status</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccione el estado" />
+                        <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="draft">Borrador</SelectItem>
-                      <SelectItem value="sent">Enviado</SelectItem>
-                      <SelectItem value="approved">Aprobado</SelectItem>
-                      <SelectItem value="rejected">Rechazado</SelectItem>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="sent">Sent</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -434,7 +434,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
               name="sentDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Fecha de Envío</FormLabel>
+                  <FormLabel>Send Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -473,7 +473,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
               name="validUntil"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Válido Hasta</FormLabel>
+                  <FormLabel>Valid Until</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
