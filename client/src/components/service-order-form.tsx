@@ -171,7 +171,10 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-h-[90vh] overflow-y-auto pb-4">
+      <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+        console.log("Form validation errors:", errors);
+        console.log("Form state:", form.formState);
+      })} className="space-y-6 max-h-[90vh] overflow-y-auto pb-4">
         <FormField
           control={form.control}
           name="projectId"
