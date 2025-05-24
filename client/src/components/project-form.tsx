@@ -414,6 +414,86 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
           />
         </div>
 
+        {/* Project Images Section */}
+        <div className="space-y-4">
+          <FormLabel className="text-base font-semibold">Imágenes del Proyecto</FormLabel>
+          <div className="grid gap-4">
+            <ImageUpload
+              images={images}
+              onImagesChange={setImages}
+              label="Agregar imágenes"
+              maxImages={10}
+            />
+          </div>
+        </div>
+
+        {/* Project Documents Section */}
+        <div className="space-y-4">
+          <FormLabel className="text-base font-semibold">Documentos del Proyecto</FormLabel>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+            <div className="text-center">
+              <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <div className="flex flex-col items-center">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.multiple = true;
+                    input.accept = '.pdf,.doc,.docx,.txt,.xls,.xlsx';
+                    input.onchange = (e) => {
+                      const files = Array.from((e.target as HTMLInputElement).files || []);
+                      const newDocs = files.map(file => ({
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        url: URL.createObjectURL(file)
+                      }));
+                      setDocuments([...documents, ...newDocs]);
+                    };
+                    input.click();
+                  }}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Subir Documentos
+                </Button>
+                <p className="text-sm text-gray-500 mt-2">
+                  PDF, DOC, DOCX, TXT, XLS, XLSX (máx. 10MB por archivo)
+                </p>
+              </div>
+            </div>
+            
+            {/* Display uploaded documents */}
+            {documents.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <h4 className="font-medium text-sm text-gray-700">Documentos subidos:</h4>
+                {documents.map((doc, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div className="flex items-center space-x-2">
+                      <FileText className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm">{doc.name}</span>
+                      <span className="text-xs text-gray-400">
+                        ({Math.round(doc.size / 1024)} KB)
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setDocuments(documents.filter((_, i) => i !== index));
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
         <div>
           <FormLabel>Personal Asignado</FormLabel>
           <StaffAssignment
