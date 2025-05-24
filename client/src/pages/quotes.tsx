@@ -268,16 +268,16 @@ export default function Quotes() {
                 </div>
                 <div className="flex items-center text-sm">
                   <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>Enviado: {formatDate(quote.sentDate)}</span>
+                  <span>Sent: {formatDate(quote.sentDate)}</span>
                 </div>
                 <div className="flex items-center text-sm">
                   <Clock className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>Válido hasta: {formatDate(quote.validUntil)}</span>
+                  <span>Valid until: {formatDate(quote.validUntil)}</span>
                 </div>
                 {quote.status === "approved" && (
                   <div className="flex items-center text-sm text-green-600">
                     <FileCheck className="h-4 w-4 mr-2" />
-                    <span>Aprobado: {formatDate(quote.approvedDate)}</span>
+                    <span>Approved: {formatDate(quote.approvedDate)}</span>
                   </div>
                 )}
                 {quote.notes && (
@@ -333,7 +333,7 @@ export default function Quotes() {
                     onClick={() => handleEditQuote(quote)}
                   >
                     <Edit className="h-4 w-4 mr-1" />
-                    Editar
+                    Edit
                   </Button>
                 </div>
               </CardFooter>
