@@ -511,13 +511,13 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
           <Card className="mb-6">
             <CardContent className="pt-6">
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3">Desglose de Materiales</h3>
+                <h3 className="text-lg font-medium mb-3">Materials Breakdown</h3>
                 <div className="space-y-3">
                   {materialItems.map((item) => (
                     <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
                       <div className="col-span-5">
                         <Input
-                          placeholder="Descripción del material"
+                          placeholder="Material description"
                           value={item.name}
                           onChange={(e) => updateMaterialItem(item.id, "name", e.target.value)}
                         />
@@ -527,7 +527,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                           type="number"
                           min="0.01"
                           step="0.01"
-                          placeholder="Cantidad"
+                          placeholder="Quantity"
                           value={item.quantity}
                           onChange={(e) => {
                             const numValue = e.target.value === '' ? 0 : Number(e.target.value);
@@ -540,7 +540,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                           type="number"
                           min="0.01"
                           step="0.01"
-                          placeholder="Precio unitario"
+                          placeholder="Unit price"
                           value={item.unitPrice}
                           onChange={(e) => {
                             const numValue = e.target.value === '' ? 0 : Number(e.target.value);
@@ -579,23 +579,23 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                   onClick={addMaterialItem}
                   className="mt-3"
                 >
-                  + Agregar Material
+                  + Add Material
                 </Button>
                 <div className="flex justify-end mt-3">
                   <div className="text-sm font-medium">
-                    Subtotal Materiales: ${materialsTotal.toFixed(2)}
+                    Materials Subtotal: ${materialsTotal.toFixed(2)}
                   </div>
                 </div>
               </div>
 
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3">Desglose de Mano de Obra</h3>
+                <h3 className="text-lg font-medium mb-3">Labor Breakdown</h3>
                 <div className="space-y-3">
                   {laborItems.map((item) => (
                     <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
                       <div className="col-span-5">
                         <Input
-                          placeholder="Descripción del trabajo"
+                          placeholder="Work description"
                           value={item.description}
                           onChange={(e) => updateLaborItem(item.id, "description", e.target.value)}
                         />
