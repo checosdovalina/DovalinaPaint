@@ -718,10 +718,10 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
             name="notes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Notas y Condiciones</FormLabel>
+                <FormLabel>Notes and Conditions</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Añade detalles adicionales o comentarios sobre la cotización"
+                    placeholder="Add additional details or comments about the quote"
                     value={field.value || ''}
                     onChange={field.onChange}
                     className="min-h-[100px]"
@@ -739,18 +739,18 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
             variant="outline" 
             onClick={() => onSuccess()}
           >
-            Cancelar
+            Cancel
           </Button>
           <Button 
             type="submit" 
             disabled={mutation.isPending}
           >
             {mutation.isPending ? (
-              <>Guardando...</>
+              <>Saving...</>
             ) : initialData?.id ? (
-              <>Actualizar Cotización</>
+              <>Update Quote</>
             ) : (
-              <>Crear Cotización</>
+              <>Create Quote</>
             )}
           </Button>
         </div>
