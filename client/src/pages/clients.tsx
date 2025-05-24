@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Client } from "@shared/schema";
 import { Layout } from "@/components/layout";
 import { ClientForm } from "@/components/client-form";
+import { ClientDetail } from "@/components/client-detail";
 import {
   Card,
   CardContent,
@@ -22,6 +23,9 @@ import {
   Edit,
   Trash,
   Search,
+  Eye,
+  Grid3X3,
+  List,
 } from "lucide-react";
 import {
   Dialog,
@@ -56,8 +60,10 @@ export default function Clients() {
   const [showClientForm, setShowClientForm] = useState(false);
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [clientToView, setClientToView] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [classificationFilter, setClassificationFilter] = useState("all");
+  const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const { toast } = useToast();
 
   // Fetch clients
@@ -104,7 +110,7 @@ export default function Clients() {
     } catch (error) {
       toast({
         title: "Error",
-        description: `No se pudo eliminar el cliente: ${error.message}`,
+        description: `No se pudo eliminar el cliente: ${error instanceof Error ? error.message : 'Error desconocido'}`,
         variant: "destructive",
       });
     } finally {
@@ -163,7 +169,7 @@ export default function Clients() {
 
   return (
     <Layout title="Clientes y Prospectos">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="flex items-center space-x-2 w-full max-w-md">
           <div className="relative w-full">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -189,10 +195,33 @@ export default function Clients() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={handleNewClient}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Cliente
-        </Button>
+        
+        <div className="flex items-center gap-2">
+          {/* View mode toggle */}
+          <div className="flex items-center border rounded-lg p-1">
+            <Button
+              variant={viewMode === "cards" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("cards")}
+              className="h-8 px-3"
+            >
+              <Grid3X3 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className="h-8 px-3"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <Button onClick={handleNewClient}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Cliente
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -200,57 +229,134 @@ export default function Clients() {
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
         </div>
       ) : filteredClients && filteredClients.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredClients.map((client) => (
-            <Card key={client.id} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{client.name}</CardTitle>
-                  <Badge className={getClassificationColor(client.classification)}>
-                    {getClassificationLabel(client.classification)}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-2 space-y-2">
-                <div className="flex items-center text-sm">
-                  <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>{client.email}</span>
-                </div>
-                <div className="flex items-center text-sm">
-                  <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>{client.phone}</span>
-                </div>
-                <div className="flex items-start text-sm">
-                  <MapPin className="h-4 w-4 mr-2 mt-1 text-gray-400" />
-                  <span className="flex-1">{client.address}</span>
-                </div>
-                {client.notes && (
-                  <div className="text-sm text-gray-500 mt-2 pt-2 border-t">
-                    <p className="line-clamp-2">{client.notes}</p>
+        viewMode === "cards" ? (
+          // Cards view
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredClients.map((client) => (
+              <Card key={client.id} className="overflow-hidden">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">{client.name}</CardTitle>
+                    <Badge className={getClassificationColor(client.classification)}>
+                      {getClassificationLabel(client.classification)}
+                    </Badge>
                   </div>
-                )}
-              </CardContent>
-              <CardFooter className="pt-2 flex justify-end space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => handleDeleteClick(client)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEditClient(client)}
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Editar
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+                </CardHeader>
+                <CardContent className="pb-2 space-y-2">
+                  <div className="flex items-center text-sm">
+                    <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                    <span>{client.email}</span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                    <span>{client.phone}</span>
+                  </div>
+                  <div className="flex items-start text-sm">
+                    <MapPin className="h-4 w-4 mr-2 mt-1 text-gray-400" />
+                    <span className="flex-1">{client.address}</span>
+                  </div>
+                  {client.notes && (
+                    <div className="text-sm text-gray-500 mt-2 pt-2 border-t">
+                      <p className="line-clamp-2">{client.notes}</p>
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter className="pt-2 flex justify-between">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    onClick={() => setClientToView(client)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Ver Detalles
+                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDeleteClick(client)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditClient(client)}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          // List view
+          <div className="space-y-4">
+            {filteredClients.map((client) => (
+              <Card key={client.id} className="overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold">{client.name}</h3>
+                          <Badge className={getClassificationColor(client.classification)}>
+                            {getClassificationLabel(client.classification)}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
+                          <div className="flex items-center">
+                            <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                            <span>{client.email}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                            <span>{client.phone}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <MapPin className="h-4 w-4 mr-2 text-gray-400" />
+                            <span className="truncate">{client.address}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2 ml-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => setClientToView(client)}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Ver Detalles
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditClient(client)}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleDeleteClick(client)}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )
       ) : (
         <div className="text-center py-20 text-gray-500">
           {searchTerm || classificationFilter !== "all"
@@ -302,6 +408,13 @@ export default function Clients() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Client Detail Dialog */}
+      <ClientDetail
+        client={clientToView}
+        isOpen={!!clientToView}
+        onClose={() => setClientToView(null)}
+      />
     </Layout>
   );
 }
