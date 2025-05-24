@@ -32,10 +32,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Upload, X, FileText, Image } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { StaffAssignment } from "@/components/staff-assignment";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 // Extend the schema to handle the form
 const formSchema = insertProjectSchema
@@ -43,7 +44,11 @@ const formSchema = insertProjectSchema
     startDate: z.date().optional(),
     dueDate: z.date().optional(),
   })
-  .omit({ assignedStaff: true });
+  .omit({ 
+    assignedStaff: true,
+    images: true,
+    documents: true
+  });
 
 type ProjectFormValues = z.infer<typeof formSchema>;
 
@@ -56,6 +61,12 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
   const { toast } = useToast();
   const [assignedStaff, setAssignedStaff] = useState<number[]>(
     initialData?.assignedStaff || []
+  );
+  const [images, setImages] = useState<string[]>(
+    initialData?.images as string[] || []
+  );
+  const [documents, setDocuments] = useState<any[]>(
+    initialData?.documents as any[] || []
   );
 
   // Fetch clients for the dropdown
@@ -83,13 +94,21 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
 
   // Create or update mutation
   const mutation = useMutation({
-    mutationFn: async (data: ProjectFormValues & { assignedStaff: number[] }) => {
+    mutationFn: async (data: ProjectFormValues) => {
+      // Include images and documents in the submission
+      const projectData = {
+        ...data,
+        assignedStaff,
+        images,
+        documents,
+      };
+
       if (initialData?.id) {
         // Update
-        return apiRequest("PUT", `/api/projects/${initialData.id}`, data);
+        return apiRequest("PUT", `/api/projects/${initialData.id}`, projectData);
       } else {
         // Create
-        return apiRequest("POST", "/api/projects", data);
+        return apiRequest("POST", "/api/projects", projectData);
       }
     },
     onSuccess: () => {

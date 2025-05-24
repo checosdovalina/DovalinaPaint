@@ -58,6 +58,7 @@ export const projects = pgTable("projects", {
   assignedStaff: jsonb("assigned_staff"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   images: jsonb("images"),
+  documents: jsonb("documents"),
 });
 
 // Esquema base para proyectos
@@ -73,6 +74,7 @@ const baseProjectSchema = createInsertSchema(projects).pick({
   totalCost: true,
   assignedStaff: true,
   images: true,
+  documents: true,
 });
 
 // Añadir validación personalizada para fechas
