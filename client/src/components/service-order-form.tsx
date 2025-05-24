@@ -154,12 +154,18 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
   });
 
   const onSubmit = (data: ServiceOrderFormValues) => {
+    console.log("Form submitted with data:", data);
+    console.log("Before images:", beforeImages);
+    console.log("After images:", afterImages);
+    
     // Include the image data with the form submission
     const submissionData = {
       ...data,
       beforeImages,
       afterImages,
     };
+    
+    console.log("Final submission data:", submissionData);
     mutation.mutate(submissionData);
   };
 
