@@ -48,11 +48,13 @@ const formSchema = insertServiceOrderSchema
     specialInstructions: z.union([z.string(), z.null()]).nullable().optional(),
     safetyRequirements: z.union([z.string(), z.null()]).nullable().optional(),
     assignedTo: z.union([z.number(), z.null()]).nullable().optional(),
-    assignedType: z.enum(["staff", "subcontractor"]).optional(),
-    beforeImages: z.array(z.string()).optional(),
-    afterImages: z.array(z.string()).optional(),
+    assignedType: z.enum(["staff", "subcontractor"]).nullable().optional(),
   })
-  .omit({ assignedStaff: true });
+  .omit({ 
+    assignedStaff: true,
+    beforeImages: true,
+    afterImages: true
+  });
 
 type ServiceOrderFormValues = z.infer<typeof formSchema>;
 
