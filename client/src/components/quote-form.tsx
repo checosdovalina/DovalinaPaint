@@ -605,7 +605,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                           type="number"
                           min="0.1"
                           step="0.1"
-                          placeholder="Horas"
+                          placeholder="Hours"
                           value={item.hours}
                           onChange={(e) => {
                             // Validar y convertir el valor a número
@@ -619,7 +619,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                           type="number"
                           min="0.01"
                           step="0.01"
-                          placeholder="Tarifa por hora"
+                          placeholder="Hourly rate"
                           value={item.hourlyRate}
                           onChange={(e) => {
                             const numValue = e.target.value === '' ? 0 : Number(e.target.value);
@@ -658,18 +658,18 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                   onClick={addLaborItem}
                   className="mt-3 text-xs"
                 >
-                  + Agregar Mano de Obra
+                  + Add Labor
                 </Button>
                 <div className="flex justify-end mt-3">
                   <div className="text-sm font-medium">
-                    Subtotal Mano de Obra: ${laborTotal.toFixed(2)}
+                    Labor Subtotal: ${laborTotal.toFixed(2)}
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Costos Adicionales ($)</h4>
+                  <h4 className="text-sm font-medium mb-2">Additional Costs ($)</h4>
                   <Input 
                     type="number" 
                     min="0"
@@ -683,8 +683,8 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                 </div>
                 <div>
                   <h4 className="text-sm font-medium mb-2">
-                    Margen de Ganancia (%) 
-                    <span className="text-xs text-gray-500 ml-2">(Solo visible internamente)</span>
+                    Profit Margin (%) 
+                    <span className="text-xs text-gray-500 ml-2">(Internal use only)</span>
                   </h4>
                   <Input 
                     type="number" 
@@ -706,7 +706,7 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between mt-2 text-lg font-bold">
-                  <span>Total Cotización:</span>
+                  <span>Total Quote:</span>
                   <span>${totalEstimate.toFixed(2)}</span>
                 </div>
               </div>
