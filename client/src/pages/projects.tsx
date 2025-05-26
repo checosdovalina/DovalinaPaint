@@ -407,7 +407,7 @@ export default function Projects() {
 
       {/* Project Form Dialog */}
       <Dialog open={showProjectForm} onOpenChange={setShowProjectForm}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {projectToEdit ? "Editar Proyecto" : "Nuevo Proyecto"}
@@ -418,10 +418,12 @@ export default function Projects() {
                 : "Complete el formulario para crear un nuevo proyecto"}
             </DialogDescription>
           </DialogHeader>
-          <ProjectForm
-            initialData={projectToEdit || undefined}
-            onSuccess={handleCloseForm}
-          />
+          <div className="max-h-[75vh] overflow-y-auto pr-2">
+            <ProjectForm
+              initialData={projectToEdit || undefined}
+              onSuccess={handleCloseForm}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 

@@ -168,7 +168,16 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
               <FormItem>
                 <FormLabel>Cliente</FormLabel>
                 <Select
-                  onValueChange={(value) => field.onChange(parseInt(value))}
+                  onValueChange={(value) => {
+                    const clientId = parseInt(value);
+                    field.onChange(clientId);
+                    
+                    // Auto-populate address when client is selected
+                    const selectedClient = clients?.find(client => client.id === clientId);
+                    if (selectedClient?.address) {
+                      form.setValue('address', selectedClient.address);
+                    }
+                  }}
                   value={field.value?.toString()}
                 >
                   <FormControl>
