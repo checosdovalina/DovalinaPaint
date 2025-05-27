@@ -87,13 +87,13 @@ export default function SimpleQuotes() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "draft":
-        return "Borrador";
+        return "Draft";
       case "sent":
-        return "Enviado";
+        return "Sent";
       case "approved":
-        return "Aprobado";
+        return "Approved";
       case "rejected":
-        return "Rechazado";
+        return "Rejected";
       default:
         return status;
     }
@@ -203,10 +203,17 @@ export default function SimpleQuotes() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {quote.sentDate
-                        ? format(new Date(quote.sentDate), "dd/MM/yyyy", { locale: es })
-                        : format(new Date(quote.createdAt), "dd/MM/yyyy", { locale: es })}
+                        ? format(new Date(quote.sentDate), "MM/dd/yyyy")
+                        : format(new Date(quote.createdAt), "MM/dd/yyyy")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setViewingQuote(quote)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -235,12 +242,12 @@ export default function SimpleQuotes() {
         <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {quoteToEdit ? "Editar Presupuesto Simplificado" : "Nuevo Presupuesto Simplificado"}
+              {quoteToEdit ? "Edit Simple Quote" : "New Simple Quote"}
             </DialogTitle>
             <DialogDescription>
               {quoteToEdit
-                ? "Modifica los detalles del presupuesto según sea necesario"
-                : "Crea un presupuesto con alcance de trabajo simplificado"}
+                ? "Modify the quote details as needed"
+                : "Create a quote with simplified scope of work"}
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[75vh] overflow-y-auto pr-2">
@@ -251,6 +258,17 @@ export default function SimpleQuotes() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Quote View Dialog */}
+      <SimpleQuoteDetail
+        open={!!viewingQuote}
+        onOpenChange={(open) => !open && setViewingQuote(null)}
+        quote={viewingQuote}
+        onEdit={(quote) => {
+          setViewingQuote(null);
+          handleEditQuote(quote);
+        }}
+      />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog
