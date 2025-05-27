@@ -77,7 +77,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   const mutation = useMutation({
     mutationFn: async (data: SimpleQuoteFormData) => {
       const endpoint = initialData?.id ? `/api/simple-quotes/${initialData.id}` : "/api/simple-quotes";
-      const method = initialData?.id ? "PATCH" : "POST";
+      const method = initialData?.id ? "PUT" : "POST";
       
       const payload = {
         projectId: data.projectId,
@@ -91,13 +91,11 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
 
       const response = await apiRequest(method, endpoint, payload);
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to ${method === 'PATCH' ? 'update' : 'create'} simple quote: ${errorText}`);
+        throw new Error(`Failed to ${method === 'PUT' ? 'update' : 'create'} simple quote`);
       }
       
       const result = await response.json();
-      console.log('API Response:', result);
-      return result;
+      return result.data || result;
     },
     onSuccess: (data) => {
       console.log("Simple quote saved successfully:", data);

@@ -426,45 +426,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update Simple Quote
-  app.patch("/api/simple-quotes/:id", isAuthenticated, async (req, res) => {
+  // Update Simple Quote - New simplified approach
+  app.put("/api/simple-quotes/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       
-      const updateData = {
+      // Get current quote
+      const currentQuote = await storage.getQuote(id);
+      if (!currentQuote) {
+        return res.status(404).json({ error: "Quote not found" });
+      }
+      
+      // Update only the simple quote fields
+      const updatedData = {
+        ...currentQuote,
         projectId: req.body.projectId,
-        total: req.body.totalEstimate,
+        totalEstimate: req.body.totalEstimate,
         scopeOfWork: req.body.scopeOfWork || "",
         notes: req.body.notes || "",
         validUntil: req.body.validUntil ? new Date(req.body.validUntil) : null,
         sentDate: req.body.sentDate ? new Date(req.body.sentDate) : null,
-        status: req.body.status || "draft",
-        materialsEstimate: [],
-        laborEstimate: [],
-        additionalCosts: [],
-        profitMargin: 0,
+        status: req.body.status || "draft"
       };
 
-      const updatedQuote = await storage.updateQuote(id, updateData);
+      const result = await storage.updateQuote(id, updatedData);
       
-      if (!updatedQuote) {
-        return res.status(404).json({ message: "Quote not found" });
-      }
-      
-      res.json({
-        id: updatedQuote.id,
-        projectId: updatedQuote.projectId,
-        total: updatedQuote.totalEstimate,
-        scopeOfWork: updatedQuote.scopeOfWork,
-        notes: updatedQuote.notes,
-        validUntil: updatedQuote.validUntil,
-        sentDate: updatedQuote.sentDate,
-        status: updatedQuote.status,
-        success: true
+      res.status(200).json({
+        success: true,
+        data: result
       });
+      
     } catch (error) {
-      console.error("Simple quote update error:", error);
-      res.status(500).json({ message: "Failed to update quote" });
+      console.error("Update error:", error);
+      res.status(500).json({ error: "Update failed" });
     }
   });
 
