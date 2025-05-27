@@ -5,17 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { SimpleQuoteForm } from "@/components/simple-quote-form";
+import { SimpleQuoteDetail } from "@/components/simple-quote-detail";
 import { Layout } from "@/components/layout";
 import PageHeader from "@/components/page-header";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
 
 export default function SimpleQuotes() {
   const [showQuoteForm, setShowQuoteForm] = useState(false);
   const [quoteToEdit, setQuoteToEdit] = useState<any>(null);
   const [quoteToDelete, setQuoteToDelete] = useState<any>(null);
+  const [viewingQuote, setViewingQuote] = useState<any>(null);
   const { toast } = useToast();
 
   // Fetch quotes and projects
@@ -51,14 +52,14 @@ export default function SimpleQuotes() {
       await apiRequest("DELETE", `/api/quotes/${quoteToDelete.id}`);
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
       toast({
-        title: "Presupuesto eliminado",
-        description: "El presupuesto ha sido eliminado exitosamente",
+        title: "Quote Deleted",
+        description: "The quote has been deleted successfully",
       });
       setQuoteToDelete(null);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "No se pudo eliminar el presupuesto",
+        description: "Could not delete the quote",
         variant: "destructive",
       });
     }
