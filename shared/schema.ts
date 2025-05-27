@@ -104,6 +104,7 @@ export const quotes = pgTable("quotes", {
   materialsEstimate: jsonb("materials_estimate"),
   laborEstimate: jsonb("labor_estimate"),
   totalEstimate: integer("total_estimate").notNull(),
+  scopeOfWork: text("scope_of_work"), // New field for simplified quotes
   status: text("status").notNull().default("draft"), // draft, sent, approved, rejected
   sentDate: timestamp("sent_date"),
   validUntil: timestamp("valid_until"),
@@ -118,6 +119,7 @@ const baseQuoteSchema = createInsertSchema(quotes).pick({
   projectId: true,
   materialsEstimate: true,
   laborEstimate: true,
+  scopeOfWork: true,
   totalEstimate: true,
   status: true,
   notes: true,
