@@ -148,8 +148,8 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
           pdf.text(`Phone: ${client.phone}`, margin, yPosition);
           yPosition += 6;
         }
-        if (project?.address) {
-          pdf.text(`Address: ${project.address}`, margin, yPosition);
+        if (client.address) {
+          pdf.text(`Address: ${client.address}`, margin, yPosition);
           yPosition += 6;
         }
       }
@@ -322,6 +322,10 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
                 <div>
                   <span className="font-medium text-gray-700">Phone:</span>
                   <p className="text-gray-900">{client?.phone || "N/A"}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Address:</span>
+                  <p className="text-gray-900">{client?.address || "N/A"}</p>
                 </div>
               </div>
             </div>
