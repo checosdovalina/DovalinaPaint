@@ -432,12 +432,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const simpleQuoteData = {
         projectId: req.body.projectId,
-        totalEstimate: req.body.totalEstimate,
+        total: req.body.totalEstimate,
         scopeOfWork: req.body.scopeOfWork,
         notes: req.body.notes,
         validUntil: req.body.validUntil && req.body.validUntil !== "" ? new Date(req.body.validUntil) : null,
         sentDate: req.body.sentDate && req.body.sentDate !== "" ? new Date(req.body.sentDate) : null,
         status: req.body.status || "draft",
+        // Maintain existing fields for Simple Quotes
+        materialsEstimate: [],
+        laborEstimate: [],
+        additionalCosts: [],
+        profitMargin: 0,
       };
 
       const quote = await storage.updateQuote(id, simpleQuoteData);
