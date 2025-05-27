@@ -76,26 +76,39 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
 
   const mutation = useMutation({
     mutationFn: async (data: SimpleQuoteFormData) => {
-      const endpoint = initialData?.id ? `/api/simple-quotes/${initialData.id}` : "/api/simple-quotes";
-      const method = initialData?.id ? "PUT" : "POST";
-      
-      const payload = {
-        projectId: data.projectId,
-        totalEstimate: data.totalEstimate,
-        scopeOfWork: data.scopeOfWork,
-        notes: data.notes || "",
-        validUntil: data.validUntil ? data.validUntil.toISOString() : null,
-        sentDate: data.sentDate ? data.sentDate.toISOString() : null,
-        status: "draft",
-      };
-
-      const response = await apiRequest(method, endpoint, payload);
-      if (!response.ok) {
-        throw new Error(`Failed to ${method === 'PUT' ? 'update' : 'create'} simple quote`);
+      if (initialData?.id) {
+        // Edit existing quote
+        const response = await apiRequest("PUT", `/api/simple-quotes/${initialData.id}`, {
+          projectId: data.projectId,
+          totalEstimate: data.totalEstimate,
+          scopeOfWork: data.scopeOfWork,
+          notes: data.notes || "",
+          validUntil: data.validUntil ? data.validUntil.toISOString() : null,
+          sentDate: data.sentDate ? data.sentDate.toISOString() : null,
+          status: "draft",
+        });
+        
+        if (response.ok) {
+          return { success: true };
+        }
+        throw new Error("Failed to update quote");
+      } else {
+        // Create new quote
+        const response = await apiRequest("POST", "/api/simple-quotes", {
+          projectId: data.projectId,
+          totalEstimate: data.totalEstimate,
+          scopeOfWork: data.scopeOfWork,
+          notes: data.notes || "",
+          validUntil: data.validUntil ? data.validUntil.toISOString() : null,
+          sentDate: data.sentDate ? data.sentDate.toISOString() : null,
+          status: "draft",
+        });
+        
+        if (response.ok) {
+          return await response.json();
+        }
+        throw new Error("Failed to create quote");
       }
-      
-      const result = await response.json();
-      return result.data || result;
     },
     onSuccess: (data) => {
       console.log("Simple quote saved successfully:", data);
