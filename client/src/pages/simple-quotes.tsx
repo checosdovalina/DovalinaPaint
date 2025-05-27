@@ -4,6 +4,7 @@ import { Plus, Eye, Edit, Trash2, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SimpleQuoteForm } from "@/components/simple-quote-form";
 import { SimpleQuoteDetail } from "@/components/simple-quote-detail";
 import { Layout } from "@/components/layout";
@@ -35,6 +36,19 @@ export default function SimpleQuotes() {
   // Filter only simple quotes (those with scopeOfWork)
   const simpleQuotes = quotes.filter((quote: any) => quote.scopeOfWork) || [];
 
+  // Separate quotes by client type (residential vs commercial)
+  const getQuotesByType = (type: string) => {
+    return simpleQuotes.filter((quote: any) => {
+      const project = projects.find((p: any) => p.id === quote.projectId);
+      if (!project) return false;
+      const client = clients.find((c: any) => c.id === project.clientId);
+      return client?.classification === type;
+    });
+  };
+
+  const residentialQuotes = getQuotesByType('residential');
+  const commercialQuotes = getQuotesByType('commercial');
+
   const handleNewQuote = () => {
     setQuoteToEdit(null);
     setShowQuoteForm(true);
@@ -45,6 +59,11 @@ export default function SimpleQuotes() {
     setShowQuoteForm(true);
   };
 
+  const handleCloseForm = () => {
+    setShowQuoteForm(false);
+    setQuoteToEdit(null);
+  };
+
   const handleDeleteQuote = async () => {
     if (!quoteToDelete) return;
 
@@ -52,36 +71,32 @@ export default function SimpleQuotes() {
       await apiRequest("DELETE", `/api/quotes/${quoteToDelete.id}`);
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
       toast({
-        title: "Quote Deleted",
-        description: "The quote has been deleted successfully",
+        title: "Success",
+        description: "Quote deleted successfully",
       });
-      setQuoteToDelete(null);
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Could not delete the quote",
+        description: "Failed to delete quote",
         variant: "destructive",
       });
+    } finally {
+      setQuoteToDelete(null);
     }
-  };
-
-  const handleCloseForm = () => {
-    setShowQuoteForm(false);
-    setQuoteToEdit(null);
   };
 
   const getProjectTitle = (projectId: number) => {
-    const project = projects?.find((p: any) => p.id === projectId);
-    return project ? project.title : `Proyecto #${projectId}`;
+    const project = projects.find((p: any) => p.id === projectId);
+    return project ? project.title : `Project #${projectId}`;
   };
 
   const getClientName = (projectId: number) => {
-    const project = projects?.find((p: any) => p.id === projectId);
+    const project = projects.find((p: any) => p.id === projectId);
     if (project) {
-      const client = clients?.find((c: any) => c.id === project.clientId);
-      return client ? client.name : `Cliente #${project.clientId}`;
+      const client = clients.find((c: any) => c.id === project.clientId);
+      return client ? client.name : `Client #${project.clientId}`;
     }
-    return "Cliente desconocido";
+    return "Unknown Client";
   };
 
   const getStatusLabel = (status: string) => {
@@ -114,9 +129,114 @@ export default function SimpleQuotes() {
     }
   };
 
+  // Render quotes table
+  const renderQuotesTable = (quotesData: any[], emptyMessage: string) => {
+    if (quotesData.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <div className="text-gray-500 text-lg mb-4">{emptyMessage}</div>
+          <Button onClick={handleNewQuote}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Quote
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Project
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Client
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Total
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {quotesData.map((quote: any) => (
+              <tr key={quote.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">
+                    {getProjectTitle(quote.projectId)}
+                  </div>
+                  <div className="text-sm text-gray-500 max-w-xs truncate">
+                    {quote.scopeOfWork}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {getClientName(quote.projectId)}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">
+                    ${quote.totalEstimate.toLocaleString()}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                      quote.status
+                    )}`}
+                  >
+                    {getStatusLabel(quote.status)}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {quote.sentDate
+                    ? format(new Date(quote.sentDate), "MM/dd/yyyy")
+                    : format(new Date(quote.createdAt), "MM/dd/yyyy")}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setViewingQuote(quote)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditQuote(quote)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setQuoteToDelete(quote)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
-      <Layout title="Presupuestos Simplificados">
+      <Layout title="Simple Quotes">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
@@ -125,116 +245,37 @@ export default function SimpleQuotes() {
   }
 
   return (
-    <Layout title="Presupuestos Simplificados">
+    <Layout title="Simple Quotes">
       <PageHeader
-        title="Presupuestos Simplificados"
-        description="Gestiona presupuestos con alcance de trabajo simplificado"
+        title="Simple Quotes"
+        description="Manage quotes with simplified scope of work"
         actions={
           <Button onClick={handleNewQuote}>
             <Plus className="h-4 w-4 mr-2" />
-            Nuevo Presupuesto
+            New Quote
           </Button>
         }
       />
 
       <div className="bg-white shadow rounded-lg overflow-hidden">
-        {simpleQuotes.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-500 text-lg mb-4">No hay presupuestos simplificados</div>
-            <Button onClick={handleNewQuote}>
-              <Plus className="h-4 w-4 mr-2" />
-              Crear Primer Presupuesto
-            </Button>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Proyecto
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cliente
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {simpleQuotes.map((quote: any) => (
-                  <tr key={quote.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {getProjectTitle(quote.projectId)}
-                      </div>
-                      <div className="text-sm text-gray-500 max-w-xs truncate">
-                        {quote.scopeOfWork}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {getClientName(quote.projectId)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        ${quote.totalEstimate.toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                          quote.status
-                        )}`}
-                      >
-                        {getStatusLabel(quote.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {quote.sentDate
-                        ? format(new Date(quote.sentDate), "MM/dd/yyyy")
-                        : format(new Date(quote.createdAt), "MM/dd/yyyy")}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setViewingQuote(quote)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditQuote(quote)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setQuoteToDelete(quote)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <Tabs defaultValue="residential" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="residential">
+              Residential ({residentialQuotes.length})
+            </TabsTrigger>
+            <TabsTrigger value="commercial">
+              Commercial ({commercialQuotes.length})
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="residential">
+            {renderQuotesTable(residentialQuotes, "No residential quotes found")}
+          </TabsContent>
+          
+          <TabsContent value="commercial">
+            {renderQuotesTable(commercialQuotes, "No commercial quotes found")}
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Quote Form Dialog */}
@@ -277,15 +318,15 @@ export default function SimpleQuotes() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará permanentemente el presupuesto.
+              This action cannot be undone. This will permanently delete the quote.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteQuote}>
-              Eliminar
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
