@@ -80,13 +80,13 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       const method = initialData?.id ? "PATCH" : "POST";
       
       const payload = {
-        ...data,
+        projectId: data.projectId,
+        totalEstimate: data.totalEstimate,
+        scopeOfWork: data.scopeOfWork,
+        notes: data.notes || "",
+        validUntil: data.validUntil ? data.validUntil.toISOString() : null,
+        sentDate: data.sentDate ? data.sentDate.toISOString() : null,
         status: "draft",
-        // Convert to the format expected by the backend
-        materialsEstimate: [],
-        laborEstimate: [],
-        additionalCosts: [],
-        profitMargin: 0,
       };
 
       const response = await apiRequest(method, endpoint, payload);
