@@ -316,8 +316,8 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           </div>
         )}
 
-        {/* Exterior Breakdown - only show if exterior is selected */}
-        {isResidential && form.watch("isExterior") && (
+        {/* Exterior Breakdown - show for all residential quotes when exterior is selected */}
+        {form.watch("isExterior") && (
           <div className="space-y-4 border rounded-lg p-4 bg-gray-50">
             <div>
               <FormLabel className="text-base font-medium">Labor Breakdown - Exterior</FormLabel>
