@@ -451,6 +451,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Simple quote not found" });
       }
       
+      console.log("Updated quote:", quote);
       res.json(quote);
     } catch (error) {
       console.error("Simple quote update error:", error);

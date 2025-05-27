@@ -89,16 +89,15 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
         status: "draft",
       };
 
-      try {
-        const response = await apiRequest(method, endpoint, payload);
-        if (!response.ok) {
-          throw new Error(`Failed to ${method === 'PATCH' ? 'update' : 'create'} simple quote`);
-        }
-        return await response.json();
-      } catch (error) {
-        console.error('API Error:', error);
-        throw error;
+      const response = await apiRequest(method, endpoint, payload);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to ${method === 'PATCH' ? 'update' : 'create'} simple quote: ${errorText}`);
       }
+      
+      const result = await response.json();
+      console.log('API Response:', result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
