@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -40,6 +41,8 @@ const simpleQuoteSchema = z.object({
   projectId: z.number().min(1, "Please select a project"),
   totalEstimate: z.number().min(0, "Total estimate must be greater than or equal to 0"),
   scopeOfWork: z.string().min(1, "Scope of work is required"),
+  isInterior: z.boolean().optional(),
+  isExterior: z.boolean().optional(),
   notes: z.string().optional(),
   validUntil: z.date().optional(),
   sentDate: z.date().optional(),
