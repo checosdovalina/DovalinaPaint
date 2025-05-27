@@ -263,58 +263,56 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           )}
         />
 
-        {/* Residential Service Options */}
-        {isResidential && (
-          <div className="space-y-4">
-            <div>
-              <FormLabel className="text-base font-medium">Service Type</FormLabel>
-              <p className="text-sm text-muted-foreground">Select which areas will be painted</p>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="isInterior"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Interior</FormLabel>
-                      <p className="text-sm text-muted-foreground">
-                        Indoor painting services
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="isExterior"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Exterior</FormLabel>
-                      <p className="text-sm text-muted-foreground">
-                        Outdoor painting services
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-            </div>
+        {/* Service Type Options */}
+        <div className="space-y-4">
+          <div>
+            <FormLabel className="text-base font-medium">Service Type</FormLabel>
+            <p className="text-sm text-muted-foreground">Select which areas will be painted</p>
           </div>
-        )}
+          <div className="grid gap-4 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="isInterior"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Interior</FormLabel>
+                    <p className="text-sm text-muted-foreground">
+                      Indoor painting services
+                    </p>
+                  </div>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="isExterior"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Exterior</FormLabel>
+                    <p className="text-sm text-muted-foreground">
+                      Outdoor painting services
+                    </p>
+                  </div>
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
         {/* Exterior Breakdown - show for all residential quotes when exterior is selected */}
         {form.watch("isExterior") && (
