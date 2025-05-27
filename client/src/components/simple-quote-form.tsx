@@ -66,6 +66,8 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       projectId: initialData?.projectId || 0,
       totalEstimate: initialData?.totalEstimate || initialData?.total || 0,
       scopeOfWork: initialData?.scopeOfWork || "",
+      isInterior: initialData?.isInterior || false,
+      isExterior: initialData?.isExterior || false,
       notes: initialData?.notes || "",
       validUntil: initialData?.validUntil ? new Date(initialData.validUntil) : undefined,
       sentDate: initialData?.sentDate ? new Date(initialData.sentDate) : undefined,
@@ -77,6 +79,16 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
     queryKey: ["/api/projects"],
   });
 
+  // Fetch clients to determine residential vs commercial
+  const { data: clients } = useQuery({
+    queryKey: ["/api/clients"],
+  });
+
+  // Check if selected project is residential
+  const selectedProject = projects?.find((p: any) => p.id === form.watch("projectId"));
+  const selectedClient = selectedProject ? clients?.find((c: any) => c.id === selectedProject.clientId) : null;
+  const isResidential = selectedClient?.classification === 'residential';
+
   const mutation = useMutation({
     mutationFn: async (data: SimpleQuoteFormData) => {
       if (initialData?.id) {
@@ -85,6 +97,8 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           projectId: data.projectId,
           totalEstimate: data.totalEstimate,
           scopeOfWork: data.scopeOfWork,
+          isInterior: data.isInterior || false,
+          isExterior: data.isExterior || false,
           notes: data.notes || "",
           validUntil: data.validUntil ? data.validUntil.toISOString() : null,
           sentDate: data.sentDate ? data.sentDate.toISOString() : null,
@@ -101,6 +115,8 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           projectId: data.projectId,
           totalEstimate: data.totalEstimate,
           scopeOfWork: data.scopeOfWork,
+          isInterior: data.isInterior || false,
+          isExterior: data.isExterior || false,
           notes: data.notes || "",
           validUntil: data.validUntil ? data.validUntil.toISOString() : null,
           sentDate: data.sentDate ? data.sentDate.toISOString() : null,
@@ -220,6 +236,59 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             </FormItem>
           )}
         />
+
+        {/* Residential Service Options */}
+        {isResidential && (
+          <div className="space-y-4">
+            <div>
+              <FormLabel className="text-base font-medium">Service Type</FormLabel>
+              <p className="text-sm text-muted-foreground">Select which areas will be painted</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="isInterior"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Interior</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Indoor painting services
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="isExterior"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Exterior</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Outdoor painting services
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        )}
 
         <div className="grid gap-4 md:grid-cols-2">
           <FormField
