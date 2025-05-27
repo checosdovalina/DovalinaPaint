@@ -99,73 +99,113 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       const margin = 20;
       let yPosition = margin;
 
-      // Company Header
+      // Add logo
+      try {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        
+        const logoPromise = new Promise((resolve, reject) => {
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx?.drawImage(img, 0, 0);
+            const logoData = canvas.toDataURL('image/jpeg');
+            resolve(logoData);
+          };
+          img.onerror = reject;
+        });
+        
+        img.src = logoPath;
+        const logoData = await logoPromise;
+        
+        // Add logo to PDF
+        pdf.addImage(logoData as string, 'JPEG', margin, yPosition, 20, 20);
+      } catch (error) {
+        console.log('Logo loading failed, continuing without logo');
+      }
+
+      // Company Header (next to logo)
       pdf.setFontSize(20);
       pdf.setFont("helvetica", "bold");
-      pdf.text("Dovalina Painting LLC", margin, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(12);
+      pdf.text("DOVALINA PAINTING LLC", margin + 25, yPosition + 8);
+      
+      pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
-      pdf.text("Professional Painting Services", margin, yPosition);
-      yPosition += 20;
+      pdf.text("3731 Aster Drive", margin + 25, yPosition + 15);
+      pdf.text("Charlotte, N.C. 28227", margin + 25, yPosition + 19);
+      pdf.text("704-506-9741", margin + 25, yPosition + 23);
+      pdf.text("d-dovalina@hotmail.com", margin + 25, yPosition + 27);
 
-      // Quote Title
+      // Quote number and details (right side)
       pdf.setFontSize(16);
       pdf.setFont("helvetica", "bold");
-      pdf.text("QUOTE", margin, yPosition);
+      pdf.text(`Quote #${quote.id}`, pageWidth - 60, yPosition + 8);
+      
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`Date: ${format(new Date(quote.createdAt), "MMMM do, yyyy")}`, pageWidth - 80, yPosition + 15);
+      pdf.text(`Status: ${getStatusLabel(quote.status)}`, pageWidth - 80, yPosition + 19);
+      if (quote.validUntil) {
+        pdf.text(`Valid until: ${format(new Date(quote.validUntil), "MMMM do, yyyy")}`, pageWidth - 80, yPosition + 23);
+      }
+
+      // Line separator
+      yPosition += 35;
+      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
       yPosition += 15;
 
-      // Quote Details
-      pdf.setFontSize(11);
-      pdf.setFont("helvetica", "normal");
-      
-      pdf.text(`Quote #: ${quote.id}`, margin, yPosition);
-      pdf.text(`Date: ${format(new Date(quote.createdAt), "MM/dd/yyyy")}`, pageWidth - 80, yPosition);
-      yPosition += 8;
+      // Project Information Section (Left)
+      const leftColumnX = margin;
+      const rightColumnX = pageWidth / 2 + 10;
+      const boxWidth = (pageWidth / 2) - 25;
+      const boxHeight = 35;
 
-      if (quote.validUntil) {
-        pdf.text(`Valid Until: ${format(new Date(quote.validUntil), "MM/dd/yyyy")}`, pageWidth - 80, yPosition);
-        yPosition += 8;
+      // Project Information Box
+      pdf.rect(leftColumnX, yPosition, boxWidth, boxHeight);
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Project Information", leftColumnX + 5, yPosition + 8);
+      
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      let projectY = yPosition + 15;
+      if (project) {
+        pdf.text(`Name: ${project.title}`, leftColumnX + 5, projectY);
+        projectY += 5;
+        pdf.text(`Address: ${project.address || "N/A"}`, leftColumnX + 5, projectY);
+        projectY += 5;
+        pdf.text(`Description: ${project.description || "N/A"}`, leftColumnX + 5, projectY);
       }
 
-      yPosition += 5;
-
-      // Client Information
+      // Client Information Box (Right)
+      pdf.rect(rightColumnX, yPosition, boxWidth, boxHeight);
+      pdf.setFontSize(12);
       pdf.setFont("helvetica", "bold");
-      pdf.text("Client Information:", margin, yPosition);
-      yPosition += 8;
-
+      pdf.text("Client Information", rightColumnX + 5, yPosition + 8);
+      
+      pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
+      let clientY = yPosition + 15;
       if (client) {
-        pdf.text(`Name: ${client.name}`, margin, yPosition);
-        yPosition += 6;
+        pdf.text(`Name: ${client.name}`, rightColumnX + 5, clientY);
+        clientY += 5;
         if (client.email) {
-          pdf.text(`Email: ${client.email}`, margin, yPosition);
-          yPosition += 6;
+          pdf.text(`Email: ${client.email}`, rightColumnX + 5, clientY);
+          clientY += 5;
         }
         if (client.phone) {
-          pdf.text(`Phone: ${client.phone}`, margin, yPosition);
-          yPosition += 6;
+          pdf.text(`Phone: ${client.phone}`, rightColumnX + 5, clientY);
+          clientY += 5;
         }
         if (client.address) {
-          pdf.text(`Address: ${client.address}`, margin, yPosition);
-          yPosition += 6;
+          pdf.text(`Address: ${client.address}`, rightColumnX + 5, clientY);
+          clientY += 5;
         }
       }
 
-      yPosition += 10;
-
-      // Project Information
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Project:", margin, yPosition);
-      yPosition += 8;
-
-      pdf.setFont("helvetica", "normal");
-      if (project) {
-        pdf.text(`Title: ${project.title}`, margin, yPosition);
-        yPosition += 6;
-      }
+      yPosition += boxHeight + 15;
 
       yPosition += 10;
 
