@@ -31,7 +31,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Minus } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -438,106 +438,174 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
               
               {form.watch("exteriorBreakdown.siding.enabled") && (
                 <div className="space-y-3 ml-6">
-                  {/* Material Dropdown */}
-                  <FormField
-                    control={form.control}
-                    name="exteriorBreakdown.siding.material"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Material Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select siding material" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="clapboard">Clapboard Siding</SelectItem>
-                            <SelectItem value="t1-11">T1-11 Siding</SelectItem>
-                            <SelectItem value="cedar">Cedar Siding</SelectItem>
-                            <SelectItem value="vertical">Vertical Siding</SelectItem>
-                            <SelectItem value="masonite">Masonite Siding</SelectItem>
-                            <SelectItem value="natural-wood">Natural Wood Siding</SelectItem>
-                            <SelectItem value="faux-wood">Faux Wood Siding</SelectItem>
-                            <SelectItem value="aluminum">Aluminum Siding</SelectItem>
-                            <SelectItem value="vinyl">Vinyl Siding</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  {/* Quantity, Price, Subtotal */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <FormField
-                      control={form.control}
-                      name="exteriorBreakdown.siding.quantity"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">Quantity</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="0"
-                              {...field}
-                              onChange={(e) => {
-                                const quantity = parseFloat(e.target.value) || 0;
-                                field.onChange(quantity);
-                                const price = form.getValues("exteriorBreakdown.siding.price") || 0;
-                                form.setValue("exteriorBreakdown.siding.subtotal", quantity * price);
-                              }}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="exteriorBreakdown.siding.price"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">Price ($)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="0.00"
-                              {...field}
-                              onChange={(e) => {
-                                const price = parseFloat(e.target.value) || 0;
-                                field.onChange(price);
-                                const quantity = form.getValues("exteriorBreakdown.siding.quantity") || 0;
-                                form.setValue("exteriorBreakdown.siding.subtotal", quantity * price);
-                              }}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="exteriorBreakdown.siding.subtotal"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">Subtotal ($)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="0.00"
-                              {...field}
-                              readOnly
-                              className="bg-gray-100"
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                  {/* Add Line Button */}
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const currentLines = form.getValues("exteriorBreakdown.siding.lines") || [];
+                        form.setValue("exteriorBreakdown.siding.lines", [
+                          ...currentLines,
+                          { material: "", quantity: 0, price: 0, subtotal: 0 }
+                        ]);
+                      }}
+                      className="h-8"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Line
+                    </Button>
                   </div>
+
+                  {/* Dynamic Lines */}
+                  {(form.watch("exteriorBreakdown.siding.lines") || []).map((_, lineIndex) => (
+                    <div key={lineIndex} className="border border-gray-200 rounded-lg p-3 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Siding Line #{lineIndex + 1}</span>
+                        {lineIndex > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const currentLines = form.getValues("exteriorBreakdown.siding.lines") || [];
+                              const newLines = currentLines.filter((_, i) => i !== lineIndex);
+                              form.setValue("exteriorBreakdown.siding.lines", newLines);
+                            }}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Material Dropdown */}
+                      <FormField
+                        control={form.control}
+                        name={`exteriorBreakdown.siding.lines.${lineIndex}.material`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Material Type</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select siding material" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="clapboard">Clapboard Siding</SelectItem>
+                                <SelectItem value="t1-11">T1-11 Siding</SelectItem>
+                                <SelectItem value="cedar">Cedar Siding</SelectItem>
+                                <SelectItem value="vertical">Vertical Siding</SelectItem>
+                                <SelectItem value="masonite">Masonite Siding</SelectItem>
+                                <SelectItem value="natural-wood">Natural Wood Siding</SelectItem>
+                                <SelectItem value="faux-wood">Faux Wood Siding</SelectItem>
+                                <SelectItem value="aluminum">Aluminum Siding</SelectItem>
+                                <SelectItem value="vinyl">Vinyl Siding</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {/* Quantity, Price, Subtotal */}
+                      <div className="grid grid-cols-3 gap-2">
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.siding.lines.${lineIndex}.quantity`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Quantity</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const quantity = parseFloat(e.target.value) || 0;
+                                    field.onChange(quantity);
+                                    const lines = form.getValues("exteriorBreakdown.siding.lines") || [];
+                                    if (lines[lineIndex]) {
+                                      const price = lines[lineIndex].price || 0;
+                                      form.setValue(`exteriorBreakdown.siding.lines.${lineIndex}.subtotal`, quantity * price);
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.siding.lines.${lineIndex}.price`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Price ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const price = parseFloat(e.target.value) || 0;
+                                    field.onChange(price);
+                                    const lines = form.getValues("exteriorBreakdown.siding.lines") || [];
+                                    if (lines[lineIndex]) {
+                                      const quantity = lines[lineIndex].quantity || 0;
+                                      form.setValue(`exteriorBreakdown.siding.lines.${lineIndex}.subtotal`, quantity * price);
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.siding.lines.${lineIndex}.subtotal`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Subtotal ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  readOnly
+                                  className="bg-gray-100"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Initialize with first line if none exist */}
+                  {(!form.watch("exteriorBreakdown.siding.lines") || form.watch("exteriorBreakdown.siding.lines").length === 0) && (
+                    <div className="text-center py-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("exteriorBreakdown.siding.lines", [
+                            { material: "", quantity: 0, price: 0, subtotal: 0 }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Siding Line
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
