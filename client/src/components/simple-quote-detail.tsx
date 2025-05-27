@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileDown, Printer, Eye } from "lucide-react";
 import { format } from "date-fns";
+import logoPath from "@assets/78c08020-ed9d-43be-8936-ddbc8089b6c3.jpeg";
 import jsPDF from "jspdf";
 
 interface SimpleQuoteDetailProps {
@@ -255,56 +256,72 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Quote Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Project Information</h3>
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Project:</span>
-                    <p className="text-sm text-gray-900">{project?.title || "N/A"}</p>
+          {/* Company Header */}
+          <div className="border-b pb-6">
+            <div className="flex justify-between items-start">
+              <div className="flex items-start space-x-4">
+                <img 
+                  src={logoPath} 
+                  alt="Dovalina Painting LLC Logo" 
+                  className="h-16 w-16 object-contain"
+                />
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">DOVALINA PAINTING LLC</h1>
+                  <div className="mt-2 text-sm text-gray-600 space-y-1">
+                    <p>3731 Aster Drive</p>
+                    <p>Charlotte, N.C. 28227</p>
+                    <p>704-506-9741</p>
+                    <p>d-dovalina@hotmail.com</p>
                   </div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Client:</span>
-                    <p className="text-sm text-gray-900">{client?.name || "N/A"}</p>
-                  </div>
-                  {project?.address && (
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">Address:</span>
-                      <p className="text-sm text-gray-900">{project.address}</p>
-                    </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <h2 className="text-2xl font-bold text-gray-900">Quote #{quote.id}</h2>
+                <div className="mt-2 text-sm text-gray-600 space-y-1">
+                  <p><span className="font-medium">Date:</span> {format(new Date(quote.createdAt), "MMMM do, yyyy")}</p>
+                  <p><span className="font-medium">Status:</span> <span className={`inline-flex px-2 py-1 text-xs rounded-full ${getStatusColor(quote.status)}`}>{getStatusLabel(quote.status)}</span></p>
+                  {quote.validUntil && (
+                    <p><span className="font-medium">Valid until:</span> {format(new Date(quote.validUntil), "MMMM do, yyyy")}</p>
                   )}
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Quote Details</h3>
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Created:</span>
-                    <p className="text-sm text-gray-900">
-                      {format(new Date(quote.createdAt), "PPP")}
-                    </p>
-                  </div>
-                  {quote.validUntil && (
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">Valid Until:</span>
-                      <p className="text-sm text-gray-900">
-                        {format(new Date(quote.validUntil), "PPP")}
-                      </p>
-                    </div>
-                  )}
-                  {quote.sentDate && (
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">Sent Date:</span>
-                      <p className="text-sm text-gray-900">
-                        {format(new Date(quote.sentDate), "PPP")}
-                      </p>
-                    </div>
-                  )}
+          {/* Project and Client Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Information</h3>
+              <div className="space-y-3">
+                <div>
+                  <span className="font-medium text-gray-700">Name:</span>
+                  <p className="text-gray-900">{project?.title || "N/A"}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Address:</span>
+                  <p className="text-gray-900">{project?.address || "N/A"}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Description:</span>
+                  <p className="text-gray-900">{project?.description || "N/A"}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Client Information</h3>
+              <div className="space-y-3">
+                <div>
+                  <span className="font-medium text-gray-700">Name:</span>
+                  <p className="text-gray-900">{client?.name || "N/A"}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Email:</span>
+                  <p className="text-gray-900">{client?.email || "N/A"}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Phone:</span>
+                  <p className="text-gray-900">{client?.phone || "N/A"}</p>
                 </div>
               </div>
             </div>
