@@ -390,6 +390,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simple Quote routes (simplified quote module)
+  app.post("/api/simple-quotes", isAuthenticated, async (req, res) => {
+    try {
+      const simpleQuoteData = {
+        projectId: req.body.projectId,
+        totalEstimate: req.body.totalEstimate,
+        scopeOfWork: req.body.scopeOfWork,
+        notes: req.body.notes,
+        validUntil: req.body.validUntil,
+        sentDate: req.body.sentDate,
+        status: "draft",
+        materialsEstimate: [],
+        laborEstimate: [],
+      };
+
+      const quote = await storage.createQuote(simpleQuoteData);
+      
+      // Get project for activity
+      const project = await storage.getProject(quote.projectId);
+      
+      // Create activity for simple quote creation
+      await storage.createActivity({
+        type: "quote_created",
+        description: `Simple quote created for project "${project?.title || 'Unknown'}"`,
+        userId: req.user.id,
+        projectId: quote.projectId,
+        clientId: project?.clientId
+      });
+      
+      res.status(201).json(quote);
+    } catch (error) {
+      console.error("Simple quote creation error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Service Order routes
   app.get("/api/service-orders", isAuthenticated, async (req, res) => {
     try {

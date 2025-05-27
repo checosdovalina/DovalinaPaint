@@ -1,0 +1,276 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Plus, Eye, Edit, Trash2, FileDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { SimpleQuoteForm } from "@/components/simple-quote-form";
+import { Layout } from "@/components/layout";
+import PageHeader from "@/components/page-header";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+
+export default function SimpleQuotes() {
+  const [showQuoteForm, setShowQuoteForm] = useState(false);
+  const [quoteToEdit, setQuoteToEdit] = useState<any>(null);
+  const [quoteToDelete, setQuoteToDelete] = useState<any>(null);
+  const { toast } = useToast();
+
+  // Fetch quotes and projects
+  const { data: quotes = [], isLoading } = useQuery({
+    queryKey: ["/api/quotes"],
+  });
+
+  const { data: projects = [] } = useQuery({
+    queryKey: ["/api/projects"],
+  });
+
+  const { data: clients = [] } = useQuery({
+    queryKey: ["/api/clients"],
+  });
+
+  // Filter only simple quotes (those with scopeOfWork)
+  const simpleQuotes = quotes.filter((quote: any) => quote.scopeOfWork) || [];
+
+  const handleNewQuote = () => {
+    setQuoteToEdit(null);
+    setShowQuoteForm(true);
+  };
+
+  const handleEditQuote = (quote: any) => {
+    setQuoteToEdit(quote);
+    setShowQuoteForm(true);
+  };
+
+  const handleDeleteQuote = async () => {
+    if (!quoteToDelete) return;
+
+    try {
+      await apiRequest("DELETE", `/api/quotes/${quoteToDelete.id}`);
+      queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+      toast({
+        title: "Presupuesto eliminado",
+        description: "El presupuesto ha sido eliminado exitosamente",
+      });
+      setQuoteToDelete(null);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el presupuesto",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCloseForm = () => {
+    setShowQuoteForm(false);
+    setQuoteToEdit(null);
+  };
+
+  const getProjectTitle = (projectId: number) => {
+    const project = projects?.find((p: any) => p.id === projectId);
+    return project ? project.title : `Proyecto #${projectId}`;
+  };
+
+  const getClientName = (projectId: number) => {
+    const project = projects?.find((p: any) => p.id === projectId);
+    if (project) {
+      const client = clients?.find((c: any) => c.id === project.clientId);
+      return client ? client.name : `Cliente #${project.clientId}`;
+    }
+    return "Cliente desconocido";
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "draft":
+        return "Borrador";
+      case "sent":
+        return "Enviado";
+      case "approved":
+        return "Aprobado";
+      case "rejected":
+        return "Rechazado";
+      default:
+        return status;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "draft":
+        return "bg-gray-100 text-gray-800";
+      case "sent":
+        return "bg-blue-100 text-blue-800";
+      case "approved":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Layout title="Presupuestos Simplificados">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout title="Presupuestos Simplificados">
+      <PageHeader
+        title="Presupuestos Simplificados"
+        description="Gestiona presupuestos con alcance de trabajo simplificado"
+        actions={
+          <Button onClick={handleNewQuote}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Presupuesto
+          </Button>
+        }
+      />
+
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        {simpleQuotes.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-gray-500 text-lg mb-4">No hay presupuestos simplificados</div>
+            <Button onClick={handleNewQuote}>
+              <Plus className="h-4 w-4 mr-2" />
+              Crear Primer Presupuesto
+            </Button>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Proyecto
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cliente
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Estado
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Fecha
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {simpleQuotes.map((quote: any) => (
+                  <tr key={quote.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {getProjectTitle(quote.projectId)}
+                      </div>
+                      <div className="text-sm text-gray-500 max-w-xs truncate">
+                        {quote.scopeOfWork}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {getClientName(quote.projectId)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        ${quote.totalEstimate.toLocaleString()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                          quote.status
+                        )}`}
+                      >
+                        {getStatusLabel(quote.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {quote.sentDate
+                        ? format(new Date(quote.sentDate), "dd/MM/yyyy", { locale: es })
+                        : format(new Date(quote.createdAt), "dd/MM/yyyy", { locale: es })}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditQuote(quote)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setQuoteToDelete(quote)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Quote Form Dialog */}
+      <Dialog open={showQuoteForm} onOpenChange={setShowQuoteForm}>
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {quoteToEdit ? "Editar Presupuesto Simplificado" : "Nuevo Presupuesto Simplificado"}
+            </DialogTitle>
+            <DialogDescription>
+              {quoteToEdit
+                ? "Modifica los detalles del presupuesto según sea necesario"
+                : "Crea un presupuesto con alcance de trabajo simplificado"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[75vh] overflow-y-auto pr-2">
+            <SimpleQuoteForm
+              initialData={quoteToEdit || undefined}
+              onSuccess={handleCloseForm}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={!!quoteToDelete}
+        onOpenChange={() => setQuoteToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará permanentemente el presupuesto.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteQuote}>
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Layout>
+  );
+}

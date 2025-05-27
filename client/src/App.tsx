@@ -21,6 +21,7 @@ import Payments from "@/pages/payments";
 import FinancialReports from "@/pages/financial-reports";
 import Suppliers from "@/pages/suppliers";
 import PurchaseOrders from "@/pages/purchase-orders";
+import SimpleQuotes from "@/pages/simple-quotes";
 
 function Router() {
   return (

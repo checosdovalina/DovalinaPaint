@@ -70,7 +70,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   });
 
   // Fetch projects
-  const { data: projects } = useQuery({
+  const { data: projects = [] } = useQuery({
     queryKey: ["/api/projects"],
   });
 
