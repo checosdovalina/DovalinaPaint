@@ -70,13 +70,13 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   });
 
   // Fetch projects
-  const { data: projects = [] } = useQuery({
+  const { data: projects } = useQuery({
     queryKey: ["/api/projects"],
   });
 
   const mutation = useMutation({
     mutationFn: async (data: SimpleQuoteFormData) => {
-      const endpoint = initialData?.id ? `/api/quotes/${initialData.id}` : "/api/simple-quotes";
+      const endpoint = initialData?.id ? `/api/simple-quotes/${initialData.id}` : "/api/simple-quotes";
       const method = initialData?.id ? "PATCH" : "POST";
       
       const payload = {
@@ -135,7 +135,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {projects?.map((project: any) => (
+                    {Array.isArray(projects) && projects.map((project: any) => (
                       <SelectItem key={project.id} value={project.id.toString()}>
                         {project.title}
                       </SelectItem>

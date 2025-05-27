@@ -426,6 +426,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update Simple Quote
+  app.patch("/api/simple-quotes/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const simpleQuoteData = {
+        projectId: req.body.projectId,
+        totalEstimate: req.body.totalEstimate,
+        scopeOfWork: req.body.scopeOfWork,
+        notes: req.body.notes,
+        validUntil: req.body.validUntil && req.body.validUntil !== "" ? new Date(req.body.validUntil) : null,
+        sentDate: req.body.sentDate && req.body.sentDate !== "" ? new Date(req.body.sentDate) : null,
+        status: req.body.status || "draft",
+      };
+
+      const quote = await storage.updateQuote(id, simpleQuoteData);
+      
+      if (!quote) {
+        return res.status(404).json({ message: "Simple quote not found" });
+      }
+      
+      res.json(quote);
+    } catch (error) {
+      console.error("Simple quote update error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Service Order routes
   app.get("/api/service-orders", isAuthenticated, async (req, res) => {
     try {
