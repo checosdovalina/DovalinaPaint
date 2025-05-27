@@ -108,6 +108,8 @@ export const quotes = pgTable("quotes", {
   // Residential service options
   isInterior: boolean("is_interior").default(false),
   isExterior: boolean("is_exterior").default(false),
+  // Exterior breakdown options
+  exteriorBreakdown: jsonb("exterior_breakdown"), // {soffit: {ft: number, price: number, subtotal: number}, facia: {...}, gutters: {...}}
   status: text("status").notNull().default("draft"), // draft, sent, approved, rejected
   sentDate: timestamp("sent_date"),
   validUntil: timestamp("valid_until"),
@@ -125,6 +127,7 @@ const baseQuoteSchema = createInsertSchema(quotes).pick({
   scopeOfWork: true,
   isInterior: true,
   isExterior: true,
+  exteriorBreakdown: true,
   totalEstimate: true,
   status: true,
   notes: true,
