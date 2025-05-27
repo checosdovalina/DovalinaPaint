@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -654,6 +655,173 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                       <input type="hidden" {...field} />
                     )}
                   />
+                </div>
+              )}
+            </div>
+
+            {/* Chimney */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="exteriorBreakdown.chimney.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Chimney</FormLabel>
+                      <p className="text-xs text-muted-foreground">Chimney painting with material selection</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("exteriorBreakdown.chimney.enabled") && (
+                <div className="space-y-3 ml-6">
+                  {/* Chimney Type - Radio Buttons */}
+                  <FormField
+                    control={form.control}
+                    name="exteriorBreakdown.chimney.type"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="text-xs">Chimney Type</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              // Clear siding material when switching to brick
+                              if (value === "brick") {
+                                form.setValue("exteriorBreakdown.chimney.sidingMaterial", "");
+                              }
+                            }}
+                            defaultValue={field.value}
+                            className="flex flex-row space-x-6"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="brick" id="chimney-brick" />
+                              <label htmlFor="chimney-brick" className="text-sm font-medium">
+                                Brick
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="siding" id="chimney-siding" />
+                              <label htmlFor="chimney-siding" className="text-sm font-medium">
+                                Siding
+                              </label>
+                            </div>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Siding Material Dropdown - Only show if Siding is selected */}
+                  {form.watch("exteriorBreakdown.chimney.type") === "siding" && (
+                    <FormField
+                      control={form.control}
+                      name="exteriorBreakdown.chimney.sidingMaterial"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Siding Material</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select siding material" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="clapboard">Clapboard Siding</SelectItem>
+                              <SelectItem value="t1-11">T1-11 Siding</SelectItem>
+                              <SelectItem value="cedar">Cedar Siding</SelectItem>
+                              <SelectItem value="vertical">Vertical Siding</SelectItem>
+                              <SelectItem value="masonite">Masonite Siding</SelectItem>
+                              <SelectItem value="natural-wood">Natural Wood Siding</SelectItem>
+                              <SelectItem value="faux-wood">Faux Wood Siding</SelectItem>
+                              <SelectItem value="aluminum">Aluminum Siding</SelectItem>
+                              <SelectItem value="vinyl">Vinyl Siding</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  
+                  {/* Quantity, Price, Subtotal */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <FormField
+                      control={form.control}
+                      name="exteriorBreakdown.chimney.quantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Quantity</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0"
+                              {...field}
+                              onChange={(e) => {
+                                const quantity = parseFloat(e.target.value) || 0;
+                                field.onChange(quantity);
+                                const price = form.getValues("exteriorBreakdown.chimney.price") || 0;
+                                form.setValue("exteriorBreakdown.chimney.subtotal", quantity * price);
+                              }}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="exteriorBreakdown.chimney.price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Price ($)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              {...field}
+                              onChange={(e) => {
+                                const price = parseFloat(e.target.value) || 0;
+                                field.onChange(price);
+                                const quantity = form.getValues("exteriorBreakdown.chimney.quantity") || 0;
+                                form.setValue("exteriorBreakdown.chimney.subtotal", quantity * price);
+                              }}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="exteriorBreakdown.chimney.subtotal"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Subtotal ($)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              {...field}
+                              readOnly
+                              className="bg-gray-100"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
               )}
             </div>
