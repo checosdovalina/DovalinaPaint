@@ -37,9 +37,9 @@ import { useState } from "react";
 
 // Simplified quote schema without cost breakdown
 const simpleQuoteSchema = z.object({
-  projectId: z.number().min(1, "Debe seleccionar un proyecto"),
-  totalEstimate: z.number().min(0, "El total estimado debe ser mayor o igual a 0"),
-  scopeOfWork: z.string().min(1, "El alcance del trabajo es requerido"),
+  projectId: z.number().min(1, "Please select a project"),
+  totalEstimate: z.number().min(0, "Total estimate must be greater than or equal to 0"),
+  scopeOfWork: z.string().min(1, "Scope of work is required"),
   notes: z.string().optional(),
   validUntil: z.date().optional(),
   sentDate: z.date().optional(),
@@ -95,17 +95,17 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
       toast({
-        title: "Éxito",
+        title: "Success",
         description: initialData?.id 
-          ? "Presupuesto actualizado exitosamente" 
-          : "Presupuesto creado exitosamente",
+          ? "Quote updated successfully" 
+          : "Quote created successfully",
       });
       onSuccess();
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Error al guardar el presupuesto",
+        description: error.message || "Error saving quote",
         variant: "destructive",
       });
     },
