@@ -94,11 +94,12 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/simple-quotes"] });
       toast({
         title: "Success",
         description: initialData?.id 
-          ? "Quote updated successfully" 
-          : "Quote created successfully",
+          ? "Simple quote updated successfully" 
+          : "Simple quote created successfully",
       });
       onSuccess();
     },
