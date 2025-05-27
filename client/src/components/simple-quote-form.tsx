@@ -99,16 +99,25 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       console.log('API Response:', result);
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Simple quote saved successfully:", data);
+      
+      // Invalidate cache to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
       queryClient.invalidateQueries({ queryKey: ["/api/simple-quotes"] });
+      
+      // Show success message
       toast({
         title: "Success",
         description: initialData?.id 
           ? "Simple quote updated successfully" 
           : "Simple quote created successfully",
       });
-      onSuccess();
+      
+      // Close modal/form
+      if (typeof onSuccess === 'function') {
+        onSuccess();
+      }
     },
     onError: (error: any) => {
       console.error("Simple quote error:", error);
