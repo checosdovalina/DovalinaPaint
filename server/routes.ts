@@ -448,6 +448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         scopeOfWork: req.body.scopeOfWork || "",
         isInterior: req.body.isInterior || false,
         isExterior: req.body.isExterior || false,
+        exteriorBreakdown: req.body.exteriorBreakdown || null,
         notes: req.body.notes || "",
         validUntil: req.body.validUntil ? new Date(req.body.validUntil) : null,
         sentDate: req.body.sentDate ? new Date(req.body.sentDate) : null,
