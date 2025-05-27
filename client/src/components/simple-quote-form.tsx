@@ -107,11 +107,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   const selectedClient = selectedProject ? clients?.find((c: any) => c.id === selectedProject.clientId) : null;
   const isResidential = selectedClient?.classification === 'residential';
   
-  // Debug logs
-  console.log('Debug - selectedProject:', selectedProject);
-  console.log('Debug - selectedClient:', selectedClient);
-  console.log('Debug - isResidential:', isResidential);
-  console.log('Debug - form.watch("isExterior"):', form.watch("isExterior"));
+
 
   const mutation = useMutation({
     mutationFn: async (data: SimpleQuoteFormData) => {
@@ -322,11 +318,11 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
               <p className="text-sm text-muted-foreground">Select and price specific exterior components</p>
             </div>
             
-            {/* Soffit */}
+            {/* Boxes (Unified Soffit, Facia, Gutters) */}
             <div className="space-y-2">
               <FormField
                 control={form.control}
-                name="exteriorBreakdown.soffit.enabled"
+                name="exteriorBreakdown.boxes.enabled"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                     <FormControl>
@@ -336,31 +332,33 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="font-medium">Soffit</FormLabel>
+                      <FormLabel className="font-medium">Boxes (Soffit, Facia, Gutters)</FormLabel>
+                      <p className="text-xs text-muted-foreground">Quantity will be multiplied by 3 automatically</p>
                     </div>
                   </FormItem>
                 )}
               />
               
-              {form.watch("exteriorBreakdown.soffit.enabled") && (
+              {form.watch("exteriorBreakdown.boxes.enabled") && (
                 <div className="grid grid-cols-3 gap-2 ml-6">
                   <FormField
                     control={form.control}
-                    name="exteriorBreakdown.soffit.ft"
+                    name="exteriorBreakdown.boxes.quantity"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">Ft</FormLabel>
+                        <FormLabel className="text-xs">Quantity</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
-                            step="0.01"
+                            step="1"
                             placeholder="0"
                             {...field}
                             onChange={(e) => {
-                              const ft = parseFloat(e.target.value) || 0;
-                              field.onChange(ft);
-                              const price = form.getValues("exteriorBreakdown.soffit.price") || 0;
-                              form.setValue("exteriorBreakdown.soffit.subtotal", ft * price);
+                              const quantity = parseFloat(e.target.value) || 0;
+                              field.onChange(quantity);
+                              const price = form.getValues("exteriorBreakdown.boxes.price") || 0;
+                              // Multiply quantity by 3 for the subtotal calculation
+                              form.setValue("exteriorBreakdown.boxes.subtotal", (quantity * 3) * price);
                             }}
                           />
                         </FormControl>
@@ -370,7 +368,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   
                   <FormField
                     control={form.control}
-                    name="exteriorBreakdown.soffit.price"
+                    name="exteriorBreakdown.boxes.price"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs">Price ($)</FormLabel>
@@ -383,8 +381,9 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                             onChange={(e) => {
                               const price = parseFloat(e.target.value) || 0;
                               field.onChange(price);
-                              const ft = form.getValues("exteriorBreakdown.soffit.ft") || 0;
-                              form.setValue("exteriorBreakdown.soffit.subtotal", ft * price);
+                              const quantity = form.getValues("exteriorBreakdown.boxes.quantity") || 0;
+                              // Multiply quantity by 3 for the subtotal calculation
+                              form.setValue("exteriorBreakdown.boxes.subtotal", (quantity * 3) * price);
                             }}
                           />
                         </FormControl>
@@ -394,193 +393,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   
                   <FormField
                     control={form.control}
-                    name="exteriorBreakdown.soffit.subtotal"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Subtotal ($)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            {...field}
-                            readOnly
-                            className="bg-gray-100"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Facia */}
-            <div className="space-y-2">
-              <FormField
-                control={form.control}
-                name="exteriorBreakdown.facia.enabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="font-medium">Facia</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              
-              {form.watch("exteriorBreakdown.facia.enabled") && (
-                <div className="grid grid-cols-3 gap-2 ml-6">
-                  <FormField
-                    control={form.control}
-                    name="exteriorBreakdown.facia.ft"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Ft</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) => {
-                              const ft = parseFloat(e.target.value) || 0;
-                              field.onChange(ft);
-                              const price = form.getValues("exteriorBreakdown.facia.price") || 0;
-                              form.setValue("exteriorBreakdown.facia.subtotal", ft * price);
-                            }}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="exteriorBreakdown.facia.price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Price ($)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            {...field}
-                            onChange={(e) => {
-                              const price = parseFloat(e.target.value) || 0;
-                              field.onChange(price);
-                              const ft = form.getValues("exteriorBreakdown.facia.ft") || 0;
-                              form.setValue("exteriorBreakdown.facia.subtotal", ft * price);
-                            }}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="exteriorBreakdown.facia.subtotal"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Subtotal ($)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            {...field}
-                            readOnly
-                            className="bg-gray-100"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Gutters */}
-            <div className="space-y-2">
-              <FormField
-                control={form.control}
-                name="exteriorBreakdown.gutters.enabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="font-medium">Gutters</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              
-              {form.watch("exteriorBreakdown.gutters.enabled") && (
-                <div className="grid grid-cols-3 gap-2 ml-6">
-                  <FormField
-                    control={form.control}
-                    name="exteriorBreakdown.gutters.ft"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Ft</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) => {
-                              const ft = parseFloat(e.target.value) || 0;
-                              field.onChange(ft);
-                              const price = form.getValues("exteriorBreakdown.gutters.price") || 0;
-                              form.setValue("exteriorBreakdown.gutters.subtotal", ft * price);
-                            }}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="exteriorBreakdown.gutters.price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Price ($)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            {...field}
-                            onChange={(e) => {
-                              const price = parseFloat(e.target.value) || 0;
-                              field.onChange(price);
-                              const ft = form.getValues("exteriorBreakdown.gutters.ft") || 0;
-                              form.setValue("exteriorBreakdown.gutters.subtotal", ft * price);
-                            }}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="exteriorBreakdown.gutters.subtotal"
+                    name="exteriorBreakdown.boxes.subtotal"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs">Subtotal ($)</FormLabel>
