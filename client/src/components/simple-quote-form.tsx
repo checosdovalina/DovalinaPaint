@@ -825,6 +825,220 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 </div>
               )}
             </div>
+
+            {/* Porch */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="exteriorBreakdown.porch.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Porch</FormLabel>
+                      <p className="text-xs text-muted-foreground">Porch painting with columns and ceiling options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("exteriorBreakdown.porch.enabled") && (
+                <div className="space-y-4 ml-6">
+                  {/* Columns Sub-section */}
+                  <div className="space-y-2">
+                    <FormField
+                      control={form.control}
+                      name="exteriorBreakdown.porch.columns.enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-sm font-medium">Columns</FormLabel>
+                            <p className="text-xs text-muted-foreground">Porch columns painting</p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    {form.watch("exteriorBreakdown.porch.columns.enabled") && (
+                      <div className="grid grid-cols-3 gap-2 ml-6">
+                        <FormField
+                          control={form.control}
+                          name="exteriorBreakdown.porch.columns.quantity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Quantity</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="1"
+                                  placeholder="0"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const quantity = parseFloat(e.target.value) || 0;
+                                    field.onChange(quantity);
+                                    const price = form.getValues("exteriorBreakdown.porch.columns.price") || 0;
+                                    form.setValue("exteriorBreakdown.porch.columns.subtotal", quantity * price);
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="exteriorBreakdown.porch.columns.price"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Price ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const price = parseFloat(e.target.value) || 0;
+                                    field.onChange(price);
+                                    const quantity = form.getValues("exteriorBreakdown.porch.columns.quantity") || 0;
+                                    form.setValue("exteriorBreakdown.porch.columns.subtotal", quantity * price);
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="exteriorBreakdown.porch.columns.subtotal"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Subtotal ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  readOnly
+                                  className="bg-gray-100"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Ceiling Sub-section */}
+                  <div className="space-y-2">
+                    <FormField
+                      control={form.control}
+                      name="exteriorBreakdown.porch.ceiling.enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                            <p className="text-xs text-muted-foreground">Porch ceiling painting</p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    {form.watch("exteriorBreakdown.porch.ceiling.enabled") && (
+                      <div className="grid grid-cols-3 gap-2 ml-6">
+                        <FormField
+                          control={form.control}
+                          name="exteriorBreakdown.porch.ceiling.quantity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Sq Ft</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const quantity = parseFloat(e.target.value) || 0;
+                                    field.onChange(quantity);
+                                    const price = form.getValues("exteriorBreakdown.porch.ceiling.price") || 0;
+                                    form.setValue("exteriorBreakdown.porch.ceiling.subtotal", quantity * price);
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="exteriorBreakdown.porch.ceiling.price"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const price = parseFloat(e.target.value) || 0;
+                                    field.onChange(price);
+                                    const quantity = form.getValues("exteriorBreakdown.porch.ceiling.quantity") || 0;
+                                    form.setValue("exteriorBreakdown.porch.ceiling.subtotal", quantity * price);
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="exteriorBreakdown.porch.ceiling.subtotal"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Subtotal ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  readOnly
+                                  className="bg-gray-100"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
