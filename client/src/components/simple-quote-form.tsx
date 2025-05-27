@@ -61,7 +61,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
     resolver: zodResolver(simpleQuoteSchema),
     defaultValues: {
       projectId: initialData?.projectId || 0,
-      totalEstimate: initialData?.totalEstimate || 0,
+      totalEstimate: initialData?.totalEstimate || initialData?.total || 0,
       scopeOfWork: initialData?.scopeOfWork || "",
       notes: initialData?.notes || "",
       validUntil: initialData?.validUntil ? new Date(initialData.validUntil) : undefined,
