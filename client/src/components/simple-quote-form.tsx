@@ -106,6 +106,12 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   const selectedProject = projects?.find((p: any) => p.id === form.watch("projectId"));
   const selectedClient = selectedProject ? clients?.find((c: any) => c.id === selectedProject.clientId) : null;
   const isResidential = selectedClient?.classification === 'residential';
+  
+  // Debug logs
+  console.log('Debug - selectedProject:', selectedProject);
+  console.log('Debug - selectedClient:', selectedClient);
+  console.log('Debug - isResidential:', isResidential);
+  console.log('Debug - form.watch("isExterior"):', form.watch("isExterior"));
 
   const mutation = useMutation({
     mutationFn: async (data: SimpleQuoteFormData) => {
