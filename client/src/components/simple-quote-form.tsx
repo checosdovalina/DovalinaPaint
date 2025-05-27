@@ -124,14 +124,14 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             name="projectId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Proyecto</FormLabel>
+                <FormLabel>Project</FormLabel>
                 <Select
                   onValueChange={(value) => field.onChange(parseInt(value))}
                   value={field.value?.toString()}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un proyecto" />
+                      <SelectValue placeholder="Select a project" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -152,7 +152,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             name="totalEstimate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Total Estimado ($)</FormLabel>
+                <FormLabel>Total Estimate ($)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -173,17 +173,17 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           name="scopeOfWork"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Alcance del Trabajo</FormLabel>
+              <FormLabel>Scope of Work</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Describa detalladamente el alcance del trabajo a realizar..."
+                  placeholder="Describe in detail the scope of work to be performed..."
                   className="min-h-[120px]"
                   {...field}
                 />
               </FormControl>
               <FormMessage />
               <div className="text-xs text-gray-500 mt-1">
-                Puede usar viñetas con "•", "-", "*", o "✓" para crear listas
+                You can use bullet points with "•", "-", "*", or "✓" to create lists
               </div>
             </FormItem>
           )}
@@ -195,7 +195,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             name="validUntil"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Válido Hasta</FormLabel>
+                <FormLabel>Valid Until</FormLabel>
                 <Popover open={validUntilOpen} onOpenChange={setValidUntilOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
