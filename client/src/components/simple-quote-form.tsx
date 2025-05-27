@@ -540,6 +540,123 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 </div>
               )}
             </div>
+
+            {/* Dormer */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="exteriorBreakdown.dormer.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Dormer</FormLabel>
+                      <p className="text-xs text-muted-foreground">Roof dormer windows with complexity pricing</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("exteriorBreakdown.dormer.enabled") && (
+                <div className="space-y-3 ml-6">
+                  {/* Complexity Level */}
+                  <FormField
+                    control={form.control}
+                    name="exteriorBreakdown.dormer.complexity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Complexity Level</FormLabel>
+                        <Select 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            // Auto-set price based on complexity
+                            const price = value === "simple" ? 300 : 400;
+                            form.setValue("exteriorBreakdown.dormer.unitPrice", price);
+                            
+                            // Recalculate subtotal
+                            const quantity = form.getValues("exteriorBreakdown.dormer.quantity") || 0;
+                            form.setValue("exteriorBreakdown.dormer.subtotal", quantity * price);
+                          }} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select complexity level" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="simple">Simple - $300 USD</SelectItem>
+                            <SelectItem value="complex">Complex - $400 USD</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  {/* Quantity and Subtotal */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <FormField
+                      control={form.control}
+                      name="exteriorBreakdown.dormer.quantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Quantity</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="1"
+                              placeholder="0"
+                              {...field}
+                              onChange={(e) => {
+                                const quantity = parseFloat(e.target.value) || 0;
+                                field.onChange(quantity);
+                                const unitPrice = form.getValues("exteriorBreakdown.dormer.unitPrice") || 0;
+                                form.setValue("exteriorBreakdown.dormer.subtotal", quantity * unitPrice);
+                              }}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="exteriorBreakdown.dormer.subtotal"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Subtotal ($)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              {...field}
+                              readOnly
+                              className="bg-gray-100"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Hidden unit price field for calculations */}
+                  <FormField
+                    control={form.control}
+                    name="exteriorBreakdown.dormer.unitPrice"
+                    render={({ field }) => (
+                      <input type="hidden" {...field} />
+                    )}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         )}
 
