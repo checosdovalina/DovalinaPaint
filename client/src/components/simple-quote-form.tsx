@@ -494,6 +494,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
+                                <SelectItem value="brick">Brick</SelectItem>
                                 <SelectItem value="clapboard">Clapboard Siding</SelectItem>
                                 <SelectItem value="t1-11">T1-11 Siding</SelectItem>
                                 <SelectItem value="cedar">Cedar Siding</SelectItem>
