@@ -430,32 +430,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/simple-quotes/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      console.log("Updating simple quote ID:", id);
+      console.log("Request body:", req.body);
+      
+      // Get existing quote first
+      const existingQuote = await storage.getQuote(id);
+      if (!existingQuote) {
+        return res.status(404).json({ message: "Simple quote not found" });
+      }
+      
       const simpleQuoteData = {
         projectId: req.body.projectId,
         total: req.body.totalEstimate,
         scopeOfWork: req.body.scopeOfWork,
-        notes: req.body.notes,
+        notes: req.body.notes || "",
         validUntil: req.body.validUntil && req.body.validUntil !== "" ? new Date(req.body.validUntil) : null,
         sentDate: req.body.sentDate && req.body.sentDate !== "" ? new Date(req.body.sentDate) : null,
         status: req.body.status || "draft",
-        // Maintain existing fields for Simple Quotes
-        materialsEstimate: [],
-        laborEstimate: [],
-        additionalCosts: [],
-        profitMargin: 0,
+        // Preserve existing fields that shouldn't be overwritten
+        materialsEstimate: existingQuote.materialsEstimate || [],
+        laborEstimate: existingQuote.laborEstimate || [],
+        additionalCosts: existingQuote.additionalCosts || [],
+        profitMargin: existingQuote.profitMargin || 0,
+        createdAt: existingQuote.createdAt,
+        userId: existingQuote.userId,
       };
 
-      const quote = await storage.updateQuote(id, simpleQuoteData);
+      console.log("Data to update:", simpleQuoteData);
+      const updatedQuote = await storage.updateQuote(id, simpleQuoteData);
       
-      if (!quote) {
-        return res.status(404).json({ message: "Simple quote not found" });
-      }
-      
-      console.log("Updated quote:", quote);
-      res.json(quote);
+      console.log("Updated quote result:", updatedQuote);
+      res.status(200).json(updatedQuote);
     } catch (error) {
       console.error("Simple quote update error:", error);
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ message: "Error updating simple quote", error: error.message });
     }
   });
 
