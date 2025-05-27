@@ -216,6 +216,8 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
       pdf.setFont("helvetica", "normal");
       const scopeLines = quote.scopeOfWork.split('\n');
+      const maxWidth = pageWidth - (2 * margin);
+      
       scopeLines.forEach((line: string) => {
         if (yPosition > 250) {
           pdf.addPage();
@@ -225,11 +227,26 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
         const bulletRegex = /^[\s]*[•\-\*✓]\s*/;
         if (bulletRegex.test(line)) {
           const cleanLine = line.replace(bulletRegex, '').trim();
-          pdf.text(`• ${cleanLine}`, margin + 5, yPosition);
+          const wrappedLines = pdf.splitTextToSize(`• ${cleanLine}`, maxWidth - 10);
+          wrappedLines.forEach((wrappedLine: string) => {
+            if (yPosition > 250) {
+              pdf.addPage();
+              yPosition = margin;
+            }
+            pdf.text(wrappedLine, margin + 5, yPosition);
+            yPosition += 6;
+          });
         } else {
-          pdf.text(line, margin, yPosition);
+          const wrappedLines = pdf.splitTextToSize(line, maxWidth);
+          wrappedLines.forEach((wrappedLine: string) => {
+            if (yPosition > 250) {
+              pdf.addPage();
+              yPosition = margin;
+            }
+            pdf.text(wrappedLine, margin, yPosition);
+            yPosition += 6;
+          });
         }
-        yPosition += 6;
       });
 
       yPosition += 15;
