@@ -1108,6 +1108,403 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 </div>
               )}
             </div>
+
+            {/* Windows */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="exteriorBreakdown.windows.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Windows</FormLabel>
+                      <p className="text-xs text-muted-foreground">Window painting with material and coating options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("exteriorBreakdown.windows.enabled") && (
+                <div className="space-y-3 ml-6">
+                  {/* Add Line Button */}
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const currentLines = form.getValues("exteriorBreakdown.windows.lines") || [];
+                        form.setValue("exteriorBreakdown.windows.lines", [
+                          ...currentLines,
+                          { type: "", coats: "", quantity: 0, unitPrice: 0, subtotal: 0 }
+                        ]);
+                      }}
+                      className="h-8"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Line
+                    </Button>
+                  </div>
+
+                  {/* Dynamic Lines */}
+                  {(form.watch("exteriorBreakdown.windows.lines") || []).map((_, lineIndex) => (
+                    <div key={lineIndex} className="border border-gray-200 rounded-lg p-3 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Window Line #{lineIndex + 1}</span>
+                        {lineIndex > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const currentLines = form.getValues("exteriorBreakdown.windows.lines") || [];
+                              const newLines = currentLines.filter((_, i) => i !== lineIndex);
+                              form.setValue("exteriorBreakdown.windows.lines", newLines);
+                            }}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Window Type Dropdown */}
+                      <FormField
+                        control={form.control}
+                        name={`exteriorBreakdown.windows.lines.${lineIndex}.type`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Window Type</FormLabel>
+                            <Select 
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                // Reset coats and unit price when type changes
+                                form.setValue(`exteriorBreakdown.windows.lines.${lineIndex}.coats`, "");
+                                form.setValue(`exteriorBreakdown.windows.lines.${lineIndex}.unitPrice`, 0);
+                                form.setValue(`exteriorBreakdown.windows.lines.${lineIndex}.subtotal`, 0);
+                              }} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select window type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="plastic-pvc">Plastic/PVC (Brick Molding only)</SelectItem>
+                                <SelectItem value="wood">Wood (Brick Molding, Sashes, Grilled)</SelectItem>
+                                <SelectItem value="casement">Casement Windows</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Coats Dropdown - Only show if window type is selected */}
+                      {form.watch(`exteriorBreakdown.windows.lines.${lineIndex}.type`) && (
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.windows.lines.${lineIndex}.coats`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Number of Coats</FormLabel>
+                              <Select 
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  const windowType = form.watch(`exteriorBreakdown.windows.lines.${lineIndex}.type`);
+                                  let unitPrice = 0;
+                                  
+                                  // Set unit price based on type and coats
+                                  if (windowType === "plastic-pvc") {
+                                    unitPrice = value === "1" ? 40 : 60;
+                                  } else if (windowType === "wood") {
+                                    unitPrice = value === "1" ? 80 : 120;
+                                  } else if (windowType === "casement") {
+                                    unitPrice = value === "1" ? 70 : 100;
+                                  }
+                                  
+                                  form.setValue(`exteriorBreakdown.windows.lines.${lineIndex}.unitPrice`, unitPrice);
+                                  
+                                  // Recalculate subtotal
+                                  const quantity = form.getValues(`exteriorBreakdown.windows.lines.${lineIndex}.quantity`) || 0;
+                                  form.setValue(`exteriorBreakdown.windows.lines.${lineIndex}.subtotal`, quantity * unitPrice);
+                                }} 
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select number of coats" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="1">1 Coat</SelectItem>
+                                  <SelectItem value="2">2 Coats</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                      
+                      {/* Quantity and Subtotal */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.windows.lines.${lineIndex}.quantity`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Quantity</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="1"
+                                  placeholder="0"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const quantity = parseFloat(e.target.value) || 0;
+                                    field.onChange(quantity);
+                                    const lines = form.getValues("exteriorBreakdown.windows.lines") || [];
+                                    if (lines[lineIndex]) {
+                                      const unitPrice = lines[lineIndex].unitPrice || 0;
+                                      form.setValue(`exteriorBreakdown.windows.lines.${lineIndex}.subtotal`, quantity * unitPrice);
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.windows.lines.${lineIndex}.subtotal`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Subtotal ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  readOnly
+                                  className="bg-gray-100"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      {/* Show unit price for reference */}
+                      {form.watch(`exteriorBreakdown.windows.lines.${lineIndex}.unitPrice`) > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          Unit Price: ${form.watch(`exteriorBreakdown.windows.lines.${lineIndex}.unitPrice`)} per window
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Initialize with first line if none exist */}
+                  {(!form.watch("exteriorBreakdown.windows.lines") || form.watch("exteriorBreakdown.windows.lines").length === 0) && (
+                    <div className="text-center py-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("exteriorBreakdown.windows.lines", [
+                            { type: "", coats: "", quantity: 0, unitPrice: 0, subtotal: 0 }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Window Line
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Shutters */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="exteriorBreakdown.shutters.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Shutters</FormLabel>
+                      <p className="text-xs text-muted-foreground">Shutter painting with panel types</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("exteriorBreakdown.shutters.enabled") && (
+                <div className="space-y-3 ml-6">
+                  {/* Add Line Button */}
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const currentLines = form.getValues("exteriorBreakdown.shutters.lines") || [];
+                        form.setValue("exteriorBreakdown.shutters.lines", [
+                          ...currentLines,
+                          { type: "", quantity: 0, unitPrice: 0, subtotal: 0 }
+                        ]);
+                      }}
+                      className="h-8"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Line
+                    </Button>
+                  </div>
+
+                  {/* Dynamic Lines */}
+                  {(form.watch("exteriorBreakdown.shutters.lines") || []).map((_, lineIndex) => (
+                    <div key={lineIndex} className="border border-gray-200 rounded-lg p-3 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Shutter Line #{lineIndex + 1}</span>
+                        {lineIndex > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const currentLines = form.getValues("exteriorBreakdown.shutters.lines") || [];
+                              const newLines = currentLines.filter((_, i) => i !== lineIndex);
+                              form.setValue("exteriorBreakdown.shutters.lines", newLines);
+                            }}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Shutter Type Dropdown */}
+                      <FormField
+                        control={form.control}
+                        name={`exteriorBreakdown.shutters.lines.${lineIndex}.type`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Shutter Type</FormLabel>
+                            <Select 
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                const unitPrice = value === "panel" ? 25 : 35;
+                                form.setValue(`exteriorBreakdown.shutters.lines.${lineIndex}.unitPrice`, unitPrice);
+                                
+                                // Recalculate subtotal
+                                const quantity = form.getValues(`exteriorBreakdown.shutters.lines.${lineIndex}.quantity`) || 0;
+                                form.setValue(`exteriorBreakdown.shutters.lines.${lineIndex}.subtotal`, quantity * unitPrice);
+                              }} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select shutter type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="panel">Panel - $25</SelectItem>
+                                <SelectItem value="louver">Louver - $35</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {/* Quantity and Subtotal */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.shutters.lines.${lineIndex}.quantity`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Quantity</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="1"
+                                  placeholder="0"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const quantity = parseFloat(e.target.value) || 0;
+                                    field.onChange(quantity);
+                                    const lines = form.getValues("exteriorBreakdown.shutters.lines") || [];
+                                    if (lines[lineIndex]) {
+                                      const unitPrice = lines[lineIndex].unitPrice || 0;
+                                      form.setValue(`exteriorBreakdown.shutters.lines.${lineIndex}.subtotal`, quantity * unitPrice);
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.shutters.lines.${lineIndex}.subtotal`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Subtotal ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  readOnly
+                                  className="bg-gray-100"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Initialize with first line if none exist */}
+                  {(!form.watch("exteriorBreakdown.shutters.lines") || form.watch("exteriorBreakdown.shutters.lines").length === 0) && (
+                    <div className="text-center py-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("exteriorBreakdown.shutters.lines", [
+                            { type: "", quantity: 0, unitPrice: 0, subtotal: 0 }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Shutter Line
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
