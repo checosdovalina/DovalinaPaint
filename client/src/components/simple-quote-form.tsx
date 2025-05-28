@@ -1596,14 +1596,156 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           />
         </div>
 
-        {/* Editable Total Section */}
+        {/* Breakdown Summary and Total Section */}
         <div className="bg-gray-50 p-4 rounded-lg border">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-800">Resumen del Presupuesto</h3>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Calculate total from all breakdown items
+                let total = 0;
+                
+                // Boxes subtotal
+                if (form.watch("exteriorBreakdown.boxes.enabled")) {
+                  total += form.getValues("exteriorBreakdown.boxes.subtotal") || 0;
+                }
+                
+                // Siding lines subtotal
+                if (form.watch("exteriorBreakdown.siding.enabled")) {
+                  const sidingLines = form.getValues("exteriorBreakdown.siding.lines") || [];
+                  sidingLines.forEach(line => {
+                    total += line.subtotal || 0;
+                  });
+                }
+                
+                // Dormer lines subtotal
+                if (form.watch("exteriorBreakdown.dormer.enabled")) {
+                  const dormerLines = form.getValues("exteriorBreakdown.dormer.lines") || [];
+                  dormerLines.forEach(line => {
+                    total += line.subtotal || 0;
+                  });
+                }
+                
+                // Chimney lines subtotal
+                if (form.watch("exteriorBreakdown.chimney.enabled")) {
+                  const chimneyLines = form.getValues("exteriorBreakdown.chimney.lines") || [];
+                  chimneyLines.forEach(line => {
+                    total += line.subtotal || 0;
+                  });
+                }
+                
+                // Porch columns and ceiling subtotal
+                if (form.watch("exteriorBreakdown.porch.enabled")) {
+                  if (form.watch("exteriorBreakdown.porch.columns.enabled")) {
+                    total += form.getValues("exteriorBreakdown.porch.columns.subtotal") || 0;
+                  }
+                  if (form.watch("exteriorBreakdown.porch.ceiling.enabled")) {
+                    total += form.getValues("exteriorBreakdown.porch.ceiling.subtotal") || 0;
+                  }
+                }
+                
+                // Windows lines subtotal
+                if (form.watch("exteriorBreakdown.windows.enabled")) {
+                  const windowLines = form.getValues("exteriorBreakdown.windows.lines") || [];
+                  windowLines.forEach(line => {
+                    total += line.subtotal || 0;
+                  });
+                }
+                
+                // Shutters lines subtotal
+                if (form.watch("exteriorBreakdown.shutters.enabled")) {
+                  const shutterLines = form.getValues("exteriorBreakdown.shutters.lines") || [];
+                  shutterLines.forEach(line => {
+                    total += line.subtotal || 0;
+                  });
+                }
+                
+                // Update the total
+                form.setValue("totalEstimate", total);
+              }}
+              className="h-8"
+            >
+              Calculate Total
+            </Button>
           </div>
-          <div className="grid gap-3">
+          
+          {/* Breakdown details */}
+          <div className="space-y-2 mb-4">
+            {/* Boxes breakdown */}
+            {form.watch("exteriorBreakdown.boxes.enabled") && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Boxes (Soffit, Facia, Gutters):</span>
+                <span className="font-medium">${(form.watch("exteriorBreakdown.boxes.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {/* Siding breakdown */}
+            {form.watch("exteriorBreakdown.siding.enabled") && form.watch("exteriorBreakdown.siding.lines") && (
+              <>
+                {form.watch("exteriorBreakdown.siding.lines").map((line, index) => (
+                  line.subtotal > 0 && (
+                    <div key={index} className="flex justify-between text-sm">
+                      <span className="text-gray-600">Siding Line #{index + 1}:</span>
+                      <span className="font-medium">${(line.subtotal || 0).toFixed(2)}</span>
+                    </div>
+                  )
+                ))}
+              </>
+            )}
+            
+            {/* Windows breakdown */}
+            {form.watch("exteriorBreakdown.windows.enabled") && form.watch("exteriorBreakdown.windows.lines") && (
+              <>
+                {form.watch("exteriorBreakdown.windows.lines").map((line, index) => (
+                  line.subtotal > 0 && (
+                    <div key={index} className="flex justify-between text-sm">
+                      <span className="text-gray-600">Window Line #{index + 1}:</span>
+                      <span className="font-medium">${(line.subtotal || 0).toFixed(2)}</span>
+                    </div>
+                  )
+                ))}
+              </>
+            )}
+            
+            {/* Shutters breakdown */}
+            {form.watch("exteriorBreakdown.shutters.enabled") && form.watch("exteriorBreakdown.shutters.lines") && (
+              <>
+                {form.watch("exteriorBreakdown.shutters.lines").map((line, index) => (
+                  line.subtotal > 0 && (
+                    <div key={index} className="flex justify-between text-sm">
+                      <span className="text-gray-600">Shutter Line #{index + 1}:</span>
+                      <span className="font-medium">${(line.subtotal || 0).toFixed(2)}</span>
+                    </div>
+                  )
+                ))}
+              </>
+            )}
+            
+            {/* Porch breakdown */}
+            {form.watch("exteriorBreakdown.porch.enabled") && (
+              <>
+                {form.watch("exteriorBreakdown.porch.columns.enabled") && form.watch("exteriorBreakdown.porch.columns.subtotal") > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Porch Columns:</span>
+                    <span className="font-medium">${(form.watch("exteriorBreakdown.porch.columns.subtotal") || 0).toFixed(2)}</span>
+                  </div>
+                )}
+                {form.watch("exteriorBreakdown.porch.ceiling.enabled") && form.watch("exteriorBreakdown.porch.ceiling.subtotal") > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Porch Ceiling:</span>
+                    <span className="font-medium">${(form.watch("exteriorBreakdown.porch.ceiling.subtotal") || 0).toFixed(2)}</span>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          
+          <div className="border-t pt-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-600">Total del Proyecto:</span>
+              <span className="text-lg font-semibold text-gray-800">Total del Proyecto:</span>
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-500">$</span>
                 <FormField
@@ -1613,7 +1755,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                     <Input
                       type="number"
                       step="0.01"
-                      className="w-32 text-right font-semibold"
+                      className="w-32 text-right font-semibold text-lg"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
@@ -1621,8 +1763,8 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 />
               </div>
             </div>
-            <div className="text-xs text-gray-500">
-              El total puede ser editado directamente según las necesidades del proyecto
+            <div className="text-xs text-gray-500 mt-2">
+              Use "Calculate Total" para sumar automáticamente todos los subtotales, o edite el total manualmente
             </div>
           </div>
         </div>
