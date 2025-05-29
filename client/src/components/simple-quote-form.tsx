@@ -66,6 +66,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   // Debug: Log initial data when editing
   if (initialData) {
     console.log("Editing quote with data:", initialData);
+    console.log("Optional comments from DB:", initialData.optionalComments);
   }
 
   const form = useForm({
