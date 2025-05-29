@@ -1985,6 +1985,106 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 
                 // Update the total
                 form.setValue("totalEstimate", total);
+                
+                // Generate breakdown summary for scope of work
+                let breakdownSummary = "Project Breakdown:\n\n";
+                
+                // Add each module to the breakdown
+                if (form.watch("exteriorBreakdown.boxes.enabled") && form.getValues("exteriorBreakdown.boxes.subtotal") > 0) {
+                  breakdownSummary += `• Boxes (Soffit, Facia, Gutters): $${(form.getValues("exteriorBreakdown.boxes.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("exteriorBreakdown.siding.enabled")) {
+                  const sidingLines = form.getValues("exteriorBreakdown.siding.lines") || [];
+                  sidingLines.forEach((line, index) => {
+                    if (line.subtotal > 0) {
+                      breakdownSummary += `• Siding ${line.material ? `(${line.material})` : `Line #${index + 1}`}: $${(line.subtotal || 0).toFixed(2)}\n`;
+                    }
+                  });
+                }
+                
+                if (form.watch("exteriorBreakdown.dormer.enabled")) {
+                  const dormerLines = form.getValues("exteriorBreakdown.dormer.lines") || [];
+                  dormerLines.forEach((line, index) => {
+                    if (line.subtotal > 0) {
+                      breakdownSummary += `• Dormer ${line.type ? `(${line.type})` : `Line #${index + 1}`}: $${(line.subtotal || 0).toFixed(2)}\n`;
+                    }
+                  });
+                }
+                
+                if (form.watch("exteriorBreakdown.chimney.enabled")) {
+                  const chimneyLines = form.getValues("exteriorBreakdown.chimney.lines") || [];
+                  chimneyLines.forEach((line, index) => {
+                    if (line.subtotal > 0) {
+                      breakdownSummary += `• Chimney ${line.material ? `(${line.material})` : `Line #${index + 1}`}: $${(line.subtotal || 0).toFixed(2)}\n`;
+                    }
+                  });
+                }
+                
+                if (form.watch("exteriorBreakdown.porch.enabled")) {
+                  if (form.watch("exteriorBreakdown.porch.columns.enabled") && form.getValues("exteriorBreakdown.porch.columns.subtotal") > 0) {
+                    breakdownSummary += `• Porch Columns: $${(form.getValues("exteriorBreakdown.porch.columns.subtotal") || 0).toFixed(2)}\n`;
+                  }
+                  if (form.watch("exteriorBreakdown.porch.ceiling.enabled") && form.getValues("exteriorBreakdown.porch.ceiling.subtotal") > 0) {
+                    breakdownSummary += `• Porch Ceiling: $${(form.getValues("exteriorBreakdown.porch.ceiling.subtotal") || 0).toFixed(2)}\n`;
+                  }
+                }
+                
+                if (form.watch("exteriorBreakdown.windows.enabled")) {
+                  const windowLines = form.getValues("exteriorBreakdown.windows.lines") || [];
+                  windowLines.forEach((line, index) => {
+                    if (line.subtotal > 0) {
+                      breakdownSummary += `• Windows ${line.type && line.coats ? `(${line.type}, ${line.coats} coat${line.coats === '1' ? '' : 's'})` : `Line #${index + 1}`}: $${(line.subtotal || 0).toFixed(2)}\n`;
+                    }
+                  });
+                }
+                
+                if (form.watch("exteriorBreakdown.shutters.enabled")) {
+                  const shutterLines = form.getValues("exteriorBreakdown.shutters.lines") || [];
+                  shutterLines.forEach((line, index) => {
+                    if (line.subtotal > 0) {
+                      breakdownSummary += `• Shutters ${line.type ? `(${line.type})` : `Line #${index + 1}`}: $${(line.subtotal || 0).toFixed(2)}\n`;
+                    }
+                  });
+                }
+                
+                if (form.watch("exteriorBreakdown.deck.enabled")) {
+                  const deckLines = form.getValues("exteriorBreakdown.deck.lines") || [];
+                  deckLines.forEach((line, index) => {
+                    if (line.subtotal > 0) {
+                      breakdownSummary += `• Deck Line #${index + 1}: $${(line.subtotal || 0).toFixed(2)}\n`;
+                    }
+                  });
+                }
+                
+                if (form.watch("exteriorBreakdown.miscellaneous.enabled")) {
+                  const miscLines = form.getValues("exteriorBreakdown.miscellaneous.lines") || [];
+                  miscLines.forEach((line, index) => {
+                    if (line.price > 0) {
+                      breakdownSummary += `• ${line.description || `Miscellaneous Expense #${index + 1}`}: $${(line.price || 0).toFixed(2)}\n`;
+                    }
+                  });
+                }
+                
+                breakdownSummary += `\nTOTAL PROJECT COST: $${total.toFixed(2)}`;
+                
+                // Get current scope of work
+                const currentScope = form.getValues("scopeOfWork") || "";
+                
+                // Add the breakdown to scope of work (append or replace if already exists)
+                const hasBreakdown = currentScope.includes("Project Breakdown:");
+                let newScope;
+                
+                if (hasBreakdown) {
+                  // Replace existing breakdown
+                  const beforeBreakdown = currentScope.split("Project Breakdown:")[0].trim();
+                  newScope = beforeBreakdown ? beforeBreakdown + "\n\n" + breakdownSummary : breakdownSummary;
+                } else {
+                  // Append to existing scope
+                  newScope = currentScope ? currentScope + "\n\n" + breakdownSummary : breakdownSummary;
+                }
+                
+                form.setValue("scopeOfWork", newScope);
               }}
               className="h-8"
             >
