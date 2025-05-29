@@ -257,10 +257,9 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
     queryKey: ["/api/clients"],
   });
 
-  // Check if selected project is residential
-  const selectedProject = projects?.find((p: any) => p.id === form.watch("projectId"));
-  const selectedClient = selectedProject ? clients?.find((c: any) => c.id === selectedProject.clientId) : null;
-  const isResidential = selectedClient?.classification === 'residential';
+  // Get the selected project type from the form
+  const selectedProjectType = form.watch("projectType");
+  const isResidential = selectedProjectType === 'residential';
   
 
 
@@ -373,6 +372,36 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="projectType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Project Type</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select project type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="residential">Residential</SelectItem>
+                    <SelectItem value="commercial">Commercial</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+                <div className="text-xs text-gray-500 mt-1">
+                  Different modules and pricing will be available based on project type
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
             name="totalEstimate"
