@@ -45,6 +45,7 @@ const simpleQuoteSchema = z.object({
   isInterior: z.boolean().optional(),
   isExterior: z.boolean().optional(),
   exteriorBreakdown: z.any().optional(),
+  interiorBreakdown: z.any().optional(),
   optionalComments: z.any().optional(),
   notes: z.string().optional(),
   validUntil: z.date().optional(),
@@ -3685,6 +3686,1142 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                       )}
                     </div>
                   </div>
+                </div>
+              )}
+            </div>
+
+            {/* Hallway */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.hallway.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Hallway (Multiple)</FormLabel>
+                      <p className="text-xs text-muted-foreground">Add multiple hallways with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.hallway.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const currentLines = form.getValues("interiorBreakdown.hallway.lines") || [];
+                        form.setValue("interiorBreakdown.hallway.lines", [
+                          ...currentLines,
+                          { 
+                            name: `Hallway ${currentLines.length + 1}`,
+                            walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                            ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                            trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+                          }
+                        ]);
+                      }}
+                      className="h-8"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Hallway
+                    </Button>
+                  </div>
+
+                  {(form.watch("interiorBreakdown.hallway.lines") || []).map((_: any, lineIndex: any) => (
+                    <div key={lineIndex} className="border border-gray-200 rounded-lg p-3 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Hallway #{lineIndex + 1}</span>
+                        {lineIndex > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const currentLines = form.getValues("interiorBreakdown.hallway.lines") || [];
+                              const newLines = currentLines.filter((_: any, i: any) => i !== lineIndex);
+                              form.setValue("interiorBreakdown.hallway.lines", newLines);
+                            }}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name={`interiorBreakdown.hallway.lines.${lineIndex}.name`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Hallway name"
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.hallway.lines.${lineIndex}.walls.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.hallway.lines.${lineIndex}.walls.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.hallway.lines.${lineIndex}.walls.sqft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.hallway.lines.${lineIndex}.walls.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.hallway.lines.${lineIndex}.ceiling.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.hallway.lines.${lineIndex}.ceiling.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.hallway.lines.${lineIndex}.ceiling.sqft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.hallway.lines.${lineIndex}.ceiling.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.hallway.lines.${lineIndex}.trim.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Trim</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.hallway.lines.${lineIndex}.trim.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.hallway.lines.${lineIndex}.trim.lft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.hallway.lines.${lineIndex}.trim.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {(!form.watch("interiorBreakdown.hallway.lines") || form.watch("interiorBreakdown.hallway.lines").length === 0) && (
+                    <div className="text-center py-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("interiorBreakdown.hallway.lines", [
+                            { 
+                              name: "Main Hallway",
+                              walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                              ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                              trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+                            }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Hallway
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Stairway */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.stairway.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Stairway (Multiple)</FormLabel>
+                      <p className="text-xs text-muted-foreground">Add multiple stairways with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.stairway.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const currentLines = form.getValues("interiorBreakdown.stairway.lines") || [];
+                        form.setValue("interiorBreakdown.stairway.lines", [
+                          ...currentLines,
+                          { 
+                            name: `Stairway ${currentLines.length + 1}`,
+                            walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                            ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                            trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+                          }
+                        ]);
+                      }}
+                      className="h-8"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Stairway
+                    </Button>
+                  </div>
+
+                  {(form.watch("interiorBreakdown.stairway.lines") || []).map((_: any, lineIndex: any) => (
+                    <div key={lineIndex} className="border border-gray-200 rounded-lg p-3 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Stairway #{lineIndex + 1}</span>
+                        {lineIndex > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const currentLines = form.getValues("interiorBreakdown.stairway.lines") || [];
+                              const newLines = currentLines.filter((_: any, i: any) => i !== lineIndex);
+                              form.setValue("interiorBreakdown.stairway.lines", newLines);
+                            }}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name={`interiorBreakdown.stairway.lines.${lineIndex}.name`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Stairway name"
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.stairway.lines.${lineIndex}.walls.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.stairway.lines.${lineIndex}.walls.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.stairway.lines.${lineIndex}.walls.sqft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.stairway.lines.${lineIndex}.walls.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.stairway.lines.${lineIndex}.ceiling.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.stairway.lines.${lineIndex}.ceiling.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.stairway.lines.${lineIndex}.ceiling.sqft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.stairway.lines.${lineIndex}.ceiling.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.stairway.lines.${lineIndex}.trim.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Trim</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.stairway.lines.${lineIndex}.trim.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.stairway.lines.${lineIndex}.trim.lft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.stairway.lines.${lineIndex}.trim.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {(!form.watch("interiorBreakdown.stairway.lines") || form.watch("interiorBreakdown.stairway.lines").length === 0) && (
+                    <div className="text-center py-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("interiorBreakdown.stairway.lines", [
+                            { 
+                              name: "Main Stairway",
+                              walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                              ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                              trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+                            }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Stairway
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Bedroom */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.bedroom.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Bedroom (Multiple)</FormLabel>
+                      <p className="text-xs text-muted-foreground">Add multiple bedrooms with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.bedroom.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const currentLines = form.getValues("interiorBreakdown.bedroom.lines") || [];
+                        form.setValue("interiorBreakdown.bedroom.lines", [
+                          ...currentLines,
+                          { 
+                            name: `Bedroom ${currentLines.length + 1}`,
+                            walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                            ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                            trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+                          }
+                        ]);
+                      }}
+                      className="h-8"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Bedroom
+                    </Button>
+                  </div>
+
+                  {(form.watch("interiorBreakdown.bedroom.lines") || []).map((_: any, lineIndex: any) => (
+                    <div key={lineIndex} className="border border-gray-200 rounded-lg p-3 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Bedroom #{lineIndex + 1}</span>
+                        {lineIndex > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const currentLines = form.getValues("interiorBreakdown.bedroom.lines") || [];
+                              const newLines = currentLines.filter((_: any, i: any) => i !== lineIndex);
+                              form.setValue("interiorBreakdown.bedroom.lines", newLines);
+                            }}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name={`interiorBreakdown.bedroom.lines.${lineIndex}.name`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Bedroom name"
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.bedroom.lines.${lineIndex}.walls.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.bedroom.lines.${lineIndex}.walls.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bedroom.lines.${lineIndex}.walls.sqft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bedroom.lines.${lineIndex}.walls.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.bedroom.lines.${lineIndex}.ceiling.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.bedroom.lines.${lineIndex}.ceiling.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bedroom.lines.${lineIndex}.ceiling.sqft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bedroom.lines.${lineIndex}.ceiling.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.bedroom.lines.${lineIndex}.trim.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Trim</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.bedroom.lines.${lineIndex}.trim.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bedroom.lines.${lineIndex}.trim.lft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bedroom.lines.${lineIndex}.trim.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {(!form.watch("interiorBreakdown.bedroom.lines") || form.watch("interiorBreakdown.bedroom.lines").length === 0) && (
+                    <div className="text-center py-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("interiorBreakdown.bedroom.lines", [
+                            { 
+                              name: "Master Bedroom",
+                              walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                              ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                              trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+                            }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Bedroom
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Bathroom */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.bathroom.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Bathroom (Multiple)</FormLabel>
+                      <p className="text-xs text-muted-foreground">Add multiple bathrooms with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.bathroom.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const currentLines = form.getValues("interiorBreakdown.bathroom.lines") || [];
+                        form.setValue("interiorBreakdown.bathroom.lines", [
+                          ...currentLines,
+                          { 
+                            name: `Bathroom ${currentLines.length + 1}`,
+                            walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                            ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                            trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+                          }
+                        ]);
+                      }}
+                      className="h-8"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Bathroom
+                    </Button>
+                  </div>
+
+                  {(form.watch("interiorBreakdown.bathroom.lines") || []).map((_: any, lineIndex: any) => (
+                    <div key={lineIndex} className="border border-gray-200 rounded-lg p-3 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Bathroom #{lineIndex + 1}</span>
+                        {lineIndex > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const currentLines = form.getValues("interiorBreakdown.bathroom.lines") || [];
+                              const newLines = currentLines.filter((_: any, i: any) => i !== lineIndex);
+                              form.setValue("interiorBreakdown.bathroom.lines", newLines);
+                            }}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name={`interiorBreakdown.bathroom.lines.${lineIndex}.name`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Bathroom name"
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.bathroom.lines.${lineIndex}.walls.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.bathroom.lines.${lineIndex}.walls.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bathroom.lines.${lineIndex}.walls.sqft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bathroom.lines.${lineIndex}.walls.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.bathroom.lines.${lineIndex}.ceiling.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.bathroom.lines.${lineIndex}.ceiling.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bathroom.lines.${lineIndex}.ceiling.sqft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bathroom.lines.${lineIndex}.ceiling.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name={`interiorBreakdown.bathroom.lines.${lineIndex}.trim.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">Trim</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          {form.watch(`interiorBreakdown.bathroom.lines.${lineIndex}.trim.enabled`) && (
+                            <div className="space-y-2 ml-4">
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bathroom.lines.${lineIndex}.trim.lft`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`interiorBreakdown.bathroom.lines.${lineIndex}.trim.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {(!form.watch("interiorBreakdown.bathroom.lines") || form.watch("interiorBreakdown.bathroom.lines").length === 0) && (
+                    <div className="text-center py-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("interiorBreakdown.bathroom.lines", [
+                            { 
+                              name: "Main Bathroom",
+                              walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                              ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+                              trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+                            }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Bathroom
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
