@@ -37,14 +37,6 @@ import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
-// Exterior breakdown item schema
-const exteriorItemSchema = z.object({
-  enabled: z.boolean().default(false),
-  ft: z.number().min(0).default(0),
-  price: z.number().min(0).default(0),
-  subtotal: z.number().min(0).default(0),
-});
-
 // Simplified quote schema without cost breakdown
 const simpleQuoteSchema = z.object({
   projectId: z.number().min(1, "Please select a project"),
@@ -52,18 +44,8 @@ const simpleQuoteSchema = z.object({
   scopeOfWork: z.string().min(1, "Scope of work is required"),
   isInterior: z.boolean().optional(),
   isExterior: z.boolean().optional(),
-  exteriorBreakdown: z.object({
-    soffit: exteriorItemSchema.optional(),
-    facia: exteriorItemSchema.optional(),
-    gutters: exteriorItemSchema.optional(),
-  }).optional(),
-  optionalComments: z.object({
-    prep: z.boolean().optional().default(false),
-    primer: z.boolean().optional().default(false),
-    protection: z.boolean().optional().default(false),
-    cleanup: z.boolean().optional().default(false),
-    warranty: z.boolean().optional().default(false),
-  }).optional(),
+  exteriorBreakdown: z.any().optional(),
+  optionalComments: z.any().optional(),
   notes: z.string().optional(),
   validUntil: z.date().optional(),
   sentDate: z.date().optional(),
@@ -81,7 +63,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   const [validUntilOpen, setValidUntilOpen] = useState(false);
   const [sentDateOpen, setSentDateOpen] = useState(false);
 
-  const form = useForm<SimpleQuoteFormData>({
+  const form = useForm({
     resolver: zodResolver(simpleQuoteSchema),
     defaultValues: {
       projectId: initialData?.projectId || 0,
@@ -89,10 +71,84 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       scopeOfWork: initialData?.scopeOfWork || "",
       isInterior: initialData?.isInterior || false,
       isExterior: initialData?.isExterior || false,
-      exteriorBreakdown: initialData?.exteriorBreakdown || {
-        soffit: { enabled: false, ft: 0, price: 0, subtotal: 0 },
-        facia: { enabled: false, ft: 0, price: 0, subtotal: 0 },
-        gutters: { enabled: false, ft: 0, price: 0, subtotal: 0 },
+      exteriorBreakdown: {
+        soffit: initialData?.exteriorBreakdown?.soffit || { enabled: false, ft: 0, price: 0, subtotal: 0 },
+        facia: initialData?.exteriorBreakdown?.facia || { enabled: false, ft: 0, price: 0, subtotal: 0 },
+        gutters: initialData?.exteriorBreakdown?.gutters || { enabled: false, ft: 0, price: 0, subtotal: 0 },
+        boxes: initialData?.exteriorBreakdown?.boxes || { enabled: false, quantity: 38, price: 18, subtotal: 0 },
+        siding: {
+          enabled: initialData?.exteriorBreakdown?.siding?.enabled || false,
+          lines: initialData?.exteriorBreakdown?.siding?.lines || [{ 
+            material: "brick", 
+            quantity: 0, 
+            price: 0, 
+            subtotal: 0 
+          }]
+        },
+        dormer: {
+          enabled: initialData?.exteriorBreakdown?.dormer?.enabled || false,
+          lines: initialData?.exteriorBreakdown?.dormer?.lines || [{ 
+            type: "simple", 
+            quantity: 0, 
+            price: 300, 
+            subtotal: 0 
+          }]
+        },
+        chimney: {
+          enabled: initialData?.exteriorBreakdown?.chimney?.enabled || false,
+          lines: initialData?.exteriorBreakdown?.chimney?.lines || [{ 
+            material: "brick", 
+            quantity: 0, 
+            price: 0, 
+            subtotal: 0 
+          }]
+        },
+        porch: {
+          enabled: initialData?.exteriorBreakdown?.porch?.enabled || false,
+          columns: initialData?.exteriorBreakdown?.porch?.columns || { enabled: false, quantity: 0, price: 0, subtotal: 0 },
+          ceiling: initialData?.exteriorBreakdown?.porch?.ceiling || { enabled: false, quantity: 0, price: 0, subtotal: 0 }
+        },
+        windows: {
+          enabled: initialData?.exteriorBreakdown?.windows?.enabled || false,
+          lines: initialData?.exteriorBreakdown?.windows?.lines || [{ 
+            type: "plastic", 
+            coats: "1", 
+            quantity: 0, 
+            price: 0, 
+            subtotal: 0 
+          }]
+        },
+        shutters: {
+          enabled: initialData?.exteriorBreakdown?.shutters?.enabled || false,
+          lines: initialData?.exteriorBreakdown?.shutters?.lines || [{ 
+            type: "panel", 
+            quantity: 0, 
+            price: 25, 
+            subtotal: 0 
+          }]
+        },
+        deck: {
+          enabled: initialData?.exteriorBreakdown?.deck?.enabled || false,
+          lines: initialData?.exteriorBreakdown?.deck?.lines || [{ 
+            quantity: 0, 
+            price: 0, 
+            subtotal: 0 
+          }]
+        },
+        miscellaneous: {
+          enabled: initialData?.exteriorBreakdown?.miscellaneous?.enabled || false,
+          lines: initialData?.exteriorBreakdown?.miscellaneous?.lines || [{ 
+            description: "", 
+            price: 0 
+          }]
+        }
+      },
+      optionalComments: {
+        prep: initialData?.optionalComments?.prep || false,
+        primer: initialData?.optionalComments?.primer || false,
+        protection: initialData?.optionalComments?.protection || false,
+        cleanup: initialData?.optionalComments?.cleanup || false,
+        warranty: initialData?.optionalComments?.warranty || false,
       },
       notes: initialData?.notes || "",
       validUntil: initialData?.validUntil ? new Date(initialData.validUntil) : undefined,
@@ -118,7 +174,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
 
 
   const mutation = useMutation({
-    mutationFn: async (data: SimpleQuoteFormData) => {
+    mutationFn: async (data: any) => {
       if (initialData?.id) {
         // Edit existing quote
         const response = await apiRequest("PUT", `/api/simple-quotes/${initialData.id}`, {
@@ -128,6 +184,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           isInterior: data.isInterior || false,
           isExterior: data.isExterior || false,
           exteriorBreakdown: data.exteriorBreakdown || null,
+          optionalComments: data.optionalComments || null,
           notes: data.notes || "",
           validUntil: data.validUntil ? data.validUntil.toISOString() : null,
           sentDate: data.sentDate ? data.sentDate.toISOString() : null,
