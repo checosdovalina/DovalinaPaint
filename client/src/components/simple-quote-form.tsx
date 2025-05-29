@@ -5028,13 +5028,296 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   });
                 }
                 
+                // Calculate interior breakdown totals
+                const interiorBreakdown = formValues.interiorBreakdown || {};
+                
+                // Living Room
+                if (interiorBreakdown?.livingRoom?.enabled) {
+                  let moduleTotal = 0;
+                  if (interiorBreakdown.livingRoom.walls?.enabled) {
+                    const subtotal = (interiorBreakdown.livingRoom.walls.sqft || 0) * (interiorBreakdown.livingRoom.walls.price || 0);
+                    form.setValue("interiorBreakdown.livingRoom.walls.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.livingRoom.ceiling?.enabled) {
+                    const subtotal = (interiorBreakdown.livingRoom.ceiling.sqft || 0) * (interiorBreakdown.livingRoom.ceiling.price || 0);
+                    form.setValue("interiorBreakdown.livingRoom.ceiling.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.livingRoom.trim?.enabled) {
+                    const subtotal = (interiorBreakdown.livingRoom.trim.lft || 0) * (interiorBreakdown.livingRoom.trim.price || 0);
+                    form.setValue("interiorBreakdown.livingRoom.trim.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  form.setValue("interiorBreakdown.livingRoom.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Kitchen
+                if (interiorBreakdown?.kitchen?.enabled) {
+                  let moduleTotal = 0;
+                  if (interiorBreakdown.kitchen.walls?.enabled) {
+                    const subtotal = (interiorBreakdown.kitchen.walls.sqft || 0) * (interiorBreakdown.kitchen.walls.price || 0);
+                    form.setValue("interiorBreakdown.kitchen.walls.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.kitchen.ceiling?.enabled) {
+                    const subtotal = (interiorBreakdown.kitchen.ceiling.sqft || 0) * (interiorBreakdown.kitchen.ceiling.price || 0);
+                    form.setValue("interiorBreakdown.kitchen.ceiling.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.kitchen.trim?.enabled) {
+                    const subtotal = (interiorBreakdown.kitchen.trim.lft || 0) * (interiorBreakdown.kitchen.trim.price || 0);
+                    form.setValue("interiorBreakdown.kitchen.trim.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  form.setValue("interiorBreakdown.kitchen.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Family Room
+                if (interiorBreakdown?.familyRoom?.enabled) {
+                  let moduleTotal = 0;
+                  if (interiorBreakdown.familyRoom.walls?.enabled) {
+                    const subtotal = (interiorBreakdown.familyRoom.walls.sqft || 0) * (interiorBreakdown.familyRoom.walls.price || 0);
+                    form.setValue("interiorBreakdown.familyRoom.walls.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.familyRoom.ceiling?.enabled) {
+                    const subtotal = (interiorBreakdown.familyRoom.ceiling.sqft || 0) * (interiorBreakdown.familyRoom.ceiling.price || 0);
+                    form.setValue("interiorBreakdown.familyRoom.ceiling.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.familyRoom.trim?.enabled) {
+                    const subtotal = (interiorBreakdown.familyRoom.trim.lft || 0) * (interiorBreakdown.familyRoom.trim.price || 0);
+                    form.setValue("interiorBreakdown.familyRoom.trim.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  form.setValue("interiorBreakdown.familyRoom.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Foyer
+                if (interiorBreakdown?.foyer?.enabled) {
+                  let moduleTotal = 0;
+                  if (interiorBreakdown.foyer.walls?.enabled) {
+                    const subtotal = (interiorBreakdown.foyer.walls.sqft || 0) * (interiorBreakdown.foyer.walls.price || 0);
+                    form.setValue("interiorBreakdown.foyer.walls.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.foyer.ceiling?.enabled) {
+                    const subtotal = (interiorBreakdown.foyer.ceiling.sqft || 0) * (interiorBreakdown.foyer.ceiling.price || 0);
+                    form.setValue("interiorBreakdown.foyer.ceiling.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.foyer.trim?.enabled) {
+                    const subtotal = (interiorBreakdown.foyer.trim.lft || 0) * (interiorBreakdown.foyer.trim.price || 0);
+                    form.setValue("interiorBreakdown.foyer.trim.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  form.setValue("interiorBreakdown.foyer.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Garage
+                if (interiorBreakdown?.garage?.enabled) {
+                  let moduleTotal = 0;
+                  if (interiorBreakdown.garage.walls?.enabled) {
+                    const subtotal = (interiorBreakdown.garage.walls.sqft || 0) * (interiorBreakdown.garage.walls.price || 0);
+                    form.setValue("interiorBreakdown.garage.walls.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.garage.ceiling?.enabled) {
+                    const subtotal = (interiorBreakdown.garage.ceiling.sqft || 0) * (interiorBreakdown.garage.ceiling.price || 0);
+                    form.setValue("interiorBreakdown.garage.ceiling.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.garage.trim?.enabled) {
+                    const subtotal = (interiorBreakdown.garage.trim.lft || 0) * (interiorBreakdown.garage.trim.price || 0);
+                    form.setValue("interiorBreakdown.garage.trim.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  form.setValue("interiorBreakdown.garage.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Sunroom
+                if (interiorBreakdown?.sunroom?.enabled) {
+                  let moduleTotal = 0;
+                  if (interiorBreakdown.sunroom.walls?.enabled) {
+                    const subtotal = (interiorBreakdown.sunroom.walls.sqft || 0) * (interiorBreakdown.sunroom.walls.price || 0);
+                    form.setValue("interiorBreakdown.sunroom.walls.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.sunroom.ceiling?.enabled) {
+                    const subtotal = (interiorBreakdown.sunroom.ceiling.sqft || 0) * (interiorBreakdown.sunroom.ceiling.price || 0);
+                    form.setValue("interiorBreakdown.sunroom.ceiling.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.sunroom.trim?.enabled) {
+                    const subtotal = (interiorBreakdown.sunroom.trim.lft || 0) * (interiorBreakdown.sunroom.trim.price || 0);
+                    form.setValue("interiorBreakdown.sunroom.trim.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  form.setValue("interiorBreakdown.sunroom.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Laundry
+                if (interiorBreakdown?.laundry?.enabled) {
+                  let moduleTotal = 0;
+                  if (interiorBreakdown.laundry.walls?.enabled) {
+                    const subtotal = (interiorBreakdown.laundry.walls.sqft || 0) * (interiorBreakdown.laundry.walls.price || 0);
+                    form.setValue("interiorBreakdown.laundry.walls.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.laundry.ceiling?.enabled) {
+                    const subtotal = (interiorBreakdown.laundry.ceiling.sqft || 0) * (interiorBreakdown.laundry.ceiling.price || 0);
+                    form.setValue("interiorBreakdown.laundry.ceiling.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.laundry.trim?.enabled) {
+                    const subtotal = (interiorBreakdown.laundry.trim.lft || 0) * (interiorBreakdown.laundry.trim.price || 0);
+                    form.setValue("interiorBreakdown.laundry.trim.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  form.setValue("interiorBreakdown.laundry.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Basement
+                if (interiorBreakdown?.basement?.enabled) {
+                  let moduleTotal = 0;
+                  if (interiorBreakdown.basement.walls?.enabled) {
+                    const subtotal = (interiorBreakdown.basement.walls.sqft || 0) * (interiorBreakdown.basement.walls.price || 0);
+                    form.setValue("interiorBreakdown.basement.walls.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.basement.ceiling?.enabled) {
+                    const subtotal = (interiorBreakdown.basement.ceiling.sqft || 0) * (interiorBreakdown.basement.ceiling.price || 0);
+                    form.setValue("interiorBreakdown.basement.ceiling.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  if (interiorBreakdown.basement.trim?.enabled) {
+                    const subtotal = (interiorBreakdown.basement.trim.lft || 0) * (interiorBreakdown.basement.trim.price || 0);
+                    form.setValue("interiorBreakdown.basement.trim.subtotal", subtotal);
+                    moduleTotal += subtotal;
+                  }
+                  form.setValue("interiorBreakdown.basement.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Hallway (Multiple lines)
+                if (interiorBreakdown?.hallway?.enabled && interiorBreakdown?.hallway?.lines) {
+                  let moduleTotal = 0;
+                  interiorBreakdown.hallway.lines.forEach((line: any, index: number) => {
+                    let lineTotal = 0;
+                    if (line.walls?.enabled) {
+                      const subtotal = (line.walls.sqft || 0) * (line.walls.price || 0);
+                      form.setValue(`interiorBreakdown.hallway.lines.${index}.walls.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    if (line.ceiling?.enabled) {
+                      const subtotal = (line.ceiling.sqft || 0) * (line.ceiling.price || 0);
+                      form.setValue(`interiorBreakdown.hallway.lines.${index}.ceiling.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    if (line.trim?.enabled) {
+                      const subtotal = (line.trim.lft || 0) * (line.trim.price || 0);
+                      form.setValue(`interiorBreakdown.hallway.lines.${index}.trim.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    moduleTotal += lineTotal;
+                  });
+                  form.setValue("interiorBreakdown.hallway.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Stairway (Multiple lines)
+                if (interiorBreakdown?.stairway?.enabled && interiorBreakdown?.stairway?.lines) {
+                  let moduleTotal = 0;
+                  interiorBreakdown.stairway.lines.forEach((line: any, index: number) => {
+                    let lineTotal = 0;
+                    if (line.walls?.enabled) {
+                      const subtotal = (line.walls.sqft || 0) * (line.walls.price || 0);
+                      form.setValue(`interiorBreakdown.stairway.lines.${index}.walls.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    if (line.ceiling?.enabled) {
+                      const subtotal = (line.ceiling.sqft || 0) * (line.ceiling.price || 0);
+                      form.setValue(`interiorBreakdown.stairway.lines.${index}.ceiling.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    if (line.trim?.enabled) {
+                      const subtotal = (line.trim.lft || 0) * (line.trim.price || 0);
+                      form.setValue(`interiorBreakdown.stairway.lines.${index}.trim.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    moduleTotal += lineTotal;
+                  });
+                  form.setValue("interiorBreakdown.stairway.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Bedroom (Multiple lines)
+                if (interiorBreakdown?.bedroom?.enabled && interiorBreakdown?.bedroom?.lines) {
+                  let moduleTotal = 0;
+                  interiorBreakdown.bedroom.lines.forEach((line: any, index: number) => {
+                    let lineTotal = 0;
+                    if (line.walls?.enabled) {
+                      const subtotal = (line.walls.sqft || 0) * (line.walls.price || 0);
+                      form.setValue(`interiorBreakdown.bedroom.lines.${index}.walls.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    if (line.ceiling?.enabled) {
+                      const subtotal = (line.ceiling.sqft || 0) * (line.ceiling.price || 0);
+                      form.setValue(`interiorBreakdown.bedroom.lines.${index}.ceiling.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    if (line.trim?.enabled) {
+                      const subtotal = (line.trim.lft || 0) * (line.trim.price || 0);
+                      form.setValue(`interiorBreakdown.bedroom.lines.${index}.trim.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    moduleTotal += lineTotal;
+                  });
+                  form.setValue("interiorBreakdown.bedroom.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Bathroom (Multiple lines)
+                if (interiorBreakdown?.bathroom?.enabled && interiorBreakdown?.bathroom?.lines) {
+                  let moduleTotal = 0;
+                  interiorBreakdown.bathroom.lines.forEach((line: any, index: number) => {
+                    let lineTotal = 0;
+                    if (line.walls?.enabled) {
+                      const subtotal = (line.walls.sqft || 0) * (line.walls.price || 0);
+                      form.setValue(`interiorBreakdown.bathroom.lines.${index}.walls.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    if (line.ceiling?.enabled) {
+                      const subtotal = (line.ceiling.sqft || 0) * (line.ceiling.price || 0);
+                      form.setValue(`interiorBreakdown.bathroom.lines.${index}.ceiling.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    if (line.trim?.enabled) {
+                      const subtotal = (line.trim.lft || 0) * (line.trim.price || 0);
+                      form.setValue(`interiorBreakdown.bathroom.lines.${index}.trim.subtotal`, subtotal);
+                      lineTotal += subtotal;
+                    }
+                    moduleTotal += lineTotal;
+                  });
+                  form.setValue("interiorBreakdown.bathroom.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+                
                 // Update the total
                 form.setValue("totalEstimate", total);
                 
                 // Generate breakdown summary for scope of work
                 let breakdownSummary = "Project Breakdown:\n\n";
                 
-                // Add each module to the breakdown
+                // Add each exterior module to the breakdown
                 if (form.watch("exteriorBreakdown.boxes.enabled") && form.getValues("exteriorBreakdown.boxes.subtotal") > 0) {
                   breakdownSummary += `• Boxes (Soffit, Facia, Gutters): $${(form.getValues("exteriorBreakdown.boxes.subtotal") || 0).toFixed(2)}\n`;
                 }
@@ -5111,6 +5394,55 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   });
                 }
                 
+                // Add interior modules to the breakdown
+                if (form.watch("interiorBreakdown.livingRoom.enabled") && form.getValues("interiorBreakdown.livingRoom.subtotal") > 0) {
+                  breakdownSummary += `• Living Room: $${(form.getValues("interiorBreakdown.livingRoom.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("interiorBreakdown.kitchen.enabled") && form.getValues("interiorBreakdown.kitchen.subtotal") > 0) {
+                  breakdownSummary += `• Kitchen: $${(form.getValues("interiorBreakdown.kitchen.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("interiorBreakdown.familyRoom.enabled") && form.getValues("interiorBreakdown.familyRoom.subtotal") > 0) {
+                  breakdownSummary += `• Family Room: $${(form.getValues("interiorBreakdown.familyRoom.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("interiorBreakdown.foyer.enabled") && form.getValues("interiorBreakdown.foyer.subtotal") > 0) {
+                  breakdownSummary += `• Foyer: $${(form.getValues("interiorBreakdown.foyer.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("interiorBreakdown.garage.enabled") && form.getValues("interiorBreakdown.garage.subtotal") > 0) {
+                  breakdownSummary += `• Garage: $${(form.getValues("interiorBreakdown.garage.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("interiorBreakdown.sunroom.enabled") && form.getValues("interiorBreakdown.sunroom.subtotal") > 0) {
+                  breakdownSummary += `• Sunroom: $${(form.getValues("interiorBreakdown.sunroom.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("interiorBreakdown.laundry.enabled") && form.getValues("interiorBreakdown.laundry.subtotal") > 0) {
+                  breakdownSummary += `• Laundry: $${(form.getValues("interiorBreakdown.laundry.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("interiorBreakdown.basement.enabled") && form.getValues("interiorBreakdown.basement.subtotal") > 0) {
+                  breakdownSummary += `• Basement: $${(form.getValues("interiorBreakdown.basement.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("interiorBreakdown.hallway.enabled") && form.getValues("interiorBreakdown.hallway.subtotal") > 0) {
+                  breakdownSummary += `• Hallways: $${(form.getValues("interiorBreakdown.hallway.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("interiorBreakdown.stairway.enabled") && form.getValues("interiorBreakdown.stairway.subtotal") > 0) {
+                  breakdownSummary += `• Stairways: $${(form.getValues("interiorBreakdown.stairway.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("interiorBreakdown.bedroom.enabled") && form.getValues("interiorBreakdown.bedroom.subtotal") > 0) {
+                  breakdownSummary += `• Bedrooms: $${(form.getValues("interiorBreakdown.bedroom.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
+                if (form.watch("interiorBreakdown.bathroom.enabled") && form.getValues("interiorBreakdown.bathroom.subtotal") > 0) {
+                  breakdownSummary += `• Bathrooms: $${(form.getValues("interiorBreakdown.bathroom.subtotal") || 0).toFixed(2)}\n`;
+                }
+                
                 breakdownSummary += `\nTOTAL PROJECT COST: $${total.toFixed(2)}`;
                 
                 // Add optional comments if selected
@@ -5163,6 +5495,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           
           {/* Breakdown details */}
           <div className="space-y-2 mb-4">
+            {/* Exterior Modules */}
             {/* Boxes breakdown */}
             {form.watch("exteriorBreakdown.boxes.enabled") && (
               <div className="flex justify-between text-sm">
