@@ -103,7 +103,7 @@ export const quotes = pgTable("quotes", {
   projectId: integer("project_id").notNull(),
   materialsEstimate: jsonb("materials_estimate"),
   laborEstimate: jsonb("labor_estimate"),
-  totalEstimate: integer("total_estimate").notNull(),
+  totalEstimate: decimal("total_estimate", { precision: 10, scale: 2 }).notNull(),
   scopeOfWork: text("scope_of_work"), // New field for simplified quotes
   // Residential service options
   isInterior: boolean("is_interior").default(false),

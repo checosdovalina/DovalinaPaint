@@ -57,6 +57,13 @@ const simpleQuoteSchema = z.object({
     facia: exteriorItemSchema.optional(),
     gutters: exteriorItemSchema.optional(),
   }).optional(),
+  optionalComments: z.object({
+    prep: z.boolean().optional().default(false),
+    primer: z.boolean().optional().default(false),
+    protection: z.boolean().optional().default(false),
+    cleanup: z.boolean().optional().default(false),
+    warranty: z.boolean().optional().default(false),
+  }).optional(),
   notes: z.string().optional(),
   validUntil: z.date().optional(),
   sentDate: z.date().optional(),
