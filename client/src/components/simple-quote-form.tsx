@@ -1670,6 +1670,145 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 </div>
               )}
             </div>
+
+            {/* Miscellaneous Expenses */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="exteriorBreakdown.miscellaneous.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Miscellaneous Expenses</FormLabel>
+                      <p className="text-xs text-muted-foreground">Additional costs and miscellaneous items</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("exteriorBreakdown.miscellaneous.enabled") && (
+                <div className="space-y-3 ml-6">
+                  {/* Add Line Button */}
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const currentLines = form.getValues("exteriorBreakdown.miscellaneous.lines") || [];
+                        form.setValue("exteriorBreakdown.miscellaneous.lines", [
+                          ...currentLines,
+                          { description: "", price: 0 }
+                        ]);
+                      }}
+                      className="h-8"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Expense
+                    </Button>
+                  </div>
+
+                  {/* Dynamic Lines */}
+                  {(form.watch("exteriorBreakdown.miscellaneous.lines") || []).map((_, lineIndex) => (
+                    <div key={lineIndex} className="border border-gray-200 rounded-lg p-3 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Expense #{lineIndex + 1}</span>
+                        {lineIndex > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const currentLines = form.getValues("exteriorBreakdown.miscellaneous.lines") || [];
+                              const newLines = currentLines.filter((_, i) => i !== lineIndex);
+                              form.setValue("exteriorBreakdown.miscellaneous.lines", newLines);
+                            }}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {/* Description and Price */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.miscellaneous.lines.${lineIndex}.description`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Description</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="text"
+                                  placeholder="Describe the expense..."
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.miscellaneous.lines.${lineIndex}.price`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Price ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const price = parseFloat(e.target.value) || 0;
+                                    field.onChange(price);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      {/* Show current price for reference */}
+                      {form.watch(`exteriorBreakdown.miscellaneous.lines.${lineIndex}.price`) > 0 && (
+                        <div className="text-xs text-muted-foreground bg-gray-50 p-2 rounded">
+                          <strong>Cost:</strong> ${(form.watch(`exteriorBreakdown.miscellaneous.lines.${lineIndex}.price`) || 0).toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Initialize with first line if none exist */}
+                  {(!form.watch("exteriorBreakdown.miscellaneous.lines") || form.watch("exteriorBreakdown.miscellaneous.lines").length === 0) && (
+                    <div className="text-center py-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("exteriorBreakdown.miscellaneous.lines", [
+                            { description: "", price: 0 }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Expense
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -1836,6 +1975,14 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   });
                 }
                 
+                // Miscellaneous expenses
+                if (form.watch("exteriorBreakdown.miscellaneous.enabled")) {
+                  const miscLines = form.getValues("exteriorBreakdown.miscellaneous.lines") || [];
+                  miscLines.forEach(line => {
+                    total += line.price || 0;
+                  });
+                }
+                
                 // Update the total
                 form.setValue("totalEstimate", total);
               }}
@@ -1905,6 +2052,20 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                     <div key={index} className="flex justify-between text-sm">
                       <span className="text-gray-600">Deck Line #{index + 1}:</span>
                       <span className="font-medium">${(line.subtotal || 0).toFixed(2)}</span>
+                    </div>
+                  )
+                ))}
+              </>
+            )}
+            
+            {/* Miscellaneous expenses breakdown */}
+            {form.watch("exteriorBreakdown.miscellaneous.enabled") && form.watch("exteriorBreakdown.miscellaneous.lines") && (
+              <>
+                {form.watch("exteriorBreakdown.miscellaneous.lines").map((line, index) => (
+                  line.price > 0 && (
+                    <div key={index} className="flex justify-between text-sm">
+                      <span className="text-gray-600">{line.description || `Misc Expense #${index + 1}`}:</span>
+                      <span className="font-medium">${(line.price || 0).toFixed(2)}</span>
                     </div>
                   )
                 ))}
