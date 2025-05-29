@@ -192,6 +192,7 @@ export const insertSubcontractorSchema = createInsertSchema(subcontractors).pick
 export const serviceOrders = pgTable("service_orders", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").notNull(),
+  quoteId: integer("quote_id"), // Referencia a la cotización que generó esta orden
   details: text("details").notNull(),
   assignedStaff: jsonb("assigned_staff"),
   assignedSubcontractors: jsonb("assigned_subcontractors"), // Lista de subcontratistas asignados
@@ -217,6 +218,7 @@ export const serviceOrders = pgTable("service_orders", {
 // Esquema base para órdenes de servicio
 const baseServiceOrderSchema = createInsertSchema(serviceOrders).pick({
   projectId: true,
+  quoteId: true,
   details: true,
   assignedStaff: true,
   assignedSubcontractors: true, // Lista de subcontratistas asignados
