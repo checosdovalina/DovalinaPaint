@@ -239,6 +239,131 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           />
         </div>
 
+        {/* Optional Comments for Scope of Work */}
+        <div className="space-y-4">
+          <div className="border rounded-lg p-4">
+            <h3 className="text-md font-semibold text-gray-800 mb-3">Optional Work Comments</h3>
+            <p className="text-xs text-gray-500 mb-3">Select standard comments to include in the scope of work</p>
+            
+            <div className="grid gap-3">
+              <FormField
+                control={form.control}
+                name="optionalComments.prep"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-medium cursor-pointer">
+                        Preparation Work
+                      </FormLabel>
+                      <p className="text-xs text-gray-600">
+                        "Prep: Power washing as needed, scraping and sanding, removing old caulk and re-caulking gaps."
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="optionalComments.primer"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-medium cursor-pointer">
+                        Primer Application
+                      </FormLabel>
+                      <p className="text-xs text-gray-600">
+                        "Prime: Apply high-quality primer to all surfaces to ensure proper paint adhesion."
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="optionalComments.protection"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-medium cursor-pointer">
+                        Surface Protection
+                      </FormLabel>
+                      <p className="text-xs text-gray-600">
+                        "Protection: Cover and protect all landscaping, walkways, and adjacent surfaces."
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="optionalComments.cleanup"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-medium cursor-pointer">
+                        Clean-up
+                      </FormLabel>
+                      <p className="text-xs text-gray-600">
+                        "Clean-up: Complete site clean-up and proper disposal of all materials."
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="optionalComments.warranty"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-medium cursor-pointer">
+                        Warranty Information
+                      </FormLabel>
+                      <p className="text-xs text-gray-600">
+                        "Warranty: 2-year warranty on workmanship and materials against defects."
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
         <FormField
           control={form.control}
           name="scopeOfWork"
@@ -2067,6 +2192,30 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 }
                 
                 breakdownSummary += `\nTOTAL PROJECT COST: $${total.toFixed(2)}`;
+                
+                // Add optional comments if selected
+                let optionalComments = "";
+                const comments = form.getValues("optionalComments") || {};
+                
+                if (comments.prep) {
+                  optionalComments += "\n• Prep: Power washing as needed, scraping and sanding, removing old caulk and re-caulking gaps.";
+                }
+                if (comments.primer) {
+                  optionalComments += "\n• Prime: Apply high-quality primer to all surfaces to ensure proper paint adhesion.";
+                }
+                if (comments.protection) {
+                  optionalComments += "\n• Protection: Cover and protect all landscaping, walkways, and adjacent surfaces.";
+                }
+                if (comments.cleanup) {
+                  optionalComments += "\n• Clean-up: Complete site clean-up and proper disposal of all materials.";
+                }
+                if (comments.warranty) {
+                  optionalComments += "\n• Warranty: 2-year warranty on workmanship and materials against defects.";
+                }
+                
+                if (optionalComments) {
+                  breakdownSummary += "\n\nAdditional Services:" + optionalComments;
+                }
                 
                 // Get current scope of work
                 const currentScope = form.getValues("scopeOfWork") || "";
