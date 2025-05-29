@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -8,10 +8,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileDown, Printer, Eye } from "lucide-react";
+import { FileDown, Printer, Eye, Check, X, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import logoPath from "@assets/78c08020-ed9d-43be-8936-ddbc8089b6c3.jpeg";
 import jsPDF from "jspdf";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface SimpleQuoteDetailProps {
   open: boolean;
@@ -22,6 +24,7 @@ interface SimpleQuoteDetailProps {
 
 export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQuoteDetailProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const { toast } = useToast();
 
   // Fetch project and client data
   const { data: projects = [] } = useQuery({
@@ -30,6 +33,59 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
   const { data: clients = [] } = useQuery({
     queryKey: ["/api/clients"],
+  });
+
+  // Mutations for status changes
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatus: string) => {
+      const res = await apiRequest("PUT", `/api/simple-quotes/${quote.id}`, {
+        ...quote,
+        status: newStatus
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+      toast({
+        title: "Status Updated",
+        description: "Quote status has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Update Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const convertToServiceOrderMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/service-orders", {
+        projectId: quote.projectId,
+        quoteId: quote.id,
+        details: quote.scopeOfWork || "Service order created from quote",
+        status: "pending"
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      // Update quote status to converted
+      updateStatusMutation.mutate("converted");
+      queryClient.invalidateQueries({ queryKey: ["/api/service-orders"] });
+      toast({
+        title: "Service Order Created",
+        description: "Quote has been converted to a service order successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Conversion Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   if (!quote) return null;
@@ -287,7 +343,58 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
               <Badge className={getStatusColor(quote.status)}>
                 {getStatusLabel(quote.status)}
               </Badge>
-              <div className="flex space-x-1">
+              <div className="flex flex-wrap gap-2">
+                {/* Status action buttons */}
+                {quote.status === "draft" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => updateStatusMutation.mutate("sent")}
+                    disabled={updateStatusMutation.isPending}
+                  >
+                    Send to Client
+                  </Button>
+                )}
+                
+                {quote.status === "sent" && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateStatusMutation.mutate("approved")}
+                      disabled={updateStatusMutation.isPending}
+                      className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                    >
+                      <Check className="h-4 w-4 mr-1" />
+                      Approve
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateStatusMutation.mutate("rejected")}
+                      disabled={updateStatusMutation.isPending}
+                      className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Reject
+                    </Button>
+                  </>
+                )}
+
+                {quote.status === "approved" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => convertToServiceOrderMutation.mutate()}
+                    disabled={convertToServiceOrderMutation.isPending}
+                    className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                  >
+                    <ArrowRight className="h-4 w-4 mr-1" />
+                    {convertToServiceOrderMutation.isPending ? "Converting..." : "Convert to Service Order"}
+                  </Button>
+                )}
+
+                {/* Standard action buttons */}
                 <Button
                   variant="outline"
                   size="sm"
