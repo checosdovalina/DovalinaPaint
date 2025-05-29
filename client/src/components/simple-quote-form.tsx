@@ -63,6 +63,11 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   const [validUntilOpen, setValidUntilOpen] = useState(false);
   const [sentDateOpen, setSentDateOpen] = useState(false);
 
+  // Debug: Log initial data when editing
+  if (initialData) {
+    console.log("Editing quote with data:", initialData);
+  }
+
   const form = useForm({
     resolver: zodResolver(simpleQuoteSchema),
     defaultValues: {
