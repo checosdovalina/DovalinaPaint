@@ -2101,9 +2101,13 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 // Calculate total from all breakdown items
                 let total = 0;
                 
+                // Get current form values
+                const formValues = form.getValues();
+                const breakdown = formValues.exteriorBreakdown || {};
+                
                 // Boxes subtotal
-                if (form.watch("exteriorBreakdown.boxes.enabled")) {
-                  total += form.getValues("exteriorBreakdown.boxes.subtotal") || 0;
+                if (breakdown.boxes?.enabled) {
+                  total += breakdown.boxes?.subtotal || 0;
                 }
                 
                 // Siding lines subtotal
