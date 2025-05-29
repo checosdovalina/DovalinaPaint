@@ -2105,16 +2105,22 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 const formValues = form.getValues();
                 const breakdown = formValues.exteriorBreakdown || {};
                 
-                // Boxes subtotal
+                // Boxes subtotal (multiply by 3 for soffit, facia, gutters)
                 if (breakdown.boxes?.enabled) {
-                  total += breakdown.boxes?.subtotal || 0;
+                  const boxesSubtotal = (breakdown.boxes?.quantity || 0) * (breakdown.boxes?.price || 0) * 3;
+                  total += boxesSubtotal;
+                  // Update the form value for display
+                  form.setValue("exteriorBreakdown.boxes.subtotal", boxesSubtotal);
                 }
                 
                 // Siding lines subtotal
-                if (form.watch("exteriorBreakdown.siding.enabled")) {
-                  const sidingLines = form.getValues("exteriorBreakdown.siding.lines") || [];
-                  sidingLines.forEach(line => {
-                    total += line.subtotal || 0;
+                if (breakdown.siding?.enabled) {
+                  const sidingLines = breakdown.siding?.lines || [];
+                  sidingLines.forEach((line, index) => {
+                    const lineSubtotal = (line.quantity || 0) * (line.price || 0);
+                    total += lineSubtotal;
+                    // Update the form value for display
+                    form.setValue(`exteriorBreakdown.siding.lines.${index}.subtotal`, lineSubtotal);
                   });
                 }
                 
