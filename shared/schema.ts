@@ -110,6 +110,8 @@ export const quotes = pgTable("quotes", {
   isExterior: boolean("is_exterior").default(false),
   // Exterior breakdown options
   exteriorBreakdown: jsonb("exterior_breakdown"), // {soffit: {ft: number, price: number, subtotal: number}, facia: {...}, gutters: {...}}
+  // Optional comments for scope of work
+  optionalComments: jsonb("optional_comments"), // {preparation: boolean, primer: boolean, protection: boolean, cleanup: boolean, warranty: boolean}
   status: text("status").notNull().default("draft"), // draft, sent, approved, rejected
   sentDate: timestamp("sent_date"),
   validUntil: timestamp("valid_until"),
