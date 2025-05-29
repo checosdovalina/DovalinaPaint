@@ -145,6 +145,92 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           }]
         }
       },
+      interiorBreakdown: {
+        livingRoom: {
+          enabled: initialData?.interiorBreakdown?.livingRoom?.enabled || false,
+          walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+        },
+        kitchen: {
+          enabled: initialData?.interiorBreakdown?.kitchen?.enabled || false,
+          walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+        },
+        hallway: {
+          enabled: initialData?.interiorBreakdown?.hallway?.enabled || false,
+          lines: initialData?.interiorBreakdown?.hallway?.lines || [{
+            name: "Main Hallway",
+            walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+            ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+            trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+          }]
+        },
+        familyRoom: {
+          enabled: initialData?.interiorBreakdown?.familyRoom?.enabled || false,
+          walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+        },
+        foyer: {
+          enabled: initialData?.interiorBreakdown?.foyer?.enabled || false,
+          walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+        },
+        stairway: {
+          enabled: initialData?.interiorBreakdown?.stairway?.enabled || false,
+          lines: initialData?.interiorBreakdown?.stairway?.lines || [{
+            name: "Main Stairway",
+            walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+            ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+            trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+          }]
+        },
+        garage: {
+          enabled: initialData?.interiorBreakdown?.garage?.enabled || false,
+          walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+        },
+        sunroom: {
+          enabled: initialData?.interiorBreakdown?.sunroom?.enabled || false,
+          walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+        },
+        laundry: {
+          enabled: initialData?.interiorBreakdown?.laundry?.enabled || false,
+          walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+        },
+        basement: {
+          enabled: initialData?.interiorBreakdown?.basement?.enabled || false,
+          walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+          trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+        },
+        bedroom: {
+          enabled: initialData?.interiorBreakdown?.bedroom?.enabled || false,
+          lines: initialData?.interiorBreakdown?.bedroom?.lines || [{
+            name: "Master Bedroom",
+            walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+            ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+            trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+          }]
+        },
+        bathroom: {
+          enabled: initialData?.interiorBreakdown?.bathroom?.enabled || false,
+          lines: initialData?.interiorBreakdown?.bathroom?.lines || [{
+            name: "Main Bathroom",
+            walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+            ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
+            trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+          }]
+        }
+      },
       optionalComments: {
         prep: initialData?.optionalComments?.prep || false,
         primer: initialData?.optionalComments?.primer || false,
@@ -1997,6 +2083,1608 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                       </Button>
                     </div>
                   )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Interior Breakdown - show for all residential quotes when interior is selected */}
+        {form.watch("isInterior") && (
+          <div className="space-y-4 border rounded-lg p-4 bg-blue-50">
+            <div>
+              <FormLabel className="text-base font-medium">Labor Breakdown - Interior</FormLabel>
+              <p className="text-sm text-muted-foreground">Select and price specific interior rooms and components</p>
+            </div>
+            
+            {/* Living Room */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.livingRoom.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Living Room</FormLabel>
+                      <p className="text-xs text-muted-foreground">Living room painting with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.livingRoom.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.livingRoom.walls.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.livingRoom.walls.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.livingRoom.walls.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.livingRoom.walls.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.livingRoom.ceiling.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.livingRoom.ceiling.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.livingRoom.ceiling.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.livingRoom.ceiling.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.livingRoom.trim.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Trim (Baseboard)</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.livingRoom.trim.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.livingRoom.trim.lft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.livingRoom.trim.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Kitchen */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.kitchen.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Kitchen</FormLabel>
+                      <p className="text-xs text-muted-foreground">Kitchen painting with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.kitchen.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.kitchen.walls.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.kitchen.walls.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.kitchen.walls.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.kitchen.walls.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.kitchen.ceiling.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.kitchen.ceiling.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.kitchen.ceiling.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.kitchen.ceiling.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.kitchen.trim.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Trim (Baseboard)</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.kitchen.trim.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.kitchen.trim.lft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.kitchen.trim.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Family Room */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.familyRoom.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Family Room</FormLabel>
+                      <p className="text-xs text-muted-foreground">Family room painting with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.familyRoom.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.familyRoom.walls.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.familyRoom.walls.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.familyRoom.walls.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.familyRoom.walls.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.familyRoom.ceiling.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.familyRoom.ceiling.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.familyRoom.ceiling.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.familyRoom.ceiling.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.familyRoom.trim.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Trim (Baseboard)</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.familyRoom.trim.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.familyRoom.trim.lft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.familyRoom.trim.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Foyer */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.foyer.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Foyer</FormLabel>
+                      <p className="text-xs text-muted-foreground">Foyer painting with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.foyer.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.foyer.walls.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.foyer.walls.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.foyer.walls.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.foyer.walls.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.foyer.ceiling.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.foyer.ceiling.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.foyer.ceiling.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.foyer.ceiling.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.foyer.trim.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Trim (Baseboard)</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.foyer.trim.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.foyer.trim.lft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.foyer.trim.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Garage */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.garage.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Garage</FormLabel>
+                      <p className="text-xs text-muted-foreground">Garage painting with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.garage.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.garage.walls.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.garage.walls.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.garage.walls.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.garage.walls.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.garage.ceiling.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.garage.ceiling.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.garage.ceiling.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.garage.ceiling.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.garage.trim.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Trim (Baseboard)</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.garage.trim.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.garage.trim.lft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.garage.trim.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sunroom */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.sunroom.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Sunroom</FormLabel>
+                      <p className="text-xs text-muted-foreground">Sunroom painting with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.sunroom.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.sunroom.walls.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.sunroom.walls.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.sunroom.walls.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.sunroom.walls.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.sunroom.ceiling.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.sunroom.ceiling.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.sunroom.ceiling.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.sunroom.ceiling.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.sunroom.trim.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Trim (Baseboard)</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.sunroom.trim.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.sunroom.trim.lft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.sunroom.trim.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Laundry */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.laundry.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Laundry</FormLabel>
+                      <p className="text-xs text-muted-foreground">Laundry room painting with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.laundry.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.laundry.walls.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.laundry.walls.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.laundry.walls.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.laundry.walls.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.laundry.ceiling.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.laundry.ceiling.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.laundry.ceiling.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.laundry.ceiling.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.laundry.trim.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Trim (Baseboard)</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.laundry.trim.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.laundry.trim.lft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.laundry.trim.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Basement */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.basement.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Basement</FormLabel>
+                      <p className="text-xs text-muted-foreground">Basement painting with walls, ceiling, and trim options</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.basement.enabled") && (
+                <div className="space-y-3 ml-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.basement.walls.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Walls</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.basement.walls.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.basement.walls.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.basement.walls.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.basement.ceiling.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Ceiling</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.basement.ceiling.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.basement.ceiling.sqft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Sq Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.basement.ceiling.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Sq Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="interiorBreakdown.basement.trim.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-medium">Trim (Baseboard)</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {form.watch("interiorBreakdown.basement.trim.enabled") && (
+                        <div className="space-y-2 ml-4">
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.basement.trim.lft"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Linear Ft</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="interiorBreakdown.basement.trim.price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Price/Linear Ft ($)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
