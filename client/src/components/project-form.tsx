@@ -265,6 +265,33 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
 
           <FormField
             control={form.control}
+            name="projectType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Proyecto</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione el tipo de proyecto" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="residential">Residencial</SelectItem>
+                    <SelectItem value="commercial">Comercial</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
             name="priority"
             render={({ field }) => (
               <FormItem>

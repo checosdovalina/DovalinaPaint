@@ -40,6 +40,7 @@ import { useState } from "react";
 // Simplified quote schema without cost breakdown
 const simpleQuoteSchema = z.object({
   projectId: z.number().min(1, "Please select a project"),
+  projectType: z.enum(["residential", "commercial"]).default("residential"),
   totalEstimate: z.number().min(0, "Total estimate must be greater than or equal to 0"),
   scopeOfWork: z.string().min(1, "Scope of work is required"),
   isInterior: z.boolean().optional(),
@@ -70,6 +71,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
     resolver: zodResolver(simpleQuoteSchema),
     defaultValues: {
       projectId: initialData?.projectId || 0,
+      projectType: "residential" as const,
       totalEstimate: initialData?.totalEstimate || initialData?.total || 0,
       scopeOfWork: initialData?.scopeOfWork || "",
       isInterior: initialData?.isInterior || false,

@@ -48,6 +48,7 @@ export const projects = pgTable("projects", {
   description: text("description").notNull(),
   address: text("address").notNull(),
   serviceType: text("service_type").notNull(),
+  projectType: text("project_type").notNull().default("residential"), // residential, commercial
   status: text("status").notNull().default("pending"), // pending, quoted, approved, preparing, in_progress, reviewing, completed, archived
   priority: text("priority").notNull().default("medium"), // low, medium, high
   progress: integer("progress").default(0),
@@ -68,6 +69,7 @@ const baseProjectSchema = createInsertSchema(projects).pick({
   description: true,
   address: true,
   serviceType: true,
+  projectType: true,
   status: true,
   priority: true,
   progress: true,
