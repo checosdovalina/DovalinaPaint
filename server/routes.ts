@@ -468,6 +468,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete Simple Quote
+  app.delete("/api/simple-quotes/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const quote = await storage.getQuote(id);
+      
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      const deleted = await storage.deleteQuote(id);
+      
+      if (deleted) {
+        // Get project for activity
+        const project = await storage.getProject(quote.projectId);
+        
+        // Create activity for quote deletion
+        await storage.createActivity({
+          type: "quote_deleted",
+          description: `Simple quote deleted for project "${project?.title || 'Unknown'}"`,
+          userId: req.user.id,
+          projectId: quote.projectId,
+          clientId: project?.clientId
+        });
+        
+        res.sendStatus(200);
+      } else {
+        res.status(500).json({ message: "Failed to delete quote" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Service Order routes
   app.get("/api/service-orders", isAuthenticated, async (req, res) => {
     try {

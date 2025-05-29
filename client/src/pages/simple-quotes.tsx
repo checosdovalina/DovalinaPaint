@@ -68,7 +68,7 @@ export default function SimpleQuotes() {
     if (!quoteToDelete) return;
 
     try {
-      await apiRequest("DELETE", `/api/quotes/${quoteToDelete.id}`);
+      await apiRequest("DELETE", `/api/simple-quotes/${quoteToDelete.id}`);
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
       toast({
         title: "Success",
