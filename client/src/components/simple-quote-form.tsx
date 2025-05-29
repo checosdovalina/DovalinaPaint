@@ -1505,6 +1505,171 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 </div>
               )}
             </div>
+
+            {/* Deck */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="exteriorBreakdown.deck.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Deck</FormLabel>
+                      <p className="text-xs text-muted-foreground">Deck painting with custom pricing</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("exteriorBreakdown.deck.enabled") && (
+                <div className="space-y-3 ml-6">
+                  {/* Add Line Button */}
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const currentLines = form.getValues("exteriorBreakdown.deck.lines") || [];
+                        form.setValue("exteriorBreakdown.deck.lines", [
+                          ...currentLines,
+                          { quantity: 0, price: 0, subtotal: 0 }
+                        ]);
+                      }}
+                      className="h-8"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Line
+                    </Button>
+                  </div>
+
+                  {/* Dynamic Lines */}
+                  {(form.watch("exteriorBreakdown.deck.lines") || []).map((_, lineIndex) => (
+                    <div key={lineIndex} className="border border-gray-200 rounded-lg p-3 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Deck Line #{lineIndex + 1}</span>
+                        {lineIndex > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const currentLines = form.getValues("exteriorBreakdown.deck.lines") || [];
+                              const newLines = currentLines.filter((_, i) => i !== lineIndex);
+                              form.setValue("exteriorBreakdown.deck.lines", newLines);
+                            }}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {/* Quantity, Price and Subtotal */}
+                      <div className="grid grid-cols-3 gap-2">
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.deck.lines.${lineIndex}.quantity`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Quantity (sq ft)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const quantity = parseFloat(e.target.value) || 0;
+                                    field.onChange(quantity);
+                                    const lines = form.getValues("exteriorBreakdown.deck.lines") || [];
+                                    if (lines[lineIndex]) {
+                                      const price = lines[lineIndex].price || 0;
+                                      form.setValue(`exteriorBreakdown.deck.lines.${lineIndex}.subtotal`, quantity * price);
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.deck.lines.${lineIndex}.price`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Price per sq ft ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const price = parseFloat(e.target.value) || 0;
+                                    field.onChange(price);
+                                    const lines = form.getValues("exteriorBreakdown.deck.lines") || [];
+                                    if (lines[lineIndex]) {
+                                      const quantity = lines[lineIndex].quantity || 0;
+                                      form.setValue(`exteriorBreakdown.deck.lines.${lineIndex}.subtotal`, quantity * price);
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name={`exteriorBreakdown.deck.lines.${lineIndex}.subtotal`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Subtotal ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  readOnly
+                                  className="bg-gray-100"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Initialize with first line if none exist */}
+                  {(!form.watch("exteriorBreakdown.deck.lines") || form.watch("exteriorBreakdown.deck.lines").length === 0) && (
+                    <div className="text-center py-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("exteriorBreakdown.deck.lines", [
+                            { quantity: 0, price: 0, subtotal: 0 }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Deck Line
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -1663,6 +1828,14 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   });
                 }
                 
+                // Deck lines subtotal
+                if (form.watch("exteriorBreakdown.deck.enabled")) {
+                  const deckLines = form.getValues("exteriorBreakdown.deck.lines") || [];
+                  deckLines.forEach(line => {
+                    total += line.subtotal || 0;
+                  });
+                }
+                
                 // Update the total
                 form.setValue("totalEstimate", total);
               }}
@@ -1717,6 +1890,20 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   line.subtotal > 0 && (
                     <div key={index} className="flex justify-between text-sm">
                       <span className="text-gray-600">Shutter Line #{index + 1}:</span>
+                      <span className="font-medium">${(line.subtotal || 0).toFixed(2)}</span>
+                    </div>
+                  )
+                ))}
+              </>
+            )}
+            
+            {/* Deck breakdown */}
+            {form.watch("exteriorBreakdown.deck.enabled") && form.watch("exteriorBreakdown.deck.lines") && (
+              <>
+                {form.watch("exteriorBreakdown.deck.lines").map((line, index) => (
+                  line.subtotal > 0 && (
+                    <div key={index} className="flex justify-between text-sm">
+                      <span className="text-gray-600">Deck Line #{index + 1}:</span>
                       <span className="font-medium">${(line.subtotal || 0).toFixed(2)}</span>
                     </div>
                   )
