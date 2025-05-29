@@ -2130,60 +2130,79 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 }
                 
                 // Dormer lines subtotal
-                if (form.watch("exteriorBreakdown.dormer.enabled")) {
-                  const dormerLines = form.getValues("exteriorBreakdown.dormer.lines") || [];
-                  dormerLines.forEach(line => {
-                    total += line.subtotal || 0;
+                if (breakdown.dormer?.enabled) {
+                  const dormerLines = breakdown.dormer?.lines || [];
+                  dormerLines.forEach((line, index) => {
+                    const lineSubtotal = (line.quantity || 0) * (line.price || 0);
+                    total += lineSubtotal;
+                    // Update the form value for display
+                    form.setValue(`exteriorBreakdown.dormer.lines.${index}.subtotal`, lineSubtotal);
                   });
                 }
                 
                 // Chimney lines subtotal
-                if (form.watch("exteriorBreakdown.chimney.enabled")) {
-                  const chimneyLines = form.getValues("exteriorBreakdown.chimney.lines") || [];
-                  chimneyLines.forEach(line => {
-                    total += line.subtotal || 0;
+                if (breakdown.chimney?.enabled) {
+                  const chimneyLines = breakdown.chimney?.lines || [];
+                  chimneyLines.forEach((line, index) => {
+                    const lineSubtotal = (line.quantity || 0) * (line.price || 0);
+                    total += lineSubtotal;
+                    // Update the form value for display
+                    form.setValue(`exteriorBreakdown.chimney.lines.${index}.subtotal`, lineSubtotal);
                   });
                 }
                 
                 // Porch columns and ceiling subtotal
-                if (form.watch("exteriorBreakdown.porch.enabled")) {
-                  if (form.watch("exteriorBreakdown.porch.columns.enabled")) {
-                    total += form.getValues("exteriorBreakdown.porch.columns.subtotal") || 0;
+                if (breakdown.porch?.enabled) {
+                  if (breakdown.porch?.columns?.enabled) {
+                    const columnsSubtotal = (breakdown.porch?.columns?.quantity || 0) * (breakdown.porch?.columns?.price || 0);
+                    total += columnsSubtotal;
+                    form.setValue("exteriorBreakdown.porch.columns.subtotal", columnsSubtotal);
                   }
-                  if (form.watch("exteriorBreakdown.porch.ceiling.enabled")) {
-                    total += form.getValues("exteriorBreakdown.porch.ceiling.subtotal") || 0;
+                  if (breakdown.porch?.ceiling?.enabled) {
+                    const ceilingSubtotal = (breakdown.porch?.ceiling?.quantity || 0) * (breakdown.porch?.ceiling?.price || 0);
+                    total += ceilingSubtotal;
+                    form.setValue("exteriorBreakdown.porch.ceiling.subtotal", ceilingSubtotal);
                   }
                 }
                 
                 // Windows lines subtotal
-                if (form.watch("exteriorBreakdown.windows.enabled")) {
-                  const windowLines = form.getValues("exteriorBreakdown.windows.lines") || [];
-                  windowLines.forEach(line => {
-                    total += line.subtotal || 0;
+                if (breakdown.windows?.enabled) {
+                  const windowLines = breakdown.windows?.lines || [];
+                  windowLines.forEach((line, index) => {
+                    const lineSubtotal = (line.quantity || 0) * (line.price || 0);
+                    total += lineSubtotal;
+                    form.setValue(`exteriorBreakdown.windows.lines.${index}.subtotal`, lineSubtotal);
                   });
                 }
                 
                 // Shutters lines subtotal
-                if (form.watch("exteriorBreakdown.shutters.enabled")) {
-                  const shutterLines = form.getValues("exteriorBreakdown.shutters.lines") || [];
-                  shutterLines.forEach(line => {
-                    total += line.subtotal || 0;
+                if (breakdown.shutters?.enabled) {
+                  const shutterLines = breakdown.shutters?.lines || [];
+                  shutterLines.forEach((line, index) => {
+                    const lineSubtotal = (line.quantity || 0) * (line.price || 0);
+                    total += lineSubtotal;
+                    form.setValue(`exteriorBreakdown.shutters.lines.${index}.subtotal`, lineSubtotal);
                   });
                 }
                 
                 // Deck lines subtotal
-                if (form.watch("exteriorBreakdown.deck.enabled")) {
-                  const deckLines = form.getValues("exteriorBreakdown.deck.lines") || [];
-                  deckLines.forEach(line => {
-                    total += line.subtotal || 0;
+                if (breakdown.deck?.enabled) {
+                  const deckLines = breakdown.deck?.lines || [];
+                  deckLines.forEach((line, index) => {
+                    const lineSubtotal = (line.quantity || 0) * (line.price || 0);
+                    total += lineSubtotal;
+                    form.setValue(`exteriorBreakdown.deck.lines.${index}.subtotal`, lineSubtotal);
                   });
                 }
                 
                 // Miscellaneous expenses
-                if (form.watch("exteriorBreakdown.miscellaneous.enabled")) {
-                  const miscLines = form.getValues("exteriorBreakdown.miscellaneous.lines") || [];
-                  miscLines.forEach(line => {
-                    total += line.price || 0;
+                if (breakdown.miscellaneous?.enabled) {
+                  const miscLines = breakdown.miscellaneous?.lines || [];
+                  miscLines.forEach((line, index) => {
+                    const lineTotal = line.price || 0;
+                    total += lineTotal;
+                    // Miscellaneous doesn't have quantity, just price
+                    form.setValue(`exteriorBreakdown.miscellaneous.lines.${index}.price`, lineTotal);
                   });
                 }
                 
