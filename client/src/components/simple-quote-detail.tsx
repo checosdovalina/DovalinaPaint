@@ -46,6 +46,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+      onOpenChange(false); // Cerrar el diálogo para forzar re-render
       toast({
         title: "Status Updated",
         description: "Quote status has been updated successfully.",
@@ -74,6 +75,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       // Update quote status to converted
       updateStatusMutation.mutate("converted");
       queryClient.invalidateQueries({ queryKey: ["/api/service-orders"] });
+      onOpenChange(false); // Cerrar el diálogo
       toast({
         title: "Service Order Created",
         description: "Quote has been converted to a service order successfully.",
