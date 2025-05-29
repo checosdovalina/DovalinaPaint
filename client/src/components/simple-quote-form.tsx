@@ -5591,6 +5591,91 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 )}
               </>
             )}
+            
+            {/* Interior Modules */}
+            {form.watch("interiorBreakdown.livingRoom.enabled") && form.watch("interiorBreakdown.livingRoom.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Living Room:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.livingRoom.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {form.watch("interiorBreakdown.kitchen.enabled") && form.watch("interiorBreakdown.kitchen.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Kitchen:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.kitchen.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {form.watch("interiorBreakdown.familyRoom.enabled") && form.watch("interiorBreakdown.familyRoom.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Family Room:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.familyRoom.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {form.watch("interiorBreakdown.foyer.enabled") && form.watch("interiorBreakdown.foyer.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Foyer:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.foyer.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {form.watch("interiorBreakdown.garage.enabled") && form.watch("interiorBreakdown.garage.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Garage:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.garage.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {form.watch("interiorBreakdown.sunroom.enabled") && form.watch("interiorBreakdown.sunroom.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Sunroom:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.sunroom.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {form.watch("interiorBreakdown.laundry.enabled") && form.watch("interiorBreakdown.laundry.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Laundry:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.laundry.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {form.watch("interiorBreakdown.basement.enabled") && form.watch("interiorBreakdown.basement.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Basement:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.basement.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {form.watch("interiorBreakdown.hallway.enabled") && form.watch("interiorBreakdown.hallway.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Hallways:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.hallway.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {form.watch("interiorBreakdown.stairway.enabled") && form.watch("interiorBreakdown.stairway.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Stairways:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.stairway.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {form.watch("interiorBreakdown.bedroom.enabled") && form.watch("interiorBreakdown.bedroom.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Bedrooms:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.bedroom.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {form.watch("interiorBreakdown.bathroom.enabled") && form.watch("interiorBreakdown.bathroom.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Bathrooms:</span>
+                <span className="font-medium">${(form.watch("interiorBreakdown.bathroom.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
           </div>
           
           <div className="border-t pt-3">
