@@ -67,6 +67,9 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   const [validUntilOpen, setValidUntilOpen] = useState(false);
   const [sentDateOpen, setSentDateOpen] = useState(false);
 
+  // Debug log to see what initialData contains
+  console.log("SimpleQuoteForm initialData:", initialData);
+
 
 
   const form = useForm({
