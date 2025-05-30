@@ -291,6 +291,20 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
     },
   });
 
+  // Force form update when initialData changes to ensure UI reflects the correct state
+  useEffect(() => {
+    if (initialData) {
+      console.log("Resetting form with isExterior:", calculatedIsExterior);
+      form.setValue("isExterior", calculatedIsExterior);
+      form.setValue("isInterior", initialData.isInterior || false);
+      
+      const calculatedIsSpecialRequirements = initialData?.isSpecialRequirements || 
+        (initialData?.specialRequirements?.miscellaneous?.enabled && 
+         initialData?.specialRequirements?.miscellaneous?.lines?.length > 0) || false;
+      form.setValue("isSpecialRequirements", calculatedIsSpecialRequirements);
+    }
+  }, [initialData, calculatedIsExterior, form]);
+
   // Fetch projects
   const { data: projects } = useQuery({
     queryKey: ["/api/projects"],
