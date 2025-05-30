@@ -71,6 +71,12 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   console.log("SimpleQuoteForm initialData:", initialData);
   console.log("specialRequirements data:", initialData?.specialRequirements);
   console.log("miscellaneous lines:", initialData?.specialRequirements?.miscellaneous?.lines);
+  
+  // Add debug logging to the submit function
+  const logFormData = (data: any) => {
+    console.log("Form data being submitted:", data);
+    console.log("specialRequirements being sent:", data.specialRequirements);
+  };
 
 
 
