@@ -81,7 +81,9 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       scopeOfWork: initialData?.scopeOfWork || "",
       isInterior: initialData?.isInterior || false,
       isExterior: initialData?.isExterior || false,
-      isSpecialRequirements: initialData?.isSpecialRequirements || false,
+      isSpecialRequirements: initialData?.isSpecialRequirements || 
+        (initialData?.specialRequirements?.miscellaneous?.enabled && 
+         initialData?.specialRequirements?.miscellaneous?.lines?.length > 0) || false,
       exteriorBreakdown: {
         soffit: initialData?.exteriorBreakdown?.soffit || { enabled: false, ft: 0, price: 0, subtotal: 0 },
         facia: initialData?.exteriorBreakdown?.facia || { enabled: false, ft: 0, price: 0, subtotal: 0 },
@@ -249,7 +251,8 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       },
       specialRequirements: {
         miscellaneous: {
-          enabled: initialData?.specialRequirements?.miscellaneous?.enabled || false,
+          enabled: initialData?.specialRequirements?.miscellaneous?.enabled || 
+            (initialData?.specialRequirements?.miscellaneous?.lines?.length > 0) || false,
           lines: initialData?.specialRequirements?.miscellaneous?.lines || [{
             description: "",
             price: 0
