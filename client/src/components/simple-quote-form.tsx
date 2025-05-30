@@ -5659,14 +5659,13 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 let breakdownSummary = "Project Breakdown:\n\n";
                 
                 // Add each exterior module to the breakdown
-                const currentFormValues = form.getValues();
-                if (currentFormValues.exteriorBreakdown?.boxes?.enabled && currentFormValues.exteriorBreakdown?.boxes?.subtotal > 0) {
-                  breakdownSummary += `• Boxes (Soffit, Facia, Gutters): $${(currentFormValues.exteriorBreakdown.boxes.subtotal || 0).toFixed(2)}\n`;
+                if (form.watch("exteriorBreakdown.boxes.enabled") && form.getValues("exteriorBreakdown.boxes.subtotal") > 0) {
+                  breakdownSummary += `• Boxes (Soffit, Facia, Gutters): $${(form.getValues("exteriorBreakdown.boxes.subtotal") || 0).toFixed(2)}\n`;
                 }
                 
-                if (currentFormValues.exteriorBreakdown?.siding?.enabled) {
-                  const sidingLines = currentFormValues.exteriorBreakdown?.siding?.lines || [];
-                  sidingLines.forEach((line: any, index: number) => {
+                if (form.watch("exteriorBreakdown.siding.enabled")) {
+                  const sidingLines = form.getValues("exteriorBreakdown.siding.lines") || [];
+                  sidingLines.forEach((line, index) => {
                     if (line.subtotal > 0) {
                       breakdownSummary += `• Siding ${line.material ? `(${line.material})` : `Line #${index + 1}`}: $${(line.subtotal || 0).toFixed(2)}\n`;
                     }
