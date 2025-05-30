@@ -36,11 +36,16 @@ export default function SimpleQuotes() {
   // Filter only simple quotes (those with scopeOfWork)
   const simpleQuotes = quotes.filter((quote: any) => quote.scopeOfWork) || [];
 
-  // Separate quotes by client type (residential vs commercial)
+  // Separate quotes by project type (residential vs commercial)
   const getQuotesByType = (type: string) => {
     return simpleQuotes.filter((quote: any) => {
       const project = projects.find((p: any) => p.id === quote.projectId);
       if (!project) return false;
+      // First check if the project has a projectType field
+      if (project.projectType) {
+        return project.projectType === type;
+      }
+      // Fallback to client classification for existing projects
       const client = clients.find((c: any) => c.id === project.clientId);
       return client?.classification === type;
     });
