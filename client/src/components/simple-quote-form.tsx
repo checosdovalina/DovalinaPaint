@@ -6029,6 +6029,20 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 ))}
               </>
             )}
+
+            {/* Special Requirements breakdown */}
+            {form.watch("specialRequirements.miscellaneous.enabled") && form.watch("specialRequirements.miscellaneous.lines") && (
+              <>
+                {form.watch("specialRequirements.miscellaneous.lines").map((line: any, index: number) => (
+                  line.price > 0 && (
+                    <div key={index} className="flex justify-between text-sm">
+                      <span className="text-gray-600">{line.description || `Special Requirement #${index + 1}`}:</span>
+                      <span className="font-medium">${(line.price || 0).toFixed(2)}</span>
+                    </div>
+                  )
+                ))}
+              </>
+            )}
           </div>
           
           <div className="border-t pt-3">

@@ -114,6 +114,9 @@ export const quotes = pgTable("quotes", {
   exteriorBreakdown: jsonb("exterior_breakdown"), // {soffit: {ft: number, price: number, subtotal: number}, facia: {...}, gutters: {...}}
   // Interior breakdown options
   interiorBreakdown: jsonb("interior_breakdown"), // {livingRoom: {walls: {enabled: boolean, sqft: number, price: number}, ceiling: {...}, trim: {...}}, kitchen: {...}, etc}
+  // Special requirements section
+  isSpecialRequirements: boolean("is_special_requirements").default(false),
+  specialRequirements: jsonb("special_requirements"), // {miscellaneous: {enabled: boolean, lines: [{description: string, price: number}]}}
   // Optional comments for scope of work
   optionalComments: jsonb("optional_comments"), // {preparation: boolean, primer: boolean, protection: boolean, cleanup: boolean, warranty: boolean}
   status: text("status").notNull().default("draft"), // draft, sent, approved, rejected
@@ -135,6 +138,8 @@ const baseQuoteSchema = createInsertSchema(quotes).pick({
   isExterior: true,
   exteriorBreakdown: true,
   interiorBreakdown: true,
+  isSpecialRequirements: true,
+  specialRequirements: true,
   totalEstimate: true,
   status: true,
   notes: true,
