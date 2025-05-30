@@ -88,7 +88,8 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       totalEstimate: initialData?.totalEstimate || initialData?.total || 0,
       scopeOfWork: initialData?.scopeOfWork || "",
       isInterior: initialData?.isInterior || false,
-      isExterior: initialData?.isExterior || false,
+      isExterior: initialData?.isExterior || 
+        (initialData?.exteriorBreakdown && Object.values(initialData.exteriorBreakdown).some((module: any) => module?.enabled)) || false,
       isSpecialRequirements: initialData?.isSpecialRequirements || 
         (initialData?.specialRequirements?.miscellaneous?.enabled && 
          initialData?.specialRequirements?.miscellaneous?.lines?.length > 0) || false,
