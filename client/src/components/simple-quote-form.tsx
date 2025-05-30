@@ -5016,6 +5016,112 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           </div>
         )}
 
+        {/* Special Requirements Breakdown */}
+        {form.watch("isSpecialRequirements") && (
+          <div className="space-y-4 border rounded-lg p-4 bg-yellow-50">
+            <div>
+              <FormLabel className="text-base font-medium">Special Requirements</FormLabel>
+              <p className="text-sm text-muted-foreground">Custom work and special items</p>
+            </div>
+            
+            {/* Miscellaneous */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="specialRequirements.miscellaneous.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Miscellaneous Items</FormLabel>
+                      <p className="text-xs text-muted-foreground">Custom work items with descriptions and pricing</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("specialRequirements.miscellaneous.enabled") && (
+                <div className="space-y-3 ml-6">
+                  {form.watch("specialRequirements.miscellaneous.lines")?.map((line: any, index: number) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded bg-white">
+                      <FormField
+                        control={form.control}
+                        name={`specialRequirements.miscellaneous.lines.${index}.description`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Description</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Describe the special requirement"
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex gap-2">
+                        <FormField
+                          control={form.control}
+                          name={`specialRequirements.miscellaneous.lines.${index}.price`}
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormLabel className="text-xs">Price ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        {form.watch("specialRequirements.miscellaneous.lines").length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="mt-5"
+                            onClick={() => {
+                              const currentLines = form.getValues("specialRequirements.miscellaneous.lines");
+                              const newLines = currentLines.filter((_: any, i: number) => i !== index);
+                              form.setValue("specialRequirements.miscellaneous.lines", newLines);
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const currentLines = form.getValues("specialRequirements.miscellaneous.lines") || [];
+                      form.setValue("specialRequirements.miscellaneous.lines", [
+                        ...currentLines,
+                        { description: "", price: 0 }
+                      ]);
+                    }}
+                  >
+                    Add Item
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="grid gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
@@ -5510,6 +5616,19 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   form.setValue("interiorBreakdown.miscellaneous.subtotal", moduleTotal);
                   total += moduleTotal;
                 }
+
+                // Calculate Special Requirements total
+                const specialRequirements = form.getValues("specialRequirements");
+                if (specialRequirements?.miscellaneous?.enabled && specialRequirements?.miscellaneous?.lines) {
+                  let moduleTotal = 0;
+                  specialRequirements.miscellaneous.lines.forEach((line: any) => {
+                    if (line.price > 0) {
+                      moduleTotal += line.price || 0;
+                    }
+                  });
+                  form.setValue("specialRequirements.miscellaneous.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
                 
                 // Update the total
                 form.setValue("totalEstimate", total);
@@ -5649,6 +5768,16 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   miscLines.forEach((line: any, index: number) => {
                     if (line.price > 0) {
                       breakdownSummary += `• ${line.description || `Interior Miscellaneous #${index + 1}`}: $${(line.price || 0).toFixed(2)}\n`;
+                    }
+                  });
+                }
+                
+                // Add special requirements miscellaneous items
+                if (form.watch("specialRequirements.miscellaneous.enabled")) {
+                  const miscLines = form.getValues("specialRequirements.miscellaneous.lines") || [];
+                  miscLines.forEach((line: any, index: number) => {
+                    if (line.price > 0) {
+                      breakdownSummary += `• ${line.description || `Special Requirement #${index + 1}`}: $${(line.price || 0).toFixed(2)}\n`;
                     }
                   });
                 }
