@@ -69,6 +69,8 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
 
   // Debug log to see what initialData contains
   console.log("SimpleQuoteForm initialData:", initialData);
+  console.log("specialRequirements data:", initialData?.specialRequirements);
+  console.log("miscellaneous lines:", initialData?.specialRequirements?.miscellaneous?.lines);
 
 
 
