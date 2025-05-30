@@ -31,7 +31,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Plus, Minus } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Minus, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -231,6 +231,13 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             walls: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
             ceiling: { enabled: false, sqft: 0, price: 0, subtotal: 0 },
             trim: { enabled: false, lft: 0, price: 0, subtotal: 0 }
+          }]
+        },
+        miscellaneous: {
+          enabled: initialData?.interiorBreakdown?.miscellaneous?.enabled || false,
+          lines: initialData?.interiorBreakdown?.miscellaneous?.lines || [{
+            description: "",
+            price: 0
           }]
         }
       },
@@ -4856,6 +4863,123 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 </div>
               )}
             </div>
+
+            {/* Miscellaneous */}
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="interiorBreakdown.miscellaneous.enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Miscellaneous</FormLabel>
+                      <p className="text-xs text-muted-foreground">Add miscellaneous interior items with descriptions and prices</p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {form.watch("interiorBreakdown.miscellaneous.enabled") && (
+                <div className="space-y-3 ml-6">
+                  {form.watch("interiorBreakdown.miscellaneous.lines")?.map((line: any, lineIndex: number) => (
+                    <div key={lineIndex} className="border rounded-lg p-4 bg-white">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="text-sm font-medium">Miscellaneous Item #{lineIndex + 1}</h4>
+                        {form.watch("interiorBreakdown.miscellaneous.lines").length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const currentLines = form.getValues("interiorBreakdown.miscellaneous.lines");
+                              const updatedLines = currentLines.filter((_: any, i: number) => i !== lineIndex);
+                              form.setValue("interiorBreakdown.miscellaneous.lines", updatedLines);
+                            }}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`interiorBreakdown.miscellaneous.lines.${lineIndex}.description`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm">Description</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g., Cabinet touch-up, Light fixture removal"
+                                  {...field}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name={`interiorBreakdown.miscellaneous.lines.${lineIndex}.price`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm">Price ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const currentLines = form.getValues("interiorBreakdown.miscellaneous.lines") || [];
+                        const newLines = [...currentLines, { description: "", price: 0 }];
+                        form.setValue("interiorBreakdown.miscellaneous.lines", newLines);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Miscellaneous Item
+                    </Button>
+                  </div>
+
+                  {(!form.watch("interiorBreakdown.miscellaneous.lines") || form.watch("interiorBreakdown.miscellaneous.lines").length === 0) && (
+                    <div className="text-center py-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("interiorBreakdown.miscellaneous.lines", [
+                            { description: "", price: 0 }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Miscellaneous Item
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -5339,6 +5463,18 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                     moduleTotal += lineTotal;
                   });
                   form.setValue("interiorBreakdown.bathroom.subtotal", moduleTotal);
+                  total += moduleTotal;
+                }
+
+                // Miscellaneous (Multiple lines)
+                if (interiorBreakdown?.miscellaneous?.enabled && interiorBreakdown?.miscellaneous?.lines) {
+                  let moduleTotal = 0;
+                  interiorBreakdown.miscellaneous.lines.forEach((line: any) => {
+                    if (line.price > 0) {
+                      moduleTotal += line.price || 0;
+                    }
+                  });
+                  form.setValue("interiorBreakdown.miscellaneous.subtotal", moduleTotal);
                   total += moduleTotal;
                 }
                 
