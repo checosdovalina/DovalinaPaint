@@ -71,6 +71,11 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   console.log("SimpleQuoteForm initialData:", initialData);
   console.log("specialRequirements data:", initialData?.specialRequirements);
   console.log("miscellaneous lines:", initialData?.specialRequirements?.miscellaneous?.lines);
+  console.log("isExterior from data:", initialData?.isExterior);
+  console.log("exteriorBreakdown data:", initialData?.exteriorBreakdown);
+  if (initialData?.exteriorBreakdown) {
+    console.log("enabled modules:", Object.entries(initialData.exteriorBreakdown).filter(([key, module]: [string, any]) => module?.enabled));
+  }
   
   // Add debug logging to the submit function
   const logFormData = (data: any) => {
@@ -89,7 +94,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       scopeOfWork: initialData?.scopeOfWork || "",
       isInterior: initialData?.isInterior || false,
       isExterior: initialData?.isExterior || 
-        (initialData?.exteriorBreakdown && Object.values(initialData.exteriorBreakdown).some((module: any) => module?.enabled)) || false,
+        (initialData?.exteriorBreakdown && Object.values(initialData.exteriorBreakdown || {}).some((module: any) => module?.enabled === true)) || false,
       isSpecialRequirements: initialData?.isSpecialRequirements || 
         (initialData?.specialRequirements?.miscellaneous?.enabled && 
          initialData?.specialRequirements?.miscellaneous?.lines?.length > 0) || false,
