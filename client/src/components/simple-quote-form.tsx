@@ -45,8 +45,10 @@ const simpleQuoteSchema = z.object({
   scopeOfWork: z.string().min(1, "Scope of work is required"),
   isInterior: z.boolean().optional(),
   isExterior: z.boolean().optional(),
+  isSpecialRequirements: z.boolean().optional(),
   exteriorBreakdown: z.any().optional(),
   interiorBreakdown: z.any().optional(),
+  specialRequirements: z.any().optional(),
   optionalComments: z.any().optional(),
   notes: z.string().optional(),
   validUntil: z.date().optional(),
@@ -76,6 +78,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       scopeOfWork: initialData?.scopeOfWork || "",
       isInterior: initialData?.isInterior || false,
       isExterior: initialData?.isExterior || false,
+      isSpecialRequirements: initialData?.isSpecialRequirements || false,
       exteriorBreakdown: {
         soffit: initialData?.exteriorBreakdown?.soffit || { enabled: false, ft: 0, price: 0, subtotal: 0 },
         facia: initialData?.exteriorBreakdown?.facia || { enabled: false, ft: 0, price: 0, subtotal: 0 },
@@ -236,6 +239,15 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
         miscellaneous: {
           enabled: initialData?.interiorBreakdown?.miscellaneous?.enabled || false,
           lines: initialData?.interiorBreakdown?.miscellaneous?.lines || [{
+            description: "",
+            price: 0
+          }]
+        }
+      },
+      specialRequirements: {
+        miscellaneous: {
+          enabled: initialData?.specialRequirements?.miscellaneous?.enabled || false,
+          lines: initialData?.specialRequirements?.miscellaneous?.lines || [{
             description: "",
             price: 0
           }]
@@ -582,7 +594,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             <FormLabel className="text-base font-medium">Service Type</FormLabel>
             <p className="text-sm text-muted-foreground">Select which areas will be painted</p>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             <FormField
               control={form.control}
               name="isInterior"
@@ -619,6 +631,27 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                     <FormLabel>Exterior</FormLabel>
                     <p className="text-sm text-muted-foreground">
                       Outdoor painting services
+                    </p>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="isSpecialRequirements"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Special Requirements</FormLabel>
+                    <p className="text-sm text-muted-foreground">
+                      Custom work and special items
                     </p>
                   </div>
                 </FormItem>
