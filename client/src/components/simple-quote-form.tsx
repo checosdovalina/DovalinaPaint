@@ -85,6 +85,12 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
 
 
 
+  // Calculate isExterior value
+  const calculatedIsExterior = initialData?.isExterior || 
+    (initialData?.exteriorBreakdown && Object.values(initialData.exteriorBreakdown || {}).some((module: any) => module?.enabled === true)) || false;
+  
+  console.log("Calculated isExterior value:", calculatedIsExterior);
+
   const form = useForm({
     resolver: zodResolver(simpleQuoteSchema),
     defaultValues: {
@@ -93,8 +99,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       totalEstimate: initialData?.totalEstimate || initialData?.total || 0,
       scopeOfWork: initialData?.scopeOfWork || "",
       isInterior: initialData?.isInterior || false,
-      isExterior: initialData?.isExterior || 
-        (initialData?.exteriorBreakdown && Object.values(initialData.exteriorBreakdown || {}).some((module: any) => module?.enabled === true)) || false,
+      isExterior: calculatedIsExterior,
       isSpecialRequirements: initialData?.isSpecialRequirements || 
         (initialData?.specialRequirements?.miscellaneous?.enabled && 
          initialData?.specialRequirements?.miscellaneous?.lines?.length > 0) || false,
