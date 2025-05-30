@@ -5610,6 +5610,16 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   breakdownSummary += `• Bathrooms: $${(form.getValues("interiorBreakdown.bathroom.subtotal") || 0).toFixed(2)}\n`;
                 }
                 
+                // Add interior miscellaneous items
+                if (form.watch("interiorBreakdown.miscellaneous.enabled")) {
+                  const miscLines = form.getValues("interiorBreakdown.miscellaneous.lines") || [];
+                  miscLines.forEach((line: any, index: number) => {
+                    if (line.price > 0) {
+                      breakdownSummary += `• ${line.description || `Interior Miscellaneous #${index + 1}`}: $${(line.price || 0).toFixed(2)}\n`;
+                    }
+                  });
+                }
+                
                 breakdownSummary += `\nTOTAL PROJECT COST: $${total.toFixed(2)}`;
                 
                 // Add optional comments if selected
@@ -5842,6 +5852,20 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 <span className="text-gray-600">Bathrooms:</span>
                 <span className="font-medium">${(form.watch("interiorBreakdown.bathroom.subtotal") || 0).toFixed(2)}</span>
               </div>
+            )}
+            
+            {/* Interior Miscellaneous breakdown */}
+            {form.watch("interiorBreakdown.miscellaneous.enabled") && form.watch("interiorBreakdown.miscellaneous.lines") && (
+              <>
+                {form.watch("interiorBreakdown.miscellaneous.lines").map((line: any, index: number) => (
+                  line.price > 0 && (
+                    <div key={index} className="flex justify-between text-sm">
+                      <span className="text-gray-600">{line.description || `Interior Misc #${index + 1}`}:</span>
+                      <span className="font-medium">${(line.price || 0).toFixed(2)}</span>
+                    </div>
+                  )
+                ))}
+              </>
             )}
           </div>
           
