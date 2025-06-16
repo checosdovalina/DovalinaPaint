@@ -397,6 +397,84 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
       yPosition += 15;
 
+      // Add Project Images if available
+      if (project?.images && Array.isArray(project.images) && project.images.length > 0) {
+        // Check if we need a new page for images
+        if (yPosition > 200) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(14);
+        pdf.text("Project Images:", margin, yPosition);
+        yPosition += 15;
+
+        // Add each image
+        const imgWidth = 70; // Width of each image in mm
+        const imgHeight = 55; // Height of each image in mm
+        const imagesPerRow = 2; // Number of images per row
+        let currentRow = 0;
+        let currentCol = 0;
+
+        for (let i = 0; i < project.images.length; i++) {
+          try {
+            // Calculate position for current image
+            const xPos = margin + (currentCol * (imgWidth + 10));
+            const yPos = yPosition + (currentRow * (imgHeight + 10));
+
+            // Check if we need a new page
+            if (yPos + imgHeight > 270) {
+              pdf.addPage();
+              yPosition = margin;
+              currentRow = 0;
+              currentCol = 0;
+              
+              // Re-add title on new page
+              pdf.setFont("helvetica", "bold");
+              pdf.setFontSize(14);
+              pdf.text("Project Images (continued):", margin, yPosition);
+              yPosition += 15;
+            }
+
+            // Add image to PDF
+            pdf.addImage(
+              project.images[i],
+              'JPEG',
+              xPos,
+              yPosition + (currentRow * (imgHeight + 10)),
+              imgWidth,
+              imgHeight,
+              undefined,
+              'NONE',
+              0
+            );
+
+            // Draw border around image
+            pdf.setDrawColor(220, 220, 220);
+            pdf.rect(xPos, yPosition + (currentRow * (imgHeight + 10)), imgWidth, imgHeight);
+
+            // Move to next position
+            currentCol++;
+            if (currentCol >= imagesPerRow) {
+              currentCol = 0;
+              currentRow++;
+            }
+          } catch (error) {
+            console.error("Error adding image to PDF:", error);
+          }
+        }
+
+        // Move position down after all images
+        yPosition += Math.ceil(project.images.length / imagesPerRow) * (imgHeight + 10) + 10;
+      }
+
+      // Check if we need a new page for total and footer
+      if (yPosition > 250) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+
       // Total
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(14);
