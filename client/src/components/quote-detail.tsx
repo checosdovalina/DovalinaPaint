@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Quote, Project, Client } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileDown, Printer, Eye, X, Check } from "lucide-react";
+import { FileDown, Printer, Eye, X, Check, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -79,6 +79,124 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
       toast({
         title: "Error",
         description: `Could not reject the quote: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Conversion to service order mutation
+  const convertToServiceOrderMutation = useMutation({
+    mutationFn: async () => {
+      // Prepare detailed scope of work without costs
+      let serviceOrderDetails = "";
+      
+      // Add basic project information
+      if (project) {
+        serviceOrderDetails += `PROJECT: ${project.title}\n`;
+        serviceOrderDetails += `SERVICE TYPE: ${project.serviceType}\n`;
+        if (project.description) {
+          serviceOrderDetails += `DESCRIPTION: ${project.description}\n\n`;
+        }
+      }
+      
+      // Add scope of work if available
+      if (quote.scopeOfWork) {
+        serviceOrderDetails += `SCOPE OF WORK:\n${quote.scopeOfWork}\n\n`;
+      }
+      
+      // Add work details from materials and labor (descriptions only, no costs)
+      if (Array.isArray(quote.materialsEstimate) && quote.materialsEstimate.length > 0) {
+        serviceOrderDetails += `MATERIALS REQUIRED:\n`;
+        quote.materialsEstimate.forEach((item: any, index: number) => {
+          if (item.name) {
+            serviceOrderDetails += `• ${item.name}${item.quantity ? ` (Qty: ${item.quantity})` : ''}\n`;
+          }
+        });
+        serviceOrderDetails += `\n`;
+      }
+      
+      if (Array.isArray(quote.laborEstimate) && quote.laborEstimate.length > 0) {
+        serviceOrderDetails += `WORK TASKS:\n`;
+        quote.laborEstimate.forEach((item: any, index: number) => {
+          if (item.description) {
+            serviceOrderDetails += `• ${item.description}${item.hours ? ` (Est. ${item.hours} hours)` : ''}\n`;
+          }
+        });
+        serviceOrderDetails += `\n`;
+      }
+      
+      // Add exterior breakdown if available
+      if ((quote as any).exteriorBreakdown) {
+        const exterior = (quote as any).exteriorBreakdown;
+        serviceOrderDetails += `EXTERIOR WORK DETAILS:\n`;
+        
+        if (exterior.preparation?.length > 0) {
+          serviceOrderDetails += `Preparation:\n`;
+          exterior.preparation.forEach((prep: any) => {
+            serviceOrderDetails += `• ${prep.task}\n`;
+          });
+        }
+        
+        if (exterior.painting?.length > 0) {
+          serviceOrderDetails += `Painting:\n`;
+          exterior.painting.forEach((paint: any) => {
+            serviceOrderDetails += `• ${paint.surface} - ${paint.coats} coat(s)\n`;
+          });
+        }
+        
+        if (exterior.cleanup?.length > 0) {
+          serviceOrderDetails += `Cleanup:\n`;
+          exterior.cleanup.forEach((clean: any) => {
+            serviceOrderDetails += `• ${clean.task}\n`;
+          });
+        }
+        serviceOrderDetails += `\n`;
+      }
+      
+      // Add notes if available
+      if (quote.notes) {
+        serviceOrderDetails += `ADDITIONAL NOTES:\n${quote.notes}\n\n`;
+      }
+      
+      // Fallback if no content
+      if (!serviceOrderDetails.trim()) {
+        serviceOrderDetails = "Service order created from quote - please review and add specific work details.";
+      }
+
+      const res = await apiRequest("POST", "/api/service-orders", {
+        projectId: quote.projectId,
+        quoteId: quote.id,
+        details: serviceOrderDetails.trim(),
+        status: "pending"
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      // Update quote status to converted
+      const updateStatusMutation = useMutation({
+        mutationFn: async () => {
+          return apiRequest("PUT", `/api/quotes/${quote.id}`, {
+            ...quote,
+            status: "converted"
+          });
+        },
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/service-orders"] });
+        }
+      });
+      updateStatusMutation.mutate();
+      
+      onClose();
+      toast({
+        title: "Service Order Created",
+        description: "Quote has been converted to a service order successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Conversion Failed",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -421,6 +539,20 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
                 </Button>
               </>
             )}
+            
+            {/* Convert to Service Order button - only show for approved quotes */}
+            {quote.status === 'approved' && (
+              <Button 
+                variant="outline" 
+                onClick={() => convertToServiceOrderMutation.mutate()}
+                disabled={convertToServiceOrderMutation.isPending}
+                className="mr-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+              >
+                <ArrowRight className="mr-2 h-4 w-4" />
+                {convertToServiceOrderMutation.isPending ? "Converting..." : "Convert to Service Order"}
+              </Button>
+            )}
+            
             <Button 
               variant="outline" 
               onClick={onClose}

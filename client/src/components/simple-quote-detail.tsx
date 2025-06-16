@@ -63,10 +63,37 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
   const convertToServiceOrderMutation = useMutation({
     mutationFn: async () => {
+      // Prepare detailed scope of work without costs
+      let serviceOrderDetails = "";
+      
+      if (quote.scopeOfWork) {
+        serviceOrderDetails = `SCOPE OF WORK:\n${quote.scopeOfWork}\n\n`;
+      }
+      
+      // Add notes if available
+      if (quote.notes) {
+        serviceOrderDetails += `ADDITIONAL NOTES:\n${quote.notes}\n\n`;
+      }
+      
+      // Add project information
+      const project = projects.find((p: any) => p.id === quote.projectId);
+      if (project) {
+        serviceOrderDetails += `PROJECT: ${project.title}\n`;
+        serviceOrderDetails += `SERVICE TYPE: ${project.serviceType}\n`;
+        if (project.description) {
+          serviceOrderDetails += `DESCRIPTION: ${project.description}\n`;
+        }
+      }
+      
+      // Fallback if no scope of work
+      if (!serviceOrderDetails.trim()) {
+        serviceOrderDetails = "Service order created from quote - please review and add specific work details.";
+      }
+
       const res = await apiRequest("POST", "/api/service-orders", {
         projectId: quote.projectId,
         quoteId: quote.id,
-        details: quote.scopeOfWork || "Service order created from quote",
+        details: serviceOrderDetails.trim(),
         status: "pending"
       });
       return res.json();
