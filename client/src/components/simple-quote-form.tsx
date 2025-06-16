@@ -5274,7 +5274,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             name="sentDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha de Envío</FormLabel>
+                <FormLabel>Send Date</FormLabel>
                 <Popover open={sentDateOpen} onOpenChange={setSentDateOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -5316,7 +5316,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
         {/* Breakdown Summary and Total Section */}
         <div className="bg-gray-50 p-4 rounded-lg border">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Resumen del Presupuesto</h3>
+            <h3 className="text-lg font-semibold text-gray-800">Quote Summary</h3>
             <Button
               type="button"
               variant="outline"
@@ -6150,7 +6150,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           
           <div className="border-t pt-3">
             <div className="flex justify-between items-center">
-              <span className="text-lg font-semibold text-gray-800">Total del Proyecto:</span>
+              <span className="text-lg font-semibold text-gray-800">Project Total:</span>
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-500">$</span>
                 <FormField
@@ -6169,7 +6169,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
               </div>
             </div>
             <div className="text-xs text-gray-500 mt-2">
-              Use "Calculate Total" para sumar automáticamente todos los subtotales, o edite el total manualmente
+              Use "Calculate Total" to automatically sum all subtotals, or edit the total manually
             </div>
           </div>
         </div>
@@ -6177,7 +6177,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
         {/* Notes Mini Module */}
         <div className="space-y-4">
           <div className="border rounded-lg p-4">
-            <h3 className="text-md font-semibold text-gray-800 mb-3">Notas del Presupuesto</h3>
+            <h3 className="text-md font-semibold text-gray-800 mb-3">Quote Notes</h3>
             
             <FormField
               control={form.control}
