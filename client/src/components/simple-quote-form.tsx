@@ -32,11 +32,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Plus, Minus, Trash } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Minus, Trash, Users, FolderPlus } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ClientForm } from "@/components/client-form";
+import { ProjectForm } from "@/components/project-form";
 
 // Simplified quote schema without cost breakdown
 const simpleQuoteSchema = z.object({
@@ -67,6 +76,10 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   const { toast } = useToast();
   const [validUntilOpen, setValidUntilOpen] = useState(false);
   const [sentDateOpen, setSentDateOpen] = useState(false);
+  
+  // Modal states for creating new clients and projects
+  const [showClientForm, setShowClientForm] = useState(false);
+  const [showProjectForm, setShowProjectForm] = useState(false);
 
   // Debug log to see what initialData contains
   console.log("SimpleQuoteForm initialData:", initialData);
@@ -319,6 +332,25 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   // Get the selected project type from the form
   const selectedProjectType = form.watch("projectType");
   const isResidential = selectedProjectType === 'residential';
+
+  // Handlers for creating new clients and projects
+  const handleClientCreated = () => {
+    setShowClientForm(false);
+    queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+    toast({
+      title: "Success",
+      description: "Client created successfully",
+    });
+  };
+
+  const handleProjectCreated = () => {
+    setShowProjectForm(false);
+    queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+    toast({
+      title: "Success", 
+      description: "Project created successfully",
+    });
+  };
   
 
 
@@ -415,7 +447,31 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             name="projectId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Project</FormLabel>
+                <div className="flex items-center justify-between">
+                  <FormLabel>Project</FormLabel>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowClientForm(true)}
+                      className="h-8 px-2"
+                    >
+                      <Users className="h-3 w-3 mr-1" />
+                      Client
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowProjectForm(true)}
+                      className="h-8 px-2"
+                    >
+                      <FolderPlus className="h-3 w-3 mr-1" />
+                      Project
+                    </Button>
+                  </div>
+                </div>
                 <Select
                   onValueChange={(value) => field.onChange(parseInt(value))}
                   value={field.value?.toString()}
@@ -6176,6 +6232,32 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           </Button>
         </div>
       </form>
+
+      {/* Client Creation Dialog */}
+      <Dialog open={showClientForm} onOpenChange={setShowClientForm}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Client</DialogTitle>
+            <DialogDescription>
+              Add a new client to the system
+            </DialogDescription>
+          </DialogHeader>
+          <ClientForm onSuccess={handleClientCreated} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Project Creation Dialog */}
+      <Dialog open={showProjectForm} onOpenChange={setShowProjectForm}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription>
+              Add a new project for an existing client
+            </DialogDescription>
+          </DialogHeader>
+          <ProjectForm onSuccess={handleProjectCreated} />
+        </DialogContent>
+      </Dialog>
     </Form>
   );
 }
