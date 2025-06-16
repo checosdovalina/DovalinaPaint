@@ -91,9 +91,9 @@ export function ClientForm({ initialData, onSuccess }: ClientFormProps) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombre</FormLabel>
+                <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nombre completo o razón social" {...field} />
+                  <Input placeholder="Full name or company name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -105,19 +105,19 @@ export function ClientForm({ initialData, onSuccess }: ClientFormProps) {
             name="classification"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Clasificación</FormLabel>
+                <FormLabel>Classification</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione una clasificación" />
+                      <SelectValue placeholder="Select a classification" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="residential">Residencial</SelectItem>
-                    <SelectItem value="commercial">Comercial</SelectItem>
+                    <SelectItem value="residential">Residential</SelectItem>
+                    <SelectItem value="commercial">Commercial</SelectItem>
                     <SelectItem value="industrial">Industrial</SelectItem>
                   </SelectContent>
                 </Select>
@@ -133,9 +133,9 @@ export function ClientForm({ initialData, onSuccess }: ClientFormProps) {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Correo Electrónico</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="email@ejemplo.com" {...field} />
+                  <Input type="email" placeholder="email@example.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -147,9 +147,9 @@ export function ClientForm({ initialData, onSuccess }: ClientFormProps) {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Teléfono</FormLabel>
+                <FormLabel>Phone</FormLabel>
                 <FormControl>
-                  <Input placeholder="Número de teléfono" {...field} />
+                  <Input placeholder="Phone number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -162,9 +162,9 @@ export function ClientForm({ initialData, onSuccess }: ClientFormProps) {
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Dirección</FormLabel>
+              <FormLabel>Address</FormLabel>
               <FormControl>
-                <Input placeholder="Dirección completa" {...field} />
+                <Input placeholder="Complete address" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -176,10 +176,10 @@ export function ClientForm({ initialData, onSuccess }: ClientFormProps) {
           name="notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Notas Adicionales</FormLabel>
+              <FormLabel>Additional Notes</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Información adicional sobre el cliente"
+                  placeholder="Additional information about the client"
                   {...field}
                 />
               </FormControl>
@@ -194,17 +194,17 @@ export function ClientForm({ initialData, onSuccess }: ClientFormProps) {
             variant="outline"
             onClick={onSuccess}
           >
-            Cancelar
+            Cancel
           </Button>
           <Button
             type="submit"
             disabled={mutation.isPending}
           >
             {mutation.isPending
-              ? "Guardando..."
+              ? "Saving..."
               : initialData?.id
-              ? "Actualizar Cliente"
-              : "Crear Cliente"}
+              ? "Update Client"
+              : "Create Client"}
           </Button>
         </div>
       </form>
