@@ -625,107 +625,13 @@ ${quote.notes ? `\nNotes:\n${quote.notes}` : ''}
         </div>
       </div>
 
+      {/* Main Content Area */}
       {isLoadingQuotes ? (
         <div className="flex justify-center py-20">
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
         </div>
-      ) : filteredQuotes && filteredQuotes.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredQuotes.map((quote) => (
-            <Card key={quote.id} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg truncate">
-                    {getProjectName(quote.projectId)}
-                  </CardTitle>
-                  {getStatusBadge(quote.status)}
-                </div>
-              </CardHeader>
-              <CardContent className="pb-2 space-y-3">
-                <div className="flex items-center text-sm">
-                  <DollarSign className="h-4 w-4 mr-2 text-gray-400" />
-                  <span className="font-semibold">${quote.totalEstimate?.toLocaleString()}</span>
-                </div>
-                <div className="flex items-center text-sm">
-                  <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>Sent: {formatDate(quote.sentDate)}</span>
-                </div>
-                <div className="flex items-center text-sm">
-                  <Clock className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>Valid until: {formatDate(quote.validUntil)}</span>
-                </div>
-                {quote.status === "approved" && (
-                  <div className="flex items-center text-sm text-green-600">
-                    <FileCheck className="h-4 w-4 mr-2" />
-                    <span>Approved: {formatDate(quote.approvedDate)}</span>
-                  </div>
-                )}
-                {quote.notes && (
-                  <div className="text-sm text-gray-500 mt-2 pt-2 border-t">
-                    <p className="line-clamp-2">{quote.notes}</p>
-                  </div>
-                )}
-              </CardContent>
-              <CardFooter className="flex flex-wrap justify-between pt-2">
-                {quote.status === "sent" && (
-                  <div className="flex space-x-1 mb-2 mr-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 px-2 text-green-600 border-green-600 hover:bg-green-50"
-                      onClick={() => handleUpdateStatus(quote, "approved")}
-                    >
-                      <Check className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 px-2 text-red-600 border-red-600 hover:bg-red-50"
-                      onClick={() => handleUpdateStatus(quote, "rejected")}
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Reject
-                    </Button>
-                  </div>
-                )}
-                <div className="flex space-x-1 ml-auto">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
-                    onClick={() => handleDeleteClick(quote)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 w-8 p-0"
-                    onClick={() => setQuoteToView(quote)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8"
-                    onClick={() => handleEditQuote(quote)}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
       ) : (
-        <div className="text-center py-20 text-gray-500">
-          {searchTerm || statusFilter !== "all"
-            ? "No quotes found with the applied filters"
-            : "No quotes registered. Create a new one by clicking 'New Quote'"}
-        </div>
+        viewMode === 'list' ? renderTableView() : renderCardsView()
       )}
 
       {/* Quote Form Dialog */}
