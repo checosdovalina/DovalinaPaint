@@ -30,12 +30,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, FileDown, Printer } from "lucide-react";
+import { Calendar as CalendarIcon, FileDown, Printer, Plus, Users, FolderPlus } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ClientForm } from "@/components/client-form";
+import { ProjectForm } from "@/components/project-form";
 
 // Extend the schema to handle the form
 const formSchema = insertQuoteSchema
@@ -142,6 +151,10 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
   const [additionalCosts, setAdditionalCosts] = useState<number>(
     initialData?.additionalCosts || 0
   );
+  
+  // Modal states for creating new clients and projects
+  const [showClientForm, setShowClientForm] = useState(false);
+  const [showProjectForm, setShowProjectForm] = useState(false);
 
   // Calculate totals
   const materialsTotal = materialItems.reduce((sum, item) => sum + item.total, 0);
@@ -165,6 +178,16 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
     queryFn: async () => {
       const res = await fetch("/api/projects");
       if (!res.ok) throw new Error("Failed to fetch projects");
+      return res.json();
+    },
+  });
+
+  // Fetch clients for project creation
+  const { data: clients } = useQuery({
+    queryKey: ["/api/clients"],
+    queryFn: async () => {
+      const res = await fetch("/api/clients");
+      if (!res.ok) throw new Error("Failed to fetch clients");
       return res.json();
     },
   });
@@ -324,6 +347,25 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
     mutation.mutate(formData);
   };
 
+  // Handlers for creating new clients and projects
+  const handleClientCreated = () => {
+    setShowClientForm(false);
+    queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+    toast({
+      title: "Success",
+      description: "Client created successfully",
+    });
+  };
+
+  const handleProjectCreated = () => {
+    setShowProjectForm(false);
+    queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+    toast({
+      title: "Success", 
+      description: "Project created successfully",
+    });
+  };
+
   // Función para generar el PDF de la cotización
   const generateQuotePDF = () => {
     // Esta función se implementará más adelante
@@ -377,7 +419,31 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
               name="projectId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Project</FormLabel>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowClientForm(true)}
+                        className="h-8 px-2"
+                      >
+                        <Users className="h-3 w-3 mr-1" />
+                        Client
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowProjectForm(true)}
+                        className="h-8 px-2"
+                      >
+                        <FolderPlus className="h-3 w-3 mr-1" />
+                        Project
+                      </Button>
+                    </div>
+                  </div>
                   <Select
                     onValueChange={(value) => field.onChange(parseInt(value))}
                     defaultValue={field.value?.toString()}
@@ -755,6 +821,32 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
           </Button>
         </div>
       </form>
+
+      {/* Client Creation Dialog */}
+      <Dialog open={showClientForm} onOpenChange={setShowClientForm}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Client</DialogTitle>
+            <DialogDescription>
+              Add a new client to the system
+            </DialogDescription>
+          </DialogHeader>
+          <ClientForm onSuccess={handleClientCreated} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Project Creation Dialog */}
+      <Dialog open={showProjectForm} onOpenChange={setShowProjectForm}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription>
+              Add a new project for an existing client
+            </DialogDescription>
+          </DialogHeader>
+          <ProjectForm onSuccess={handleProjectCreated} />
+        </DialogContent>
+      </Dialog>
     </Form>
   );
 }
