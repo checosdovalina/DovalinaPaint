@@ -26,6 +26,9 @@ import {
   X,
   FileCheck,
   Eye,
+  Grid3X3,
+  List,
+  Filter,
 } from "lucide-react";
 import {
   Dialog,
@@ -46,6 +49,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -65,6 +71,14 @@ export default function Quotes() {
   const [quoteToView, setQuoteToView] = useState<Quote | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  
+  // Advanced filter and view states
+  const [viewMode, setViewMode] = useState<'list' | 'cards'>('cards');
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [dateFromOpen, setDateFromOpen] = useState(false);
+  const [dateToOpen, setDateToOpen] = useState(false);
+  
   const { toast } = useToast();
 
   // Fetch quotes
@@ -162,19 +176,48 @@ export default function Quotes() {
     }
   };
 
-  // Filter quotes
+  // Helper function to clear all filters
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setSearchTerm('');
+    setDateFrom(undefined);
+    setDateTo(undefined);
+  };
+
+  // Filter quotes with advanced filters
   const filteredQuotes = quotes?.filter(quote => {
     // Filter by status
     if (statusFilter !== "all" && quote.status !== statusFilter) {
       return false;
     }
     
-    // Filter by search term (using project names)
-    if (searchTerm && projects) {
+    // Enhanced search filter (search in project title, client name, or quote details)
+    if (searchTerm && (projects && clients)) {
       const searchTermLower = searchTerm.toLowerCase();
       const project = projects.find(p => p.id === quote.projectId);
+      const client = project ? clients.find(c => c.id === project.clientId) : null;
       
-      if (!project || !project.title.toLowerCase().includes(searchTermLower)) {
+      const searchableText = [
+        project?.title,
+        client?.name,
+        quote.scopeOfWork,
+        quote.notes
+      ].filter(Boolean).join(' ').toLowerCase();
+      
+      if (!searchableText.includes(searchTermLower)) {
+        return false;
+      }
+    }
+
+    // Date filter
+    if (dateFrom || dateTo) {
+      const quoteDate = quote.sentDate ? new Date(quote.sentDate) : new Date(quote.createdAt || Date.now());
+      
+      if (dateFrom && quoteDate < dateFrom) {
+        return false;
+      }
+      
+      if (dateTo && quoteDate > dateTo) {
         return false;
       }
     }
@@ -210,39 +253,376 @@ export default function Quotes() {
     }
   };
 
+  // Export PDF function
+  const handleExportPDF = (quote: Quote) => {
+    const project = projects?.find((p: any) => p.id === quote.projectId);
+    const client = project ? clients?.find((c: any) => c.id === project.clientId) : null;
+    
+    const content = `
+Quote #${quote.id}
+Project: ${project?.title || 'Unknown Project'}
+Client: ${client?.name || 'Unknown Client'}
+Total: $${parseFloat(quote.totalEstimate || '0').toLocaleString()}
+Status: ${quote.status}
+${quote.sentDate ? `Date Sent: ${format(new Date(quote.sentDate), "MMM dd, yyyy")}` : ''}
+
+${quote.scopeOfWork ? `Scope of Work:\n${quote.scopeOfWork}` : ''}
+${quote.notes ? `\nNotes:\n${quote.notes}` : ''}
+    `.trim();
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `quote-${quote.id}-${project?.title?.replace(/[^a-zA-Z0-9]/g, '-') || 'unknown'}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Success",
+      description: "Quote exported successfully",
+    });
+  };
+
+  // Render table view
+  const renderTableView = () => {
+    if (!filteredQuotes || filteredQuotes.length === 0) {
+      return (
+        <div className="text-center py-20 text-gray-500">
+          {searchTerm || statusFilter !== "all" || dateFrom || dateTo
+            ? "No quotes found with the applied filters"
+            : "No quotes registered. Create a new one by clicking 'New Quote'"}
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Project & Client
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Amount
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date Sent
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredQuotes.map((quote) => {
+                const project = projects?.find((p: any) => p.id === quote.projectId);
+                const client = project ? clients?.find((c: any) => c.id === project.clientId) : null;
+                
+                return (
+                  <tr key={quote.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {project?.title || `Project #${quote.projectId}`}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {client?.name || 'Unknown Client'}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-semibold text-gray-900">
+                        ${parseFloat(quote.totalEstimate || '0').toLocaleString()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {getStatusBadge(quote.status)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDate(quote.sentDate)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setQuoteToView(quote)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditQuote(quote)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleExportPDF(quote)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(quote)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
+  // Render cards view (existing implementation)
+  const renderCardsView = () => {
+    if (!filteredQuotes || filteredQuotes.length === 0) {
+      return (
+        <div className="text-center py-20 text-gray-500">
+          {searchTerm || statusFilter !== "all" || dateFrom || dateTo
+            ? "No quotes found with the applied filters"
+            : "No quotes registered. Create a new one by clicking 'New Quote'"}
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredQuotes.map((quote) => (
+          <Card key={quote.id} className="overflow-hidden">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg truncate">
+                  {getProjectName(quote.projectId)}
+                </CardTitle>
+                {getStatusBadge(quote.status)}
+              </div>
+            </CardHeader>
+            <CardContent className="pb-2 space-y-3">
+              <div className="flex items-center text-sm">
+                <DollarSign className="h-4 w-4 mr-2 text-gray-400" />
+                <span className="font-semibold">${parseFloat(quote.totalEstimate || '0').toLocaleString()}</span>
+              </div>
+              <div className="flex items-center text-sm">
+                <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                <span>Sent: {formatDate(quote.sentDate)}</span>
+              </div>
+              <div className="flex items-center text-sm">
+                <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                <span>Valid until: {formatDate(quote.validUntil)}</span>
+              </div>
+              {quote.status === "approved" && (
+                <div className="flex items-center text-sm text-green-600">
+                  <FileCheck className="h-4 w-4 mr-2" />
+                  <span>Approved: {formatDate(quote.approvedDate)}</span>
+                </div>
+              )}
+              {quote.notes && (
+                <div className="text-sm text-gray-500 mt-2 pt-2 border-t">
+                  <p className="line-clamp-2">{quote.notes}</p>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="pt-2 flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                {quote.status === "sent" && (
+                  <div className="flex space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 w-8 p-0"
+                      onClick={() => handleUpdateStatus(quote, "approved")}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                      onClick={() => handleUpdateStatus(quote, "rejected")}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <div className="flex space-x-1 ml-auto">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                  onClick={() => handleDeleteClick(quote)}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 w-8 p-0"
+                  onClick={() => setQuoteToView(quote)}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8"
+                  onClick={() => handleEditQuote(quote)}
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <Layout title="Quotes">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center space-x-2 w-full max-w-md">
-          <div className="relative w-full">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search quotes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8"
-            />
+      {/* Header with filters and controls */}
+      <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+          {/* Left side - Filters */}
+          <div className="flex flex-col sm:flex-row gap-3 flex-1">
+            {/* Search */}
+            <div className="relative min-w-[250px]">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search quotes, projects, or clients..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            {/* Status Filter */}
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="All statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="sent">Sent</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Date From */}
+            <Popover open={dateFromOpen} onOpenChange={setDateFromOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[140px] justify-start text-left font-normal",
+                    !dateFrom && "text-muted-foreground"
+                  )}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {dateFrom ? format(dateFrom, "MMM dd") : "From"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={dateFrom}
+                  onSelect={setDateFrom}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            {/* Date To */}
+            <Popover open={dateToOpen} onOpenChange={setDateToOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[140px] justify-start text-left font-normal",
+                    !dateTo && "text-muted-foreground"
+                  )}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {dateTo ? format(dateTo, "MMM dd") : "To"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={dateTo}
+                  onSelect={setDateTo}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            {/* Clear Filters */}
+            {(statusFilter !== 'all' || searchTerm || dateFrom || dateTo) && (
+              <Button
+                variant="ghost"
+                onClick={clearFilters}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Clear
+              </Button>
+            )}
           </div>
-          <Select
-            value={statusFilter}
-            onValueChange={setStatusFilter}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="sent">Sent</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
+
+          {/* Right side - Actions and View Toggle */}
+          <div className="flex items-center gap-2">
+            {/* View Toggle */}
+            <div className="flex border rounded-lg">
+              <Button
+                variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+                className="rounded-r-none"
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="rounded-l-none"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* New Quote Button */}
+            <Button onClick={handleNewQuote}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Quote
+            </Button>
+          </div>
         </div>
-        <Button onClick={handleNewQuote}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Quote
-        </Button>
       </div>
 
       {isLoadingQuotes ? (
