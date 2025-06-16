@@ -413,12 +413,12 @@ export default function Subcontractors() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {subcontractorToEdit ? "Editar Subcontratista" : "Nuevo Subcontratista"}
+              {subcontractorToEdit ? "Edit Subcontractor" : "New Subcontractor"}
             </DialogTitle>
             <DialogDescription>
               {subcontractorToEdit
-                ? "Modifique los datos del subcontratista según sea necesario"
-                : "Complete el formulario para registrar un nuevo subcontratista"}
+                ? "Modify the subcontractor details as needed"
+                : "Complete the form to register a new subcontractor"}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -429,9 +429,9 @@ export default function Subcontractors() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nombre Completo</FormLabel>
+                      <FormLabel>Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Juan Pérez" {...field} />
+                        <Input placeholder="John Doe" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -443,9 +443,9 @@ export default function Subcontractors() {
                   name="company"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Compañía (opcional)</FormLabel>
+                      <FormLabel>Company (optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="Empresa SA de CV" {...field} />
+                        <Input placeholder="ABC Company LLC" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -458,25 +458,25 @@ export default function Subcontractors() {
                 name="specialty"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Especialidad</FormLabel>
+                    <FormLabel>Specialty</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccione una especialidad" />
+                          <SelectValue placeholder="Select a specialty" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Pintor">Pintor</SelectItem>
-                        <SelectItem value="Electricista">Electricista</SelectItem>
-                        <SelectItem value="Plomero">Plomero</SelectItem>
-                        <SelectItem value="Carpintero">Carpintero</SelectItem>
-                        <SelectItem value="Albañil">Albañil</SelectItem>
-                        <SelectItem value="Diseñador">Diseñador</SelectItem>
-                        <SelectItem value="Arquitecto">Arquitecto</SelectItem>
-                        <SelectItem value="Otro">Otro</SelectItem>
+                        <SelectItem value="Painter">Painter</SelectItem>
+                        <SelectItem value="Electrician">Electrician</SelectItem>
+                        <SelectItem value="Plumber">Plumber</SelectItem>
+                        <SelectItem value="Carpenter">Carpenter</SelectItem>
+                        <SelectItem value="Mason">Mason</SelectItem>
+                        <SelectItem value="Designer">Designer</SelectItem>
+                        <SelectItem value="Architect">Architect</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -490,9 +490,9 @@ export default function Subcontractors() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Correo Electrónico</FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="correo@ejemplo.com" {...field} />
+                        <Input type="email" placeholder="email@example.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -504,7 +504,7 @@ export default function Subcontractors() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Teléfono</FormLabel>
+                      <FormLabel>Phone</FormLabel>
                       <FormControl>
                         <Input placeholder="555-1234" {...field} />
                       </FormControl>
@@ -519,9 +519,9 @@ export default function Subcontractors() {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Dirección</FormLabel>
+                    <FormLabel>Address</FormLabel>
                     <FormControl>
-                      <Input placeholder="Calle, Ciudad, Estado, CP" {...field} />
+                      <Input placeholder="Street, City, State, ZIP" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -534,9 +534,9 @@ export default function Subcontractors() {
                   name="taxId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>RFC o Identificación Fiscal</FormLabel>
+                      <FormLabel>Tax ID</FormLabel>
                       <FormControl>
-                        <Input placeholder="XXX0101011X1" {...field} />
+                        <Input placeholder="123-45-6789" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
