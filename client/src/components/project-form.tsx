@@ -114,11 +114,11 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
     onSuccess: () => {
       toast({
         title: initialData?.id
-          ? "Proyecto actualizado"
-          : "Proyecto creado",
+          ? "Project updated"
+          : "Project created",
         description: initialData?.id
-          ? "El proyecto ha sido actualizado exitosamente"
-          : "El proyecto ha sido creado exitosamente",
+          ? "The project has been successfully updated"
+          : "The project has been successfully created",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       onSuccess();
@@ -126,7 +126,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
     onError: (error) => {
       toast({
         title: "Error",
-        description: `No se pudo ${initialData?.id ? "actualizar" : "crear"} el proyecto: ${error.message}`,
+        description: `Could not ${initialData?.id ? "update" : "create"} project: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -152,9 +152,9 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Título del Proyecto</FormLabel>
+                <FormLabel>Project Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej: Pintura Casa Familia Torres" {...field} />
+                  <Input placeholder="e.g., Paint House Torres Family" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -166,7 +166,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             name="clientId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cliente</FormLabel>
+                <FormLabel>Client</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     const clientId = parseInt(value);
@@ -182,7 +182,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un cliente" />
+                      <SelectValue placeholder="Select a client" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -204,10 +204,10 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción</FormLabel>
+              <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Describa el proyecto y sus detalles"
+                  placeholder="Describe the project and its details"
                   {...field}
                 />
               </FormControl>
@@ -221,10 +221,10 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Dirección</FormLabel>
+              <FormLabel>Address</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Dirección completa del proyecto"
+                  placeholder="Complete project address"
                   {...field}
                 />
               </FormControl>
@@ -239,23 +239,23 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             name="serviceType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Servicio</FormLabel>
+                <FormLabel>Service Type</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione el tipo de servicio" />
+                      <SelectValue placeholder="Select service type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Pintura Interior">Pintura Interior</SelectItem>
-                    <SelectItem value="Pintura Exterior">Pintura Exterior</SelectItem>
-                    <SelectItem value="Pintura Interior y Exterior">Pintura Interior y Exterior</SelectItem>
-                    <SelectItem value="Pintura Industrial">Pintura Industrial</SelectItem>
-                    <SelectItem value="Pintura Comercial">Pintura Comercial</SelectItem>
-                    <SelectItem value="Pintura Residencial">Pintura Residencial</SelectItem>
+                    <SelectItem value="Interior Painting">Interior Painting</SelectItem>
+                    <SelectItem value="Exterior Painting">Exterior Painting</SelectItem>
+                    <SelectItem value="Interior and Exterior Painting">Interior and Exterior Painting</SelectItem>
+                    <SelectItem value="Industrial Painting">Industrial Painting</SelectItem>
+                    <SelectItem value="Commercial Painting">Commercial Painting</SelectItem>
+                    <SelectItem value="Residential Painting">Residential Painting</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -268,19 +268,19 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             name="projectType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Proyecto</FormLabel>
+                <FormLabel>Project Type</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione el tipo de proyecto" />
+                      <SelectValue placeholder="Select project type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="residential">Residencial</SelectItem>
-                    <SelectItem value="commercial">Comercial</SelectItem>
+                    <SelectItem value="residential">Residential</SelectItem>
+                    <SelectItem value="commercial">Commercial</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -295,20 +295,20 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             name="priority"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Prioridad</FormLabel>
+                <FormLabel>Priority</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione la prioridad" />
+                      <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="high">Alta</SelectItem>
-                    <SelectItem value="medium">Media</SelectItem>
-                    <SelectItem value="low">Baja</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
