@@ -6184,29 +6184,29 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Notas Internas</FormLabel>
+                  <FormLabel className="text-sm font-medium">Internal Notes</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Notas para uso interno del equipo..."
+                      placeholder="Internal team notes..."
                       className="min-h-[80px]"
                       {...field}
                     />
                   </FormControl>
                   <FormMessage />
                   <div className="text-xs text-gray-500 mt-1">
-                    Estas notas son solo para uso interno y no aparecerán en el presupuesto del cliente
+                    These notes are for internal use only and will not appear on the client quote
                   </div>
                 </FormItem>
               )}
             />
 
             <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
-              <h4 className="text-sm font-medium text-blue-800 mb-2">💡 Consejos para las notas:</h4>
+              <h4 className="text-sm font-medium text-blue-800 mb-2">💡 Notes tips:</h4>
               <ul className="text-xs text-blue-700 space-y-1">
-                <li>• Incluye detalles sobre materiales especiales requeridos</li>
-                <li>• Menciona consideraciones especiales del cliente</li>
-                <li>• Anota cualquier factor que pueda afectar el cronograma</li>
-                <li>• Registra conversaciones importantes con el cliente</li>
+                <li>• Include details about special materials required</li>
+                <li>• Mention special client considerations</li>
+                <li>• Note any factors that may affect the schedule</li>
+                <li>• Record important conversations with the client</li>
               </ul>
             </div>
           </div>
@@ -6218,17 +6218,17 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             variant="outline"
             onClick={onSuccess}
           >
-            Cancelar
+            Cancel
           </Button>
           <Button
             type="submit"
             disabled={mutation.isPending}
           >
             {mutation.isPending
-              ? "Guardando..."
+              ? "Saving..."
               : initialData?.id
-              ? "Actualizar Presupuesto"
-              : "Crear Presupuesto"}
+              ? "Update Quote"
+              : "Create Quote"}
           </Button>
         </div>
       </form>
