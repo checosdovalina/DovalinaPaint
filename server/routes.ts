@@ -276,10 +276,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       try {
         const quoteData = insertQuoteSchema.parse(req.body);
-        const quote = await storage.createQuote(quoteData);
         
-        // Get the project for the activity
-        const project = await storage.getProject(quote.projectId);
+        // Get the project to inherit images and documents
+        const project = await storage.getProject(quoteData.projectId);
+        
+        // Inherit images and documents from project
+        const quoteWithInheritedFiles = {
+          ...quoteData,
+          images: project?.images || null,
+          documents: project?.documents || null,
+        };
+        
+        const quote = await storage.createQuote(quoteWithInheritedFiles);
         
         // Create activity for quote creation
         await storage.createActivity({
@@ -393,6 +401,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Simple Quote routes (simplified quote module)
   app.post("/api/simple-quotes", isAuthenticated, async (req, res) => {
     try {
+      // Get project to inherit images and documents
+      const project = await storage.getProject(req.body.projectId);
+      
       const simpleQuoteData = {
         projectId: req.body.projectId,
         totalEstimate: req.body.totalEstimate,
@@ -410,12 +421,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "draft",
         materialsEstimate: [],
         laborEstimate: [],
+        // Inherit images and documents from project
+        images: project?.images || null,
+        documents: project?.documents || null,
       };
 
       const quote = await storage.createQuote(simpleQuoteData);
-      
-      // Get project for activity
-      const project = await storage.getProject(quote.projectId);
       
       // Create activity for simple quote creation
       await storage.createActivity({

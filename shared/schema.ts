@@ -125,6 +125,8 @@ export const quotes = pgTable("quotes", {
   approvedDate: timestamp("approved_date"),
   rejectedDate: timestamp("rejected_date"),
   notes: text("notes"),
+  images: jsonb("images"), // Inherited from project
+  documents: jsonb("documents"), // Inherited from project
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -143,6 +145,8 @@ const baseQuoteSchema = createInsertSchema(quotes).pick({
   totalEstimate: true,
   status: true,
   notes: true,
+  images: true,
+  documents: true,
 });
 
 // Añadir validación personalizada para fechas
@@ -222,6 +226,8 @@ export const serviceOrders = pgTable("service_orders", {
   assignedTo: integer("assigned_to"), // ID del staff o subcontratista asignado como principal
   assignedType: text("assigned_type"), // Tipo de asignación: 'staff' o 'subcontractor'
   language: text("language").default("english").notNull(), // english, spanish
+  images: jsonb("images"), // Inherited from project
+  documents: jsonb("documents"), // Inherited from project
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -245,6 +251,8 @@ const baseServiceOrderSchema = createInsertSchema(serviceOrders).pick({
   safetyRequirements: true,
   assignedTo: true,
   assignedType: true,
+  images: true,
+  documents: true,
 });
 
 // Añadir validación personalizada para fechas
