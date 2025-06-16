@@ -548,9 +548,9 @@ export default function Subcontractors() {
                   name="insuranceInfo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Información de Seguro</FormLabel>
+                      <FormLabel>Insurance Information</FormLabel>
                       <FormControl>
-                        <Input placeholder="Póliza #12345" {...field} />
+                        <Input placeholder="Policy #12345" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -564,7 +564,7 @@ export default function Subcontractors() {
                   name="rate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tarifa</FormLabel>
+                      <FormLabel>Rate</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -587,20 +587,20 @@ export default function Subcontractors() {
                   name="rateType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tipo de Tarifa</FormLabel>
+                      <FormLabel>Rate Type</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Seleccione el tipo" />
+                            <SelectValue placeholder="Select rate type" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="hourly">Por Hora</SelectItem>
-                          <SelectItem value="daily">Por Día</SelectItem>
-                          <SelectItem value="fixed">Monto Fijo</SelectItem>
+                          <SelectItem value="hourly">Hourly</SelectItem>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="fixed">Fixed Amount</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -614,10 +614,10 @@ export default function Subcontractors() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Notas</FormLabel>
+                    <FormLabel>Notes</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Información adicional sobre el subcontratista" 
+                        placeholder="Additional information about the subcontractor" 
                         className="resize-none" 
                         {...field} 
                       />
@@ -632,20 +632,20 @@ export default function Subcontractors() {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Estado</FormLabel>
+                    <FormLabel>Status</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccione el estado" />
+                          <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="active">Activo</SelectItem>
-                        <SelectItem value="inactive">Inactivo</SelectItem>
-                        <SelectItem value="blacklisted">Lista Negra</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="blacklisted">Blacklisted</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -659,15 +659,15 @@ export default function Subcontractors() {
                   variant="outline"
                   onClick={handleCloseForm}
                 >
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button type="submit" disabled={mutation.isPending}>
                   {mutation.isPending ? (
                     <>
                       <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
-                      Guardando...
+                      Saving...
                     </>
-                  ) : subcontractorToEdit ? "Actualizar" : "Crear"}
+                  ) : subcontractorToEdit ? "Update" : "Create"}
                 </Button>
               </div>
             </form>
@@ -679,19 +679,19 @@ export default function Subcontractors() {
       <AlertDialog open={!!subcontractorToDelete} onOpenChange={(open) => !open && setSubcontractorToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Está seguro que desea eliminar este subcontratista?</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure you want to delete this subcontractor?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Esto eliminará permanentemente el subcontratista
-              {subcontractorToDelete?.name && ` "${subcontractorToDelete.name}"`} y eliminará sus datos de la base de datos.
+              This action cannot be undone. This will permanently delete the subcontractor
+              {subcontractorToDelete?.name && ` "${subcontractorToDelete.name}"`} and remove their data from the database.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Eliminar
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
