@@ -6248,7 +6248,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
 
       {/* Project Creation Dialog */}
       <Dialog open={showProjectForm} onOpenChange={setShowProjectForm}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
             <DialogDescription>
