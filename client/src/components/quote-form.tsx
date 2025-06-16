@@ -826,9 +826,9 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
       <Dialog open={showClientForm} onOpenChange={setShowClientForm}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Create New Client</DialogTitle>
+            <DialogTitle>New Client</DialogTitle>
             <DialogDescription>
-              Add a new client to the system
+              Complete the form to register a new client
             </DialogDescription>
           </DialogHeader>
           <ClientForm onSuccess={handleClientCreated} />
