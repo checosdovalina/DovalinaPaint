@@ -87,6 +87,22 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
   // Conversion to service order mutation
   const convertToServiceOrderMutation = useMutation({
     mutationFn: async () => {
+      // Function to remove price information from text
+      const removePriceInfo = (text: string) => {
+        return text
+          // Remove lines with dollar amounts
+          .replace(/.*\$[\d,]+\.?\d*.*\n?/g, '')
+          // Remove "TOTAL PROJECT COST" lines
+          .replace(/.*TOTAL PROJECT COST.*\n?/g, '')
+          // Remove "Project Breakdown:" header
+          .replace(/Project Breakdown:\s*\n/g, '')
+          // Remove bullet points with price patterns
+          .replace(/• .*\$[\d,]+\.?\d*.*/g, '')
+          // Remove empty lines
+          .replace(/\n\s*\n/g, '\n')
+          .trim();
+      };
+      
       // Prepare detailed scope of work without costs
       let serviceOrderDetails = "";
       
@@ -99,10 +115,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
         }
       }
       
-      // Add scope of work if available
-      if (quote.scopeOfWork) {
-        serviceOrderDetails += `SCOPE OF WORK:\n${quote.scopeOfWork}\n\n`;
-      }
+      serviceOrderDetails += `WORK TO BE PERFORMED:\n\n`;
       
       // Add work details from materials and labor (descriptions only, no costs)
       if (Array.isArray(quote.materialsEstimate) && quote.materialsEstimate.length > 0) {
@@ -130,32 +143,53 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
         const exterior = (quote as any).exteriorBreakdown;
         serviceOrderDetails += `EXTERIOR WORK DETAILS:\n`;
         
-        if (exterior.preparation?.length > 0) {
-          serviceOrderDetails += `Preparation:\n`;
-          exterior.preparation.forEach((prep: any) => {
-            serviceOrderDetails += `• ${prep.task}\n`;
-          });
-        }
-        
-        if (exterior.painting?.length > 0) {
-          serviceOrderDetails += `Painting:\n`;
-          exterior.painting.forEach((paint: any) => {
-            serviceOrderDetails += `• ${paint.surface} - ${paint.coats} coat(s)\n`;
-          });
-        }
-        
-        if (exterior.cleanup?.length > 0) {
-          serviceOrderDetails += `Cleanup:\n`;
-          exterior.cleanup.forEach((clean: any) => {
-            serviceOrderDetails += `• ${clean.task}\n`;
-          });
-        }
+        // Extract enabled modules without costs
+        Object.entries(exterior).forEach(([key, module]: [string, any]) => {
+          if (module.enabled && module.subtotal > 0) {
+            const moduleName = key.charAt(0).toUpperCase() + key.slice(1);
+            
+            if (key === 'boxes') {
+              serviceOrderDetails += `• ${moduleName} (Soffit, Facia, Gutters) - Quantity: ${module.quantity}\n`;
+            } else if (key === 'dormer' && module.quantity > 0) {
+              serviceOrderDetails += `• ${moduleName} - ${module.complexity || 'standard'} type - Quantity: ${module.quantity}\n`;
+            } else if (key === 'shutters' && module.lines) {
+              module.lines.forEach((line: any) => {
+                if (line.quantity > 0) {
+                  serviceOrderDetails += `• ${moduleName} (${line.type}) - Quantity: ${line.quantity}\n`;
+                }
+              });
+            } else if (key === 'miscellaneous' && module.lines) {
+              module.lines.forEach((line: any) => {
+                if (line.description) {
+                  serviceOrderDetails += `• ${line.description}\n`;
+                }
+              });
+            }
+          }
+        });
         serviceOrderDetails += `\n`;
       }
       
-      // Add notes if available
+      // Add filtered scope of work (remove price information)
+      if (quote.scopeOfWork) {
+        const filteredScope = removePriceInfo(quote.scopeOfWork);
+        if (filteredScope) {
+          serviceOrderDetails += `ADDITIONAL WORK DETAILS:\n${filteredScope}\n\n`;
+        }
+      }
+      
+      // Add standard services
+      serviceOrderDetails += `INCLUDED SERVICES:\n`;
+      serviceOrderDetails += `• Prep: Power washing as needed, scraping and sanding, removing old caulk and re-caulking gaps\n`;
+      serviceOrderDetails += `• Protection: Cover and protect all landscaping, walkways, and adjacent surfaces\n`;
+      serviceOrderDetails += `• Clean-up: Complete site clean-up and proper disposal of all materials\n\n`;
+      
+      // Add notes if available (filter out price info)
       if (quote.notes) {
-        serviceOrderDetails += `ADDITIONAL NOTES:\n${quote.notes}\n\n`;
+        const filteredNotes = removePriceInfo(quote.notes);
+        if (filteredNotes) {
+          serviceOrderDetails += `ADDITIONAL NOTES:\n${filteredNotes}\n\n`;
+        }
       }
       
       // Fallback if no content

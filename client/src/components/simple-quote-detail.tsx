@@ -63,29 +63,90 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
   const convertToServiceOrderMutation = useMutation({
     mutationFn: async () => {
+      // Function to remove price information from text
+      const removePriceInfo = (text: string) => {
+        return text
+          // Remove lines with dollar amounts
+          .replace(/.*\$[\d,]+\.?\d*.*\n?/g, '')
+          // Remove "TOTAL PROJECT COST" lines
+          .replace(/.*TOTAL PROJECT COST.*\n?/g, '')
+          // Remove "Project Breakdown:" header
+          .replace(/Project Breakdown:\s*\n/g, '')
+          // Remove bullet points with price patterns
+          .replace(/• .*\$[\d,]+\.?\d*.*/g, '')
+          // Remove empty lines
+          .replace(/\n\s*\n/g, '\n')
+          .trim();
+      };
+      
       // Prepare detailed scope of work without costs
       let serviceOrderDetails = "";
       
-      if (quote.scopeOfWork) {
-        serviceOrderDetails = `SCOPE OF WORK:\n${quote.scopeOfWork}\n\n`;
-      }
-      
-      // Add notes if available
-      if (quote.notes) {
-        serviceOrderDetails += `ADDITIONAL NOTES:\n${quote.notes}\n\n`;
-      }
-      
-      // Add project information
+      // Add project information first
       const project = projects.find((p: any) => p.id === quote.projectId);
       if (project) {
         serviceOrderDetails += `PROJECT: ${project.title}\n`;
         serviceOrderDetails += `SERVICE TYPE: ${project.serviceType}\n`;
         if (project.description) {
-          serviceOrderDetails += `DESCRIPTION: ${project.description}\n`;
+          serviceOrderDetails += `DESCRIPTION: ${project.description}\n\n`;
         }
       }
       
-      // Fallback if no scope of work
+      // Process exterior breakdown if available to extract work items
+      if (quote.exteriorBreakdown) {
+        const exterior = quote.exteriorBreakdown;
+        serviceOrderDetails += `WORK TO BE PERFORMED:\n\n`;
+        
+        // Extract enabled modules without costs
+        Object.entries(exterior).forEach(([key, module]: [string, any]) => {
+          if (module.enabled && module.subtotal > 0) {
+            const moduleName = key.charAt(0).toUpperCase() + key.slice(1);
+            
+            if (key === 'boxes') {
+              serviceOrderDetails += `• ${moduleName} (Soffit, Facia, Gutters) - Quantity: ${module.quantity}\n`;
+            } else if (key === 'dormer' && module.quantity > 0) {
+              serviceOrderDetails += `• ${moduleName} - ${module.complexity || 'standard'} type - Quantity: ${module.quantity}\n`;
+            } else if (key === 'shutters' && module.lines) {
+              module.lines.forEach((line: any) => {
+                if (line.quantity > 0) {
+                  serviceOrderDetails += `• ${moduleName} (${line.type}) - Quantity: ${line.quantity}\n`;
+                }
+              });
+            } else if (key === 'miscellaneous' && module.lines) {
+              module.lines.forEach((line: any) => {
+                if (line.description) {
+                  serviceOrderDetails += `• ${line.description}\n`;
+                }
+              });
+            }
+          }
+        });
+        serviceOrderDetails += `\n`;
+      }
+      
+      // Add filtered scope of work (remove price information)
+      if (quote.scopeOfWork) {
+        const filteredScope = removePriceInfo(quote.scopeOfWork);
+        if (filteredScope) {
+          serviceOrderDetails += `ADDITIONAL WORK DETAILS:\n${filteredScope}\n\n`;
+        }
+      }
+      
+      // Add standard services
+      serviceOrderDetails += `INCLUDED SERVICES:\n`;
+      serviceOrderDetails += `• Prep: Power washing as needed, scraping and sanding, removing old caulk and re-caulking gaps\n`;
+      serviceOrderDetails += `• Protection: Cover and protect all landscaping, walkways, and adjacent surfaces\n`;
+      serviceOrderDetails += `• Clean-up: Complete site clean-up and proper disposal of all materials\n\n`;
+      
+      // Add notes if available (filter out price info)
+      if (quote.notes) {
+        const filteredNotes = removePriceInfo(quote.notes);
+        if (filteredNotes) {
+          serviceOrderDetails += `ADDITIONAL NOTES:\n${filteredNotes}\n\n`;
+        }
+      }
+      
+      // Fallback if no content
       if (!serviceOrderDetails.trim()) {
         serviceOrderDetails = "Service order created from quote - please review and add specific work details.";
       }
