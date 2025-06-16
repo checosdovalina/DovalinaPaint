@@ -553,10 +553,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/service-orders", isAuthenticated, async (req, res) => {
     try {
       const serviceOrderData = insertServiceOrderSchema.parse(req.body);
-      const serviceOrder = await storage.createServiceOrder(serviceOrderData);
       
-      // Get project for activity
-      const project = await storage.getProject(serviceOrder.projectId);
+      // Get project to inherit images and documents
+      const project = await storage.getProject(serviceOrderData.projectId);
+      
+      // Inherit images and documents from project
+      const serviceOrderWithInheritedFiles = {
+        ...serviceOrderData,
+        images: project?.images || null,
+        documents: project?.documents || null,
+      };
+      
+      const serviceOrder = await storage.createServiceOrder(serviceOrderWithInheritedFiles);
       
       // Create activity for service order creation
       await storage.createActivity({

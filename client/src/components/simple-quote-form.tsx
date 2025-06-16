@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/dialog";
 import { ClientForm } from "@/components/client-form";
 import { ProjectForm } from "@/components/project-form";
+import { InheritedAttachments } from "@/components/inherited-attachments";
 
 // Simplified quote schema without cost breakdown
 const simpleQuoteSchema = z.object({
@@ -523,6 +524,15 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             )}
           />
         </div>
+
+        {/* Show inherited attachments if editing an existing quote */}
+        {initialData?.images || initialData?.documents ? (
+          <InheritedAttachments 
+            images={initialData?.images}
+            documents={initialData?.documents}
+            title="Project Attachments"
+          />
+        ) : null}
 
         <div className="grid gap-4 md:grid-cols-2">
           <FormField

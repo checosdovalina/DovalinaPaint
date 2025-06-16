@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/dialog";
 import { ClientForm } from "@/components/client-form";
 import { ProjectForm } from "@/components/project-form";
+import { InheritedAttachments } from "@/components/inherited-attachments";
 
 // Extend the schema to handle the form
 const formSchema = insertQuoteSchema
