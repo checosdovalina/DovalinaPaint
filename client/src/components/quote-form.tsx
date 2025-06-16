@@ -495,6 +495,15 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
             />
           </div>
           
+          {/* Show inherited attachments if editing an existing quote */}
+          {initialData?.images || initialData?.documents ? (
+            <InheritedAttachments 
+              images={initialData?.images}
+              documents={initialData?.documents}
+              title="Project Attachments"
+            />
+          ) : null}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <FormField
               control={form.control}

@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { StaffAssignment } from "@/components/staff-assignment";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { InheritedAttachments } from "@/components/inherited-attachments";
 
 // Extend the schema to handle the form
 const formSchema = insertServiceOrderSchema
@@ -204,6 +205,15 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
             </FormItem>
           )}
         />
+
+        {/* Show inherited attachments if editing an existing service order */}
+        {initialData?.images || initialData?.documents ? (
+          <InheritedAttachments 
+            images={initialData?.images}
+            documents={initialData?.documents}
+            title="Project Attachments"
+          />
+        ) : null}
 
         <FormField
           control={form.control}
