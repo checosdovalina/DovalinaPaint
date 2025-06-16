@@ -323,25 +323,25 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Estado</FormLabel>
+                <FormLabel>Status</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione el estado" />
+                      <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="pending">Pendiente por visitar</SelectItem>
-                    <SelectItem value="quoted">Presupuesto enviado</SelectItem>
-                    <SelectItem value="approved">Presupuesto aprobado</SelectItem>
-                    <SelectItem value="preparing">En preparación</SelectItem>
-                    <SelectItem value="in_progress">En proceso</SelectItem>
-                    <SelectItem value="reviewing">En revisión final</SelectItem>
-                    <SelectItem value="completed">Finalizado</SelectItem>
-                    <SelectItem value="archived">Archivado</SelectItem>
+                    <SelectItem value="pending">Pending Visit</SelectItem>
+                    <SelectItem value="quoted">Quote Sent</SelectItem>
+                    <SelectItem value="approved">Quote Approved</SelectItem>
+                    <SelectItem value="preparing">In Preparation</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="reviewing">Final Review</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -354,7 +354,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             name="progress"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Progreso (%)</FormLabel>
+                <FormLabel>Progress (%)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -376,7 +376,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             name="startDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha de Inicio</FormLabel>
+                <FormLabel>Start Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
