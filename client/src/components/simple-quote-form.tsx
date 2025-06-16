@@ -109,7 +109,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
     resolver: zodResolver(simpleQuoteSchema),
     defaultValues: {
       projectId: initialData?.projectId || 0,
-      projectType: "residential" as const,
+      projectType: initialData?.projectType || "residential",
       totalEstimate: initialData?.totalEstimate || initialData?.total || 0,
       scopeOfWork: initialData?.scopeOfWork || "",
       isInterior: initialData?.isInterior || false,
@@ -309,6 +309,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   useEffect(() => {
     if (initialData) {
       console.log("Resetting form with isExterior:", calculatedIsExterior);
+      form.setValue("projectType", initialData.projectType || "residential");
       form.setValue("isExterior", calculatedIsExterior);
       form.setValue("isInterior", initialData.isInterior || false);
       
