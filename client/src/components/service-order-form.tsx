@@ -209,8 +209,8 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
         {/* Show inherited attachments if editing an existing service order */}
         {initialData?.images || initialData?.documents ? (
           <InheritedAttachments 
-            images={initialData?.images}
-            documents={initialData?.documents}
+            images={initialData?.images as any}
+            documents={initialData?.documents as any}
             title="Project Attachments"
           />
         ) : null}
