@@ -418,7 +418,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP", { locale: es })
+                          format(field.value, "PPP", { locale: enUS })
                         ) : (
                           <span>Select a date</span>
                         )}
@@ -560,7 +560,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
         </div>
 
         <div>
-          <FormLabel>Personal Asignado</FormLabel>
+          <FormLabel>Assigned Staff</FormLabel>
           <StaffAssignment
             selectedStaff={assignedStaff}
             onChange={setAssignedStaff}
@@ -573,17 +573,17 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             variant="outline"
             onClick={onSuccess}
           >
-            Cancelar
+            Cancel
           </Button>
           <Button
             type="submit"
             disabled={mutation.isPending}
           >
             {mutation.isPending
-              ? "Guardando..."
+              ? "Saving..."
               : initialData?.id
-              ? "Actualizar Proyecto"
-              : "Crear Proyecto"}
+              ? "Update Project"
+              : "Create Project"}
           </Button>
         </div>
       </form>
