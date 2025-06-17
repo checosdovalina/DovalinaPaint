@@ -710,6 +710,69 @@ export function ServiceOrderDetail({
       }
       
       // --------------------------------------------
+      // PROJECT IMAGES FROM INHERITED PROJECT (if present)
+      // --------------------------------------------
+      if (project?.images && Array.isArray(project.images) && project.images.length > 0) {
+        // Add a new page for project images
+        pdf.addPage();
+        yPos = 15;
+        
+        // Title
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text("Project Reference Images", leftMargin, yPos);
+        yPos += 10;
+        
+        // Add project images
+        const imgWidth = 80; // Width of each image in mm
+        const imgHeight = 60; // Height of each image in mm
+        const imagesPerRow = 2; // Number of images per row
+        
+        for (let i = 0; i < project.images.length; i++) {
+          try {
+            const xPos = leftMargin + (i % imagesPerRow) * (imgWidth + 5);
+            
+            // If we need to start a new row
+            if (i > 0 && i % imagesPerRow === 0) {
+              yPos += imgHeight + 10;
+            }
+            
+            // If we're about to go off the page, add a new page
+            if (yPos + imgHeight > 270) {
+              pdf.addPage();
+              yPos = 15;
+            }
+            
+            pdf.setFillColor(255, 255, 255);
+            pdf.roundedRect(xPos, yPos, imgWidth, imgHeight, 3, 3, 'F');
+            
+            // Add the image with rounded corners
+            pdf.addImage(
+              project.images[i],
+              'JPEG',
+              xPos,
+              yPos,
+              imgWidth,
+              imgHeight,
+              undefined,
+              'NONE',
+              0
+            );
+            
+            // Draw a border around the image
+            pdf.setDrawColor(220, 220, 220);
+            pdf.roundedRect(xPos, yPos, imgWidth, imgHeight, 3, 3, 'S');
+            
+          } catch (e) {
+            console.error("Error adding project image to PDF:", e);
+          }
+        }
+        
+        // Move position down after images section
+        yPos += imgHeight + 15;
+      }
+
+      // --------------------------------------------
       // CLIENT SIGNATURE SECTION
       // --------------------------------------------
       // Check if we need to add a new page for signature

@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarIcon, Upload, X, FileText, Image, Users } from "lucide-react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { StaffAssignment } from "@/components/staff-assignment";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { ClientForm } from "@/components/client-form";
@@ -420,7 +420,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
                         {field.value ? (
                           format(field.value, "PPP", { locale: es })
                         ) : (
-                          <span>Seleccione una fecha</span>
+                          <span>Select a date</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -445,7 +445,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             name="dueDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha de Entrega</FormLabel>
+                <FormLabel>Due Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -457,9 +457,9 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP", { locale: es })
+                          format(field.value, "PPP", { locale: enUS })
                         ) : (
-                          <span>Seleccione una fecha</span>
+                          <span>Select a date</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -482,19 +482,19 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
 
         {/* Project Images Section */}
         <div className="space-y-4">
-          <FormLabel className="text-base font-semibold">Imágenes del Proyecto</FormLabel>
+          <FormLabel className="text-base font-semibold">Project Images</FormLabel>
           <div className="grid gap-4">
             <ImageUpload
               value={images}
               onChange={setImages}
-              label="Agregar imágenes"
+              label="Upload images"
             />
           </div>
         </div>
 
         {/* Project Documents Section */}
         <div className="space-y-4">
-          <FormLabel className="text-base font-semibold">Documentos del Proyecto</FormLabel>
+          <FormLabel className="text-base font-semibold">Project Documents</FormLabel>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
             <div className="text-center">
               <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
@@ -521,10 +521,10 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
                   }}
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  Subir Documentos
+                  Upload Documents
                 </Button>
                 <p className="text-sm text-gray-500 mt-2">
-                  PDF, DOC, DOCX, TXT, XLS, XLSX (máx. 10MB por archivo)
+                  PDF, DOC, DOCX, TXT, XLS, XLSX (max. 10MB per file)
                 </p>
               </div>
             </div>
@@ -532,7 +532,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             {/* Display uploaded documents */}
             {documents.length > 0 && (
               <div className="mt-4 space-y-2">
-                <h4 className="font-medium text-sm text-gray-700">Documentos subidos:</h4>
+                <h4 className="font-medium text-sm text-gray-700">Uploaded documents:</h4>
                 {documents.map((doc, index) => (
                   <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                     <div className="flex items-center space-x-2">
