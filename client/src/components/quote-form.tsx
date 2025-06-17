@@ -34,7 +34,7 @@ import { Calendar as CalendarIcon, FileDown, Printer, Plus, Users, FolderPlus } 
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
@@ -156,6 +156,19 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
   // Modal states for creating new clients and projects
   const [showClientForm, setShowClientForm] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
+  
+  // State for client selection
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+
+  // Set selected client when editing existing quote
+  useEffect(() => {
+    if (initialData?.projectId && projects && Array.isArray(projects)) {
+      const project = projects.find((p: any) => p.id === initialData.projectId);
+      if (project?.clientId) {
+        setSelectedClientId(project.clientId);
+      }
+    }
+  }, [initialData?.projectId, projects]);
 
   // Calculate totals
   const materialsTotal = materialItems.reduce((sum, item) => sum + item.total, 0);
@@ -414,6 +427,43 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
             )}
           </div>
           
+          {/* Client Selection First */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-sm font-medium">Select Client</label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowClientForm(true)}
+                className="h-8 px-2"
+              >
+                <Users className="h-3 w-3 mr-1" />
+                New Client
+              </Button>
+            </div>
+            <Select
+              value={selectedClientId?.toString() || ""}
+              onValueChange={(value) => {
+                const clientId = parseInt(value);
+                setSelectedClientId(clientId);
+                // Clear project selection when client changes
+                form.setValue("projectId", 0);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a client first" />
+              </SelectTrigger>
+              <SelectContent>
+                {clients?.map((client: any) => (
+                  <SelectItem key={client.id} value={client.id.toString()}>
+                    {client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <FormField
               control={form.control}
@@ -422,44 +472,37 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
                 <FormItem>
                   <div className="flex items-center justify-between">
                     <FormLabel>Project</FormLabel>
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowClientForm(true)}
-                        className="h-8 px-2"
-                      >
-                        <Users className="h-3 w-3 mr-1" />
-                        Client
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowProjectForm(true)}
-                        className="h-8 px-2"
-                      >
-                        <FolderPlus className="h-3 w-3 mr-1" />
-                        Project
-                      </Button>
-                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowProjectForm(true)}
+                      className="h-8 px-2"
+                      disabled={!selectedClientId}
+                    >
+                      <FolderPlus className="h-3 w-3 mr-1" />
+                      New Project
+                    </Button>
                   </div>
                   <Select
                     onValueChange={(value) => field.onChange(parseInt(value))}
                     defaultValue={field.value?.toString()}
+                    disabled={!selectedClientId}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a project" />
+                        <SelectValue 
+                          placeholder={selectedClientId ? "Select a project" : "Select a client first"} 
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {projects?.map((project: any) => (
-                        <SelectItem key={project.id} value={project.id.toString()}>
-                          {project.title}
-                        </SelectItem>
-                      ))}
+                      {projects?.filter((project: any) => project.clientId === selectedClientId)
+                        .map((project: any) => (
+                          <SelectItem key={project.id} value={project.id.toString()}>
+                            {project.title}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -498,8 +541,8 @@ export function QuoteForm({ initialData, onSuccess }: QuoteFormProps) {
           {/* Show inherited attachments if editing an existing quote */}
           {initialData?.images || initialData?.documents ? (
             <InheritedAttachments 
-              images={initialData?.images}
-              documents={initialData?.documents}
+              images={initialData?.images as any}
+              documents={initialData?.documents as any}
               title="Project Attachments"
             />
           ) : null}
