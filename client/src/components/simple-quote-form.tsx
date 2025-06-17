@@ -81,6 +81,9 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
   // Modal states for creating new clients and projects
   const [showClientForm, setShowClientForm] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
+  
+  // Client selection state
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
 
   // Debug log to see what initialData contains
   console.log("SimpleQuoteForm initialData:", initialData);
@@ -321,15 +324,21 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
     }
   }, [initialData, calculatedIsExterior, form]);
 
-  // Fetch projects
-  const { data: projects } = useQuery({
-    queryKey: ["/api/projects"],
-  });
-
-  // Fetch clients to determine residential vs commercial
+  // Fetch clients first
   const { data: clients } = useQuery({
     queryKey: ["/api/clients"],
   });
+
+  // Fetch projects filtered by selected client
+  const { data: projects } = useQuery({
+    queryKey: ["/api/projects", selectedClientId],
+    enabled: !!selectedClientId,
+  });
+
+  // Filter projects by selected client
+  const filteredProjects = projects?.filter((project: any) => 
+    selectedClientId ? project.clientId === selectedClientId : false
+  ) || [];
 
   // Get the selected project type from the form
   const selectedProjectType = form.watch("projectType");
@@ -345,9 +354,16 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
     });
   };
 
-  const handleProjectCreated = () => {
+  const handleProjectCreated = (newProject?: any) => {
     setShowProjectForm(false);
     queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/projects", selectedClientId] });
+    
+    // Auto-select the newly created project
+    if (newProject?.id) {
+      form.setValue("projectId", newProject.id);
+    }
+    
     toast({
       title: "Success", 
       description: "Project created successfully",
@@ -444,6 +460,44 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-h-[80vh] overflow-y-auto">
         <div className="grid gap-4 md:grid-cols-2">
+          {/* Client Selection - First Step */}
+          <FormItem>
+            <div className="flex items-center justify-between">
+              <FormLabel>Client</FormLabel>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowClientForm(true)}
+                className="h-8 px-2"
+              >
+                <Users className="h-3 w-3 mr-1" />
+                New Client
+              </Button>
+            </div>
+            <Select
+              onValueChange={(value) => {
+                const clientId = parseInt(value);
+                setSelectedClientId(clientId);
+                // Reset project selection when client changes
+                form.setValue("projectId", 0);
+              }}
+              value={selectedClientId?.toString() || ""}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a client first" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.isArray(clients) && clients.map((client: any) => (
+                  <SelectItem key={client.id} value={client.id.toString()}>
+                    {client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormItem>
+
+          {/* Project Selection - Second Step (only enabled when client is selected) */}
           <FormField
             control={form.control}
             name="projectId"
@@ -451,40 +505,36 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
               <FormItem>
                 <div className="flex items-center justify-between">
                   <FormLabel>Project</FormLabel>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowClientForm(true)}
-                      className="h-8 px-2"
-                    >
-                      <Users className="h-3 w-3 mr-1" />
-                      Client
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowProjectForm(true)}
-                      className="h-8 px-2"
-                    >
-                      <FolderPlus className="h-3 w-3 mr-1" />
-                      Project
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowProjectForm(true)}
+                    disabled={!selectedClientId}
+                    className="h-8 px-2"
+                  >
+                    <FolderPlus className="h-3 w-3 mr-1" />
+                    New Project
+                  </Button>
                 </div>
                 <Select
                   onValueChange={(value) => field.onChange(parseInt(value))}
                   value={field.value?.toString()}
+                  disabled={!selectedClientId}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a project" />
+                      <SelectValue placeholder={
+                        !selectedClientId 
+                          ? "Select a client first" 
+                          : filteredProjects.length === 0
+                          ? "No projects available for this client"
+                          : "Select a project"
+                      } />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {Array.isArray(projects) && projects.map((project: any) => (
+                    {filteredProjects.map((project: any) => (
                       <SelectItem key={project.id} value={project.id.toString()}>
                         {project.title}
                       </SelectItem>
@@ -495,7 +545,9 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
               </FormItem>
             )}
           />
+        </div>
 
+        <div className="grid gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
             name="projectType"
@@ -6263,10 +6315,13 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
             <DialogDescription>
-              Add a new project for an existing client
+              Add a new project for the selected client
             </DialogDescription>
           </DialogHeader>
-          <ProjectForm onSuccess={handleProjectCreated} />
+          <ProjectForm 
+            onSuccess={handleProjectCreated}
+            initialData={selectedClientId ? { clientId: selectedClientId } : undefined}
+          />
         </DialogContent>
       </Dialog>
     </Form>
