@@ -83,7 +83,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       let serviceOrderDetails = "";
       
       // Add project information first
-      const project = projects.find((p: any) => p.id === quote.projectId);
+      const project = Array.isArray(projects) ? projects.find((p: any) => p.id === quote.projectId) : null;
       if (project) {
         serviceOrderDetails += `PROJECT: ${project.title}\n`;
         serviceOrderDetails += `SERVICE TYPE: ${project.serviceType}\n`;
@@ -155,7 +155,9 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
         projectId: quote.projectId,
         quoteId: quote.id,
         details: serviceOrderDetails.trim(),
-        status: "pending"
+        status: "pending",
+        images: project?.images || [],
+        documents: project?.documents || []
       });
       return res.json();
     },
@@ -180,8 +182,8 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
   if (!quote) return null;
 
-  const project = projects.find((p: any) => p.id === quote.projectId);
-  const client = clients.find((c: any) => c.id === project?.clientId);
+  const project = (projects as any[])?.find((p: any) => p.id === quote.projectId) || null;
+  const client = (clients as any[])?.find((c: any) => c.id === project?.clientId) || null;
 
   const getStatusColor = (status: string) => {
     switch (status) {

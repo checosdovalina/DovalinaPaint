@@ -554,14 +554,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const serviceOrderData = insertServiceOrderSchema.parse(req.body);
       
-      // Get project to inherit images and documents
+      // Get project to inherit images and documents if not already provided
       const project = await storage.getProject(serviceOrderData.projectId);
       
-      // Inherit images and documents from project
+      // Use provided images/documents or inherit from project
       const serviceOrderWithInheritedFiles = {
         ...serviceOrderData,
-        images: project?.images || null,
-        documents: project?.documents || null,
+        images: serviceOrderData.images || project?.images || null,
+        documents: serviceOrderData.documents || project?.documents || null,
       };
       
       const serviceOrder = await storage.createServiceOrder(serviceOrderWithInheritedFiles);

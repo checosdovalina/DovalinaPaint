@@ -201,7 +201,9 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
         projectId: quote.projectId,
         quoteId: quote.id,
         details: serviceOrderDetails.trim(),
-        status: "pending"
+        status: "pending",
+        images: project?.images || [],
+        documents: project?.documents || []
       });
       return res.json();
     },
