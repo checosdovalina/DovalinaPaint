@@ -288,7 +288,7 @@ export default function Dashboard() {
 
       {/* Project Form Dialog */}
       <Dialog open={showProjectForm} onOpenChange={setShowProjectForm}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {projectToEdit ? "Edit Project" : "New Project"}
@@ -299,10 +299,12 @@ export default function Dashboard() {
                 : "Fill out the details to create a new project"}
             </DialogDescription>
           </DialogHeader>
-          <ProjectForm
-            initialData={projectToEdit || undefined}
-            onSuccess={handleCloseForm}
-          />
+          <div className="max-h-[75vh] overflow-y-auto pr-2">
+            <ProjectForm
+              initialData={projectToEdit || undefined}
+              onSuccess={handleCloseForm}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </Layout>

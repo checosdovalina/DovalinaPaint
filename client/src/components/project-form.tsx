@@ -32,11 +32,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Upload, X, FileText, Image } from "lucide-react";
+import { Calendar as CalendarIcon, Upload, X, FileText, Image, Users } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { StaffAssignment } from "@/components/staff-assignment";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { ClientForm } from "@/components/client-form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Extend the schema to handle the form
 const formSchema = insertProjectSchema
@@ -68,6 +76,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
   const [documents, setDocuments] = useState<any[]>(
     initialData?.documents as any[] || []
   );
+  const [showClientForm, setShowClientForm] = useState(false);
 
   // Fetch clients for the dropdown
   const { data: clients } = useQuery({
@@ -143,6 +152,15 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
     });
   };
 
+  const handleClientCreated = () => {
+    setShowClientForm(false);
+    queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+    toast({
+      title: "Success",
+      description: "Client created successfully",
+    });
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -166,14 +184,26 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
             name="clientId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Client</FormLabel>
+                <div className="flex items-center justify-between">
+                  <FormLabel>Client</FormLabel>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowClientForm(true)}
+                    className="h-8 px-2"
+                  >
+                    <Users className="h-3 w-3 mr-1" />
+                    New Client
+                  </Button>
+                </div>
                 <Select
                   onValueChange={(value) => {
                     const clientId = parseInt(value);
                     field.onChange(clientId);
                     
                     // Auto-populate address when client is selected
-                    const selectedClient = clients?.find(client => client.id === clientId);
+                    const selectedClient = clients?.find((client: any) => client.id === clientId);
                     if (selectedClient?.address) {
                       form.setValue('address', selectedClient.address);
                     }
@@ -186,7 +216,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {clients?.map((client) => (
+                    {clients?.map((client: any) => (
                       <SelectItem key={client.id} value={client.id.toString()}>
                         {client.name}
                       </SelectItem>
@@ -557,6 +587,19 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
           </Button>
         </div>
       </form>
+
+      {/* Client Creation Modal */}
+      <Dialog open={showClientForm} onOpenChange={setShowClientForm}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Client</DialogTitle>
+            <DialogDescription>
+              Add a new client to the system
+            </DialogDescription>
+          </DialogHeader>
+          <ClientForm onSuccess={handleClientCreated} />
+        </DialogContent>
+      </Dialog>
     </Form>
   );
 }
