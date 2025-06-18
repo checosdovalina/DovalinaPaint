@@ -303,23 +303,33 @@ export default function FinancialReportsPage() {
                 <CardTitle className="text-lg font-medium">Beneficio Neto</CardTitle>
               </CardHeader>
               <CardContent>
-                {!isLoading && invoicesData && paymentsData ? (
+                {!isLoading ? (
                   <>
-                    <div className={`text-3xl font-bold ${
-                      (invoicesData.totalRevenue - paymentsData.totalExpenses) >= 0 
-                        ? 'text-green-600' 
-                        : 'text-red-600'
-                    }`}>
-                      {new Intl.NumberFormat('es-MX', {
-                        style: 'currency',
-                        currency: 'USD'
-                      }).format(invoicesData.totalRevenue - paymentsData.totalExpenses)}
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Margen: {profitData?.averageMargin 
-                        ? `${profitData.averageMargin.toFixed(2)}%` 
-                        : "N/A"}
-                    </p>
+                    {(() => {
+                      const totalRevenue = invoicesData?.totalRevenue || 0;
+                      const totalExpenses = paymentsData?.totalExpenses || 0;
+                      const netBenefit = totalRevenue - totalExpenses;
+                      
+                      return (
+                        <>
+                          <div className={`text-3xl font-bold ${
+                            netBenefit >= 0 
+                              ? 'text-green-600' 
+                              : 'text-red-600'
+                          }`}>
+                            {new Intl.NumberFormat('es-MX', {
+                              style: 'currency',
+                              currency: 'USD'
+                            }).format(netBenefit)}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Margen: {profitData?.averageMargin 
+                              ? `${profitData.averageMargin.toFixed(2)}%` 
+                              : "N/A"}
+                          </p>
+                        </>
+                      );
+                    })()}
                   </>
                 ) : (
                   <div className="text-3xl font-bold">Cargando...</div>

@@ -1584,6 +1584,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payments Summary API for Financial Reports
+  app.get("/api/payments/summary", isAuthenticated, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      if (!startDate || !endDate) {
+        return res.status(400).json({ message: "startDate and endDate parameters are required" });
+      }
+      
+      let payments;
+      if (startDate && endDate) {
+        payments = await storage.getPaymentsByDateRange(new Date(startDate as string), new Date(endDate as string));
+      } else {
+        payments = await storage.getPayments();
+      }
+      
+      // Calculate total expenses
+      const totalExpenses = payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+      
+      // Group by category
+      const categorySummary = payments.reduce((acc: any[], payment) => {
+        const existing = acc.find(item => item.name === payment.category);
+        if (existing) {
+          existing.total += Number(payment.amount);
+        } else {
+          acc.push({
+            name: payment.category || 'Uncategorized',
+            total: Number(payment.amount)
+          });
+        }
+        return acc;
+      }, []);
+      
+      // Group by recipient type
+      const recipientSummary = payments.reduce((acc: any[], payment) => {
+        const existing = acc.find(item => item.type === payment.recipientType);
+        if (existing) {
+          existing.total += Number(payment.amount);
+        } else {
+          acc.push({
+            type: payment.recipientType,
+            total: Number(payment.amount)
+          });
+        }
+        return acc;
+      }, []);
+      
+      // Time series data for charts
+      const timeSeriesData = payments.reduce((acc: any[], payment) => {
+        const date = payment.date.toISOString().split('T')[0];
+        const existing = acc.find(item => item.date === date);
+        if (existing) {
+          existing.amount += Number(payment.amount);
+        } else {
+          acc.push({
+            date,
+            amount: Number(payment.amount)
+          });
+        }
+        return acc;
+      }, []);
+      
+      res.json({
+        totalExpenses,
+        paymentCount: payments.length,
+        categorySummary,
+        recipientSummary,
+        timeSeriesData
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Invoices Summary API for Financial Reports
+  app.get("/api/invoices/summary", isAuthenticated, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      if (!startDate || !endDate) {
+        return res.status(400).json({ message: "startDate and endDate parameters are required" });
+      }
+      
+      let invoices;
+      if (startDate && endDate) {
+        invoices = await storage.getInvoicesByDateRange(new Date(startDate as string), new Date(endDate as string));
+      } else {
+        invoices = await storage.getInvoices();
+      }
+      
+      // Calculate total revenue
+      const totalRevenue = invoices.reduce((sum, invoice) => sum + Number(invoice.totalAmount), 0);
+      
+      // Time series data for charts
+      const timeSeriesData = invoices.reduce((acc: any[], invoice) => {
+        const date = invoice.issueDate.toISOString().split('T')[0];
+        const existing = acc.find(item => item.date === date);
+        if (existing) {
+          existing.amount += Number(invoice.totalAmount);
+        } else {
+          acc.push({
+            date,
+            amount: Number(invoice.totalAmount)
+          });
+        }
+        return acc;
+      }, []);
+      
+      res.json({
+        totalRevenue,
+        invoiceCount: invoices.length,
+        timeSeriesData
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Financial Reporting Routes
   app.get("/api/reports/financial/summary", isAuthenticated, async (req, res) => {
     try {

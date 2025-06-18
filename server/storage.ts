@@ -73,6 +73,7 @@ export interface IStorage {
   getInvoicesByProject(projectId: number): Promise<Invoice[]>;
   getInvoicesByClient(clientId: number): Promise<Invoice[]>;
   getInvoicesByStatus(status: string): Promise<Invoice[]>;
+  getInvoicesByDateRange(startDate: Date, endDate: Date): Promise<Invoice[]>;
   getInvoiceCount(): Promise<number>;
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
   updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined>;
@@ -92,6 +93,7 @@ export interface IStorage {
   getPaymentsByProject(projectId: number): Promise<Payment[]>;
   getPaymentsByRecipient(type: string, id: number): Promise<Payment[]>;
   getPaymentsByStatus(status: string): Promise<Payment[]>;
+  getPaymentsByDateRange(startDate: Date, endDate: Date): Promise<Payment[]>;
   createPayment(payment: InsertPayment): Promise<Payment>;
   updatePayment(id: number, payment: Partial<InsertPayment>): Promise<Payment | undefined>;
   deletePayment(id: number): Promise<boolean>;
@@ -725,6 +727,19 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error getting invoice count:", error);
       return 0;
+    }
+  }
+
+  async getInvoicesByDateRange(startDate: Date, endDate: Date): Promise<Invoice[]> {
+    try {
+      return await db.select().from(invoices)
+        .where(and(
+          db.sql`${invoices.issueDate} >= ${startDate.toISOString().split('T')[0]}`,
+          db.sql`${invoices.issueDate} <= ${endDate.toISOString().split('T')[0]}`
+        ));
+    } catch (error) {
+      console.error("Error fetching invoices by date range:", error);
+      return [];
     }
   }
   
