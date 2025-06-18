@@ -509,11 +509,11 @@ export default function PaymentForm({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar proyecto" />
+                        <SelectValue placeholder="Select project" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Ninguno</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {projects?.map((project: any) => (
                         <SelectItem key={project.id} value={String(project.id)}>
                           {project.title}
@@ -532,7 +532,7 @@ export default function PaymentForm({
                 name="purchaseOrderId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Orden de Compra</FormLabel>
+                    <FormLabel>Purchase Order</FormLabel>
                     <Select
                       disabled={isLoading || !supplierPurchaseOrders.length}
                       onValueChange={(value) => {
@@ -540,13 +540,13 @@ export default function PaymentForm({
                           field.onChange(undefined);
                         } else {
                           field.onChange(value);
-                          // Si seleccionamos una orden de compra, establecer el monto automáticamente
+                          // If we select a purchase order, set the amount automatically
                           const selectedOrder = supplierPurchaseOrders.find(
                             (order) => String(order.id) === value
                           );
                           if (selectedOrder) {
                             form.setValue("amount", String(selectedOrder.totalAmount || 0));
-                            form.setValue("description", `Pago por orden de compra #${selectedOrder.orderNumber}`);
+                            form.setValue("description", `Payment for purchase order #${selectedOrder.orderNumber}`);
                           }
                         }
                       }}
@@ -554,11 +554,11 @@ export default function PaymentForm({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar orden de compra" />
+                          <SelectValue placeholder="Select purchase order" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="none">Ninguna</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {supplierPurchaseOrders.map((order: any) => (
                           <SelectItem key={order.id} value={String(order.id)}>
                             #{order.orderNumber} - ${order.totalAmount || 0} ({new Date(order.issueDate).toLocaleDateString()})
@@ -567,7 +567,7 @@ export default function PaymentForm({
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      Al seleccionar una orden de compra, se marcará como pagada.
+                      When selecting a purchase order, it will be marked as paid.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
