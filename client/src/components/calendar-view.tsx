@@ -524,12 +524,12 @@ export function CalendarView({
               dayMaxEvents={true}
               height="auto"
               aspectRatio={1.8}
-              locale="es"
+              locale="en"
               buttonText={{
-                today: 'Hoy',
-                month: 'Mes',
-                week: 'Semana',
-                day: 'Día',
+                today: 'Today',
+                month: 'Month',
+                week: 'Week',
+                day: 'Day',
               }}
             />
           )}
@@ -543,32 +543,32 @@ export function CalendarView({
             <DialogTitle>{selectedEvent?.title}</DialogTitle>
             <DialogDescription>
               {selectedEvent?.extendedProps?.type === 'project' 
-                ? 'Proyecto' 
+                ? 'Project' 
                 : selectedEvent?.extendedProps?.type === 'serviceOrder'
-                ? 'Orden de Servicio'
-                : 'Evento de Google Calendar'}
+                ? 'Service Order'
+                : 'Google Calendar Event'}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="col-span-1 font-medium">Fecha Inicio:</div>
+              <div className="col-span-1 font-medium">Start Date:</div>
               <div className="col-span-3">
                 {selectedEvent?.start 
-                  ? new Date(selectedEvent.start).toLocaleDateString('es-ES', {
+                  ? new Date(selectedEvent.start).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
                       hour: 'numeric',
                       minute: 'numeric',
                     })
-                  : 'No definida'}
+                  : 'Not defined'}
               </div>
             </div>
             {selectedEvent?.end && (
               <div className="grid grid-cols-4 gap-4 mb-4">
-                <div className="col-span-1 font-medium">Fecha Fin:</div>
+                <div className="col-span-1 font-medium">End Date:</div>
                 <div className="col-span-3">
-                  {new Date(selectedEvent.end).toLocaleDateString('es-ES', {
+                  {new Date(selectedEvent.end).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -579,20 +579,20 @@ export function CalendarView({
               </div>
             )}
             <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="col-span-1 font-medium">Descripción:</div>
+              <div className="col-span-1 font-medium">Description:</div>
               <div className="col-span-3">
-                {selectedEvent?.extendedProps?.description || 'Sin descripción'}
+                {selectedEvent?.extendedProps?.description || 'No description'}
               </div>
             </div>
             {selectedEvent?.extendedProps?.location && (
               <div className="grid grid-cols-4 gap-4 mb-4">
-                <div className="col-span-1 font-medium">Ubicación:</div>
+                <div className="col-span-1 font-medium">Location:</div>
                 <div className="col-span-3">{selectedEvent.extendedProps.location}</div>
               </div>
             )}
             {selectedEvent?.extendedProps?.staffAssigned && selectedEvent.extendedProps.staffAssigned.length > 0 && (
               <div className="grid grid-cols-4 gap-4 mb-4">
-                <div className="col-span-1 font-medium">Personal Asignado:</div>
+                <div className="col-span-1 font-medium">Assigned Staff:</div>
                 <div className="col-span-3">
                   <ul className="list-disc pl-5">
                     {selectedEvent.extendedProps.staffAssigned.map((staffName, idx) => (
@@ -602,29 +602,41 @@ export function CalendarView({
                 </div>
               </div>
             )}
+            {selectedEvent?.extendedProps?.subcontractorsAssigned && selectedEvent.extendedProps.subcontractorsAssigned.length > 0 && (
+              <div className="grid grid-cols-4 gap-4 mb-4">
+                <div className="col-span-1 font-medium">Assigned Subcontractors:</div>
+                <div className="col-span-3">
+                  <ul className="list-disc pl-5">
+                    {selectedEvent.extendedProps.subcontractorsAssigned.map((subcontractorName, idx) => (
+                      <li key={idx}>{subcontractorName}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEventDetails(false)}>
-              Cerrar
+              Close
             </Button>
-            {selectedEvent?.extendedProps?.type === 'project' && (
+            {selectedEvent?.extendedProps?.type === 'project' && selectedEvent?.extendedProps?.projectId && (
               <Button 
                 onClick={() => {
-                  // Navigate to project details
                   setShowEventDetails(false);
+                  navigate(`/projects/${selectedEvent.extendedProps.projectId}`);
                 }}
               >
-                Ver Proyecto
+                View Project
               </Button>
             )}
-            {selectedEvent?.extendedProps?.type === 'serviceOrder' && (
+            {selectedEvent?.extendedProps?.type === 'serviceOrder' && selectedEvent?.extendedProps?.serviceOrderId && (
               <Button 
                 onClick={() => {
-                  // Navigate to service order details
                   setShowEventDetails(false);
+                  navigate(`/service-orders?serviceOrderId=${selectedEvent.extendedProps.serviceOrderId}`);
                 }}
               >
-                Ver Orden de Servicio
+                View Service Order
               </Button>
             )}
           </DialogFooter>
@@ -643,15 +655,15 @@ export function CalendarView({
       >
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Nuevo Evento</DialogTitle>
+            <DialogTitle>New Event</DialogTitle>
             <DialogDescription>
-              Añadir un nuevo evento al calendario
+              Add a new event to the calendar
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="event-title" className="text-right">
-                Título
+                Title
               </Label>
               <Input
                 id="event-title"
@@ -662,7 +674,7 @@ export function CalendarView({
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="event-start" className="text-right">
-                Fecha Inicio
+                Start Date
               </Label>
               <Input
                 id="event-start"
@@ -674,7 +686,7 @@ export function CalendarView({
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="event-end" className="text-right">
-                Fecha Fin
+                End Date
               </Label>
               <Input
                 id="event-end"
@@ -686,7 +698,7 @@ export function CalendarView({
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="event-description" className="text-right">
-                Descripción
+                Description
               </Label>
               <Input
                 id="event-description"
@@ -697,7 +709,7 @@ export function CalendarView({
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="event-location" className="text-right">
-                Ubicación
+                Location
               </Label>
               <Input
                 id="event-location"
@@ -708,7 +720,7 @@ export function CalendarView({
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <div className="text-right">
-                <Label htmlFor="event-all-day">Todo el día</Label>
+                <Label htmlFor="event-all-day">All Day</Label>
               </div>
               <div className="col-span-3">
                 <Switch
@@ -722,7 +734,7 @@ export function CalendarView({
             {/* Staff Assignment Type */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="assignment-type" className="text-right">
-                Asignar a
+                Assign to
               </Label>
               <div className="col-span-3">
                 <Select 
@@ -730,12 +742,12 @@ export function CalendarView({
                   onValueChange={(value) => setNewEvent({...newEvent, assignedType: value})}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo" />
+                    <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="staff">Personal interno</SelectItem>
-                    <SelectItem value="subcontractor">Subcontratista</SelectItem>
-                    <SelectItem value="none">Sin asignar</SelectItem>
+                    <SelectItem value="staff">Staff</SelectItem>
+                    <SelectItem value="subcontractor">Subcontractor</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -745,7 +757,7 @@ export function CalendarView({
             {newEvent.assignedType === 'staff' && (
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="assigned-staff" className="text-right">
-                  Personal
+                  Staff
                 </Label>
                 <div className="col-span-3">
                   <ScrollArea className="h-40 rounded-md border">
@@ -774,7 +786,7 @@ export function CalendarView({
                       ))}
                       {staff.length === 0 && (
                         <div className="text-center py-2 text-muted-foreground">
-                          No hay personal disponible
+                          No staff available
                         </div>
                       )}
                     </div>
@@ -787,7 +799,7 @@ export function CalendarView({
             {newEvent.assignedType === 'subcontractor' && (
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="assigned-subcontractor" className="text-right">
-                  Subcontratista
+                  Subcontractor
                 </Label>
                 <div className="col-span-3">
                   <Select 
@@ -800,7 +812,7 @@ export function CalendarView({
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar subcontratista" />
+                      <SelectValue placeholder="Select subcontractor" />
                     </SelectTrigger>
                     <SelectContent>
                       {subcontractors.length > 0 ? (
@@ -814,7 +826,7 @@ export function CalendarView({
                         ))
                       ) : (
                         <SelectItem value="" disabled>
-                          No hay subcontratistas disponibles
+                          No subcontractors available
                         </SelectItem>
                       )}
                     </SelectContent>
@@ -827,22 +839,22 @@ export function CalendarView({
             {newEvent.assignedType === 'none' && (
               <div className="grid grid-cols-4 items-center gap-4">
                 <div className="col-span-4 text-center py-2 text-muted-foreground">
-                  Este evento no será asignado a ningún miembro del personal o subcontratista.
+                  This event will not be assigned to any staff member or subcontractor.
                 </div>
               </div>
             )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddEvent(false)}>
-              Cancelar
+              Cancel
             </Button>
             <Button 
               onClick={() => {
                 // Add event to the calendar
                 if (!newEvent.title || !newEvent.start) {
                   toast({
-                    title: "Datos incompletos",
-                    description: "El título y la fecha de inicio son obligatorios",
+                    title: "Incomplete Data",
+                    description: "Title and start date are required",
                     variant: "destructive",
                   });
                   return;
@@ -866,12 +878,12 @@ export function CalendarView({
                 setEvents(prev => [...prev, newCalendarEvent]);
                 setShowAddEvent(false);
                 toast({
-                  title: "Evento creado",
-                  description: "El evento ha sido añadido al calendario",
+                  title: "Event Created",
+                  description: "The event has been added to the calendar",
                 });
               }}
             >
-              Guardar Evento
+              Save Event
             </Button>
           </DialogFooter>
         </DialogContent>
