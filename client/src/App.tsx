@@ -27,21 +27,21 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/" component={Dashboard} />
-      <ProtectedRoute path="/clients" component={Clients} />
-      <ProtectedRoute path="/quotes" component={Quotes} />
-      <ProtectedRoute path="/simple-quotes" component={SimpleQuotes} />
-      <ProtectedRoute path="/service-orders" component={ServiceOrders} />
-      <ProtectedRoute path="/projects" component={Projects} />
-      <ProtectedRoute path="/calendar" component={Calendar} />
-      <ProtectedRoute path="/personnel" component={Personnel} />
-      <ProtectedRoute path="/subcontractors" component={Subcontractors} />
-      <ProtectedRoute path="/suppliers" component={Suppliers} />
-      <ProtectedRoute path="/purchase-orders" component={PurchaseOrders} />
-      <ProtectedRoute path="/invoices" component={Invoices} />
-      <ProtectedRoute path="/payments" component={Payments} />
-      <ProtectedRoute path="/financial-reports" component={FinancialReports} />
-      <ProtectedRoute path="/reports" component={Reports} />
+      <ProtectedRoute path="/" component={Dashboard} title="Dashboard" />
+      <ProtectedRoute path="/clients" component={Clients} title="Clients & Prospects" />
+      <ProtectedRoute path="/quotes" component={Quotes} title="Quotes" />
+      <ProtectedRoute path="/simple-quotes" component={SimpleQuotes} title="Simple Quotes" />
+      <ProtectedRoute path="/service-orders" component={ServiceOrders} title="Service Orders" />
+      <ProtectedRoute path="/projects" component={Projects} title="Project Management" />
+      <ProtectedRoute path="/calendar" component={Calendar} title="Calendar" />
+      <ProtectedRoute path="/personnel" component={Personnel} title="Staff Management" />
+      <ProtectedRoute path="/subcontractors" component={Subcontractors} title="Subcontractors" />
+      <ProtectedRoute path="/suppliers" component={Suppliers} title="Suppliers" />
+      <ProtectedRoute path="/purchase-orders" component={PurchaseOrders} title="Purchase Orders" />
+      <ProtectedRoute path="/invoices" component={Invoices} title="Invoices" />
+      <ProtectedRoute path="/payments" component={Payments} title="Payments" />
+      <ProtectedRoute path="/financial-reports" component={FinancialReports} title="Financial Reports" />
+      <ProtectedRoute path="/reports" component={Reports} title="Reports & Analytics" />
       <Route component={NotFound} />
     </Switch>
   );
