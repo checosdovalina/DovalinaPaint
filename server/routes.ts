@@ -142,7 +142,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/projects/:id", isAuthenticated, async (req, res) => {
     try {
-      const project = await storage.getProject(parseInt(req.params.id));
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid project ID" });
+      }
+      const project = await storage.getProject(id);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
       }
@@ -241,6 +245,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Failed to delete project" });
       }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Projects Financial API for Financial Reports
+  app.get("/api/projects/financial", isAuthenticated, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      let projects;
+      if (startDate && endDate && startDate !== 'undefined' && endDate !== 'undefined') {
+        try {
+          const start = new Date(startDate as string);
+          const end = new Date(endDate as string);
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            projects = await storage.getProjects();
+          } else {
+            projects = await storage.getProjectsByDateRange(start, end);
+          }
+        } catch (dateError) {
+          projects = await storage.getProjects();
+        }
+      } else {
+        projects = await storage.getProjects();
+      }
+      
+      // Calculate financial summary for projects
+      let totalProjectValue = 0;
+      let completedProjectValue = 0;
+      let activeProjects = 0;
+      let completedProjects = 0;
+      
+      projects.forEach(project => {
+        const projectValue = Number(project.budget) || 0;
+        totalProjectValue += projectValue;
+        
+        if (project.status === 'completed') {
+          completedProjectValue += projectValue;
+          completedProjects++;
+        } else if (project.status === 'in_progress') {
+          activeProjects++;
+        }
+      });
+      
+      res.json({
+        totalProjectValue,
+        completedProjectValue,
+        activeProjects,
+        completedProjects,
+        totalProjects: projects.length,
+        averageProjectValue: projects.length > 0 ? totalProjectValue / projects.length : 0,
+        projects: projects.map(project => ({
+          id: project.id,
+          title: project.title,
+          status: project.status,
+          budget: project.budget,
+          startDate: project.startDate,
+          endDate: project.endDate
+        }))
+      });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -909,7 +974,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/invoices/:id", isAuthenticated, async (req, res) => {
     try {
-      const invoice = await storage.getInvoice(parseInt(req.params.id));
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid invoice ID" });
+      }
+      const invoice = await storage.getInvoice(id);
       if (!invoice) {
         return res.status(404).json({ message: "Invoice not found" });
       }

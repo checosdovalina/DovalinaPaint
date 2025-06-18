@@ -82,13 +82,16 @@ export default function FinancialReportsPage() {
   
   const dateRange = getDateRange();
   
-  // Format the date range for display and API requests
+  // Format the date range for display and API requests - provide default range if none selected
+  const defaultStartDate = new Date();
+  defaultStartDate.setDate(defaultStartDate.getDate() - 30); // Last 30 days
+  
   const formattedStartDate = dateRange.startDate 
     ? format(dateRange.startDate, "yyyy-MM-dd") 
-    : '';
+    : format(defaultStartDate, "yyyy-MM-dd");
   const formattedEndDate = dateRange.endDate 
     ? format(dateRange.endDate, "yyyy-MM-dd") 
-    : '';
+    : format(new Date(), "yyyy-MM-dd");
   
   // Get payments data within the selected date range
   const { data: paymentsData, isLoading: paymentsLoading } = useQuery({
