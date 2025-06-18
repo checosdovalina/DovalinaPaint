@@ -53,7 +53,7 @@ const formSchema = z.object({
   phone: z.string().min(1, "Phone number is required"),
   email: z.string().email("Invalid email address"),
   address: z.string().min(1, "Address is required"),
-  hourlyRate: z.number().min(0, "Rate must be positive"),
+  rate: z.number().min(0, "Rate must be positive"),
   rateType: z.enum(["hourly", "daily", "fixed"]),
   notes: z.string().optional(),
   status: z.enum(["active", "inactive", "blacklisted"]).default("active"),
@@ -80,7 +80,7 @@ export default function Subcontractors() {
       phone: "",
       email: "",
       address: "",
-      hourlyRate: 0,
+      rate: 0,
       rateType: "hourly",
       notes: "",
       status: "active",
@@ -140,7 +140,7 @@ export default function Subcontractors() {
       phone: "",
       email: "",
       address: "",
-      hourlyRate: 0,
+      rate: 0,
       rateType: "hourly",
       notes: "",
       status: "active",
@@ -155,12 +155,12 @@ export default function Subcontractors() {
       company: subcontractor.company || "",
       specialty: subcontractor.specialty,
       phone: subcontractor.phone,
-      email: subcontractor.email,
-      address: subcontractor.address,
-      hourlyRate: subcontractor.hourlyRate,
-      rateType: subcontractor.rateType,
+      email: subcontractor.email || "",
+      address: subcontractor.address || "",
+      rate: subcontractor.rate || 0,
+      rateType: (subcontractor.rateType as "hourly" | "daily" | "fixed") || "hourly",
       notes: subcontractor.notes || "",
-      status: subcontractor.status,
+      status: subcontractor.status as "active" | "inactive" | "blacklisted",
     });
     setShowSubcontractorForm(true);
   };
@@ -194,7 +194,10 @@ export default function Subcontractors() {
     }
   };
 
-  const getRateDisplay = (rate: number, rateType: string) => {
+  const getRateDisplay = (rate: number | null | undefined, rateType: string) => {
+    if (rate === null || rate === undefined) {
+      return "Rate not set";
+    }
     const formattedRate = rate.toFixed(2);
     switch (rateType) {
       case "hourly": return `$${formattedRate}/hr`;
@@ -248,7 +251,7 @@ export default function Subcontractors() {
                 <p className="text-sm font-medium text-primary">{subcontractor.specialty}</p>
                 <div className="flex items-center text-sm text-muted-foreground mt-1">
                   <DollarSign className="h-3 w-3 mr-1" />
-                  {getRateDisplay(subcontractor.hourlyRate, subcontractor.rateType)}
+                  {getRateDisplay(subcontractor.rate, subcontractor.rateType || "hourly")}
                 </div>
               </div>
 
@@ -424,7 +427,7 @@ export default function Subcontractors() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="hourlyRate"
+                  name="rate"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Rate Amount ($)</FormLabel>
