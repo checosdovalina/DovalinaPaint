@@ -252,10 +252,19 @@ const PurchaseOrderForm = ({
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
     editingPurchaseOrder?.projectId || null
   );
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [showCreateClient, setShowCreateClient] = useState(false);
+  const [showCreateProject, setShowCreateProject] = useState(false);
 
   // Query suppliers
   const { data: suppliers = [] } = useQuery({
     queryKey: ["/api/suppliers"],
+    enabled: isOpen,
+  });
+
+  // Query clients
+  const { data: clients = [] } = useQuery({
+    queryKey: ["/api/clients"],
     enabled: isOpen,
   });
 
@@ -343,6 +352,61 @@ const PurchaseOrderForm = ({
       return sum + (parseFloat(item.price || "0") * parseFloat(item.quantity || "0"));
     }, 0).toFixed(2);
   };
+
+  // Create client mutation
+  const createClientMutation = useMutation({
+    mutationFn: async (clientData: { name: string; email: string; phone?: string; address?: string }) => {
+      const res = await apiRequest("POST", "/api/clients", clientData);
+      return await res.json();
+    },
+    onSuccess: (newClient) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      setSelectedClientId(newClient.id);
+      setShowCreateClient(false);
+      toast({
+        title: "Client Created",
+        description: `${newClient.name} has been successfully created.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to create client: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create project mutation
+  const createProjectMutation = useMutation({
+    mutationFn: async (projectData: { 
+      clientId: number; 
+      title: string; 
+      description: string; 
+      address: string; 
+      serviceType: string 
+    }) => {
+      const res = await apiRequest("POST", "/api/projects", projectData);
+      return await res.json();
+    },
+    onSuccess: (newProject) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      setSelectedProjectId(newProject.id);
+      form.setValue("projectId", newProject.id);
+      setShowCreateProject(false);
+      toast({
+        title: "Project Created",
+        description: `${newProject.title} has been successfully created.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to create project: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
 
   // Handle form submission
   const createMutation = useMutation({
@@ -567,6 +631,37 @@ const PurchaseOrderForm = ({
                 )}
               />
 
+              <div className="space-y-2">
+                <FormLabel>Client (Optional)</FormLabel>
+                <div className="flex gap-2">
+                  <Select
+                    value={selectedClientId?.toString() || "none"}
+                    onValueChange={(value) => {
+                      if (value === "none") {
+                        setSelectedClientId(null);
+                      } else if (value === "create") {
+                        setShowCreateClient(true);
+                      } else {
+                        setSelectedClientId(parseInt(value));
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Select client" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No client</SelectItem>
+                      <SelectItem value="create">+ Create new client</SelectItem>
+                      {Array.isArray(clients) && clients.map((client) => (
+                        <SelectItem key={client.id} value={client.id.toString()}>
+                          {client.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <FormField
                 control={form.control}
                 name="orderNumber"
@@ -620,6 +715,16 @@ const PurchaseOrderForm = ({
                         if (value === 'none') {
                           field.onChange(undefined);
                           setSelectedProjectId(undefined);
+                        } else if (value === 'create') {
+                          if (!selectedClientId) {
+                            toast({
+                              title: "Client Required",
+                              description: "Please select a client first before creating a project.",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          setShowCreateProject(true);
                         } else {
                           const projectId = parseInt(value);
                           field.onChange(projectId);
@@ -635,11 +740,14 @@ const PurchaseOrderForm = ({
                       </FormControl>
                       <SelectContent>
                         <SelectItem key="none-option" value="none">None</SelectItem>
-                        {Array.isArray(projects) && projects.map((project) => (
-                          <SelectItem key={project.id} value={project.id.toString()}>
-                            {project.title}
-                          </SelectItem>
-                        ))}
+                        <SelectItem key="create-option" value="create">+ Create new project</SelectItem>
+                        {Array.isArray(projects) && projects
+                          .filter(project => !selectedClientId || project.clientId === selectedClientId)
+                          .map((project) => (
+                            <SelectItem key={project.id} value={project.id.toString()}>
+                              {project.title}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -810,6 +918,110 @@ const PurchaseOrderForm = ({
             </div>
           </form>
         </Form>
+
+        {/* Create Client Modal */}
+        <Dialog open={showCreateClient} onOpenChange={setShowCreateClient}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Client</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              const clientData = {
+                name: formData.get('name') as string,
+                email: formData.get('email') as string,
+                phone: formData.get('phone') as string || undefined,
+                address: formData.get('address') as string || undefined,
+              };
+              createClientMutation.mutate(clientData);
+            }} className="space-y-4">
+              <div>
+                <Label htmlFor="client-name">Name*</Label>
+                <Input id="client-name" name="name" required />
+              </div>
+              <div>
+                <Label htmlFor="client-email">Email*</Label>
+                <Input id="client-email" name="email" type="email" required />
+              </div>
+              <div>
+                <Label htmlFor="client-phone">Phone</Label>
+                <Input id="client-phone" name="phone" type="tel" />
+              </div>
+              <div>
+                <Label htmlFor="client-address">Address</Label>
+                <Textarea id="client-address" name="address" rows={2} />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setShowCreateClient(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createClientMutation.isPending}>
+                  {createClientMutation.isPending ? "Creating..." : "Create Client"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Project Modal */}
+        <Dialog open={showCreateProject} onOpenChange={setShowCreateProject}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Project</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              const serviceTypeSelect = (e.target as HTMLFormElement).querySelector('select[name="serviceType"]') as HTMLSelectElement;
+              const projectData = {
+                clientId: selectedClientId!,
+                title: formData.get('title') as string,
+                description: formData.get('description') as string,
+                address: formData.get('address') as string,
+                serviceType: serviceTypeSelect?.value || 'Other',
+              };
+              createProjectMutation.mutate(projectData);
+            }} className="space-y-4">
+              <div>
+                <Label htmlFor="project-title">Title*</Label>
+                <Input id="project-title" name="title" required />
+              </div>
+              <div>
+                <Label htmlFor="project-description">Description*</Label>
+                <Textarea id="project-description" name="description" rows={2} required />
+              </div>
+              <div>
+                <Label htmlFor="project-address">Address*</Label>
+                <Input id="project-address" name="address" required />
+              </div>
+              <div>
+                <Label htmlFor="project-serviceType">Service Type*</Label>
+                <Select name="serviceType" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select service type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Exterior Painting">Exterior Painting</SelectItem>
+                    <SelectItem value="Interior Painting">Interior Painting</SelectItem>
+                    <SelectItem value="Commercial Painting">Commercial Painting</SelectItem>
+                    <SelectItem value="Pressure Washing">Pressure Washing</SelectItem>
+                    <SelectItem value="Deck Staining">Deck Staining</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setShowCreateProject(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createProjectMutation.isPending}>
+                  {createProjectMutation.isPending ? "Creating..." : "Create Project"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
