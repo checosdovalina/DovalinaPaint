@@ -693,49 +693,61 @@ export default function SettingsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <FormField
-                    control={generalSettingsForm.control}
-                    name="emailNotifications"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                        <div className="space-y-0.5">
-                          <FormLabel>Email Notifications</FormLabel>
-                          <FormDescription>
-                            Receive notifications via email for important updates
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                <Form {...generalSettingsForm}>
+                  <form onSubmit={generalSettingsForm.handleSubmit(onGeneralSettingsSubmit)} className="space-y-4">
+                    <div className="space-y-3">
+                      <FormField
+                        control={generalSettingsForm.control}
+                        name="emailNotifications"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                            <div className="space-y-0.5">
+                              <FormLabel>Email Notifications</FormLabel>
+                              <FormDescription>
+                                Receive notifications via email for important updates
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
 
-                  <FormField
-                    control={generalSettingsForm.control}
-                    name="smsNotifications"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                        <div className="space-y-0.5">
-                          <FormLabel>SMS Notifications</FormLabel>
-                          <FormDescription>
-                            Receive text message notifications for urgent updates
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                      <FormField
+                        control={generalSettingsForm.control}
+                        name="smsNotifications"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                            <div className="space-y-0.5">
+                              <FormLabel>SMS Notifications</FormLabel>
+                              <FormDescription>
+                                Receive text message notifications for urgent updates
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      disabled={saveGeneralSettingsMutation.isPending}
+                      className="w-full md:w-auto"
+                    >
+                      {saveGeneralSettingsMutation.isPending ? "Saving..." : "Save Notification Settings"}
+                    </Button>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </TabsContent>
