@@ -734,8 +734,8 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(invoices)
         .where(and(
-          gte(invoices.issueDate, startDate.toISOString().split('T')[0]),
-          lte(invoices.issueDate, endDate.toISOString().split('T')[0])
+          gte(invoices.issueDate, startDate),
+          lte(invoices.issueDate, endDate)
         ));
     } catch (error) {
       console.error("Error fetching invoices by date range:", error);
@@ -909,8 +909,8 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(payments)
         .where(and(
-          gte(payments.date, startDate.toISOString().split('T')[0]),
-          lte(payments.date, endDate.toISOString().split('T')[0])
+          gte(payments.date, startDate),
+          lte(payments.date, endDate)
         ));
     } catch (error) {
       console.error("Error fetching payments by date range:", error);
