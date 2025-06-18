@@ -200,8 +200,8 @@ export default function Subcontractors() {
       await apiRequest("DELETE", `/api/subcontractors/${subcontractorToDelete.id}`, undefined);
       
       toast({
-        title: "Subcontratista eliminado",
-        description: "El subcontratista ha sido eliminado exitosamente",
+        title: "Subcontractor Deleted",
+        description: "The subcontractor has been successfully deleted",
       });
       
       queryClient.invalidateQueries({ queryKey: ["/api/subcontractors"] });

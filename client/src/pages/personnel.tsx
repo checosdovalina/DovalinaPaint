@@ -197,7 +197,7 @@ export default function Personnel() {
     } catch (error) {
       toast({
         title: "Error",
-        description: `No se pudo eliminar el miembro del personal: ${error.message}`,
+        description: `Could not delete staff member: ${error.message}`,
         variant: "destructive",
       });
     } finally {
@@ -234,11 +234,11 @@ export default function Personnel() {
   const getAvailabilityBadge = (availability: string) => {
     switch (availability) {
       case "available":
-        return <Badge className="bg-green-100 text-green-800">Disponible</Badge>;
+        return <Badge className="bg-green-100 text-green-800">Available</Badge>;
       case "assigned":
-        return <Badge className="bg-blue-100 text-blue-800">Asignado</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800">Assigned</Badge>;
       case "on_leave":
-        return <Badge className="bg-yellow-100 text-yellow-800">Permiso</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800">On Leave</Badge>;
       default:
         return <Badge variant="outline">{availability}</Badge>;
     }
@@ -248,11 +248,11 @@ export default function Personnel() {
   const getAvailabilityLabel = (availability: string) => {
     switch (availability) {
       case "available":
-        return "Disponible";
+        return "Available";
       case "assigned":
-        return "Asignado";
+        return "Assigned";
       case "on_leave":
-        return "Permiso";
+        return "On Leave";
       default:
         return availability;
     }

@@ -465,8 +465,8 @@ export default function Projects() {
       ) : (
         <div className="text-center py-20 text-gray-500">
           {searchTerm || statusFilter !== "all" || clientFilter !== "all"
-            ? "No se encontraron proyectos con los filtros aplicados"
-            : "No hay proyectos registrados. Cree uno nuevo haciendo clic en 'Nuevo Proyecto'"}
+            ? "No projects found with the applied filters"
+            : "No projects registered. Create a new one by clicking 'New Project'"}
         </div>
       )}
 
@@ -483,12 +483,12 @@ export default function Projects() {
         <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {projectToEdit ? "Editar Proyecto" : "Nuevo Proyecto"}
+              {projectToEdit ? "Edit Project" : "New Project"}
             </DialogTitle>
             <DialogDescription>
               {projectToEdit
-                ? "Modifique los detalles del proyecto según sea necesario"
-                : "Complete el formulario para crear un nuevo proyecto"}
+                ? "Modify the project details as needed"
+                : "Complete the form to create a new project"}
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[75vh] overflow-y-auto pr-2">
@@ -507,18 +507,18 @@ export default function Projects() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar Proyecto?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Project?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. El proyecto será eliminado permanentemente del sistema.
+              This action cannot be undone. The project will be permanently deleted from the system.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Eliminar
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
