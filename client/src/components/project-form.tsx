@@ -112,11 +112,17 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
         documents,
       };
 
+      console.log("Project mutation data:", projectData);
+      console.log("Is update?", !!initialData?.id);
+      console.log("Initial data:", initialData);
+
       if (initialData?.id) {
         // Update
+        console.log("Making PUT request to:", `/api/projects/${initialData.id}`);
         return apiRequest("PUT", `/api/projects/${initialData.id}`, projectData);
       } else {
         // Create
+        console.log("Making POST request to:", "/api/projects");
         return apiRequest("POST", "/api/projects", projectData);
       }
     },
@@ -149,6 +155,8 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
       startDate: data.startDate instanceof Date ? data.startDate : undefined,
       dueDate: data.dueDate instanceof Date ? data.dueDate : undefined,
       assignedStaff,
+      images,
+      documents,
     });
   };
 
