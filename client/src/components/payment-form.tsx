@@ -123,11 +123,14 @@ export default function PaymentForm({
         amount: parseFloat(data.amount), // Convert to number
         date: data.date.toISOString(), // Convert Date to ISO string
         description: data.description || "Pago registrado",
-        paymentType: data.paymentMethod, // Map paymentMethod to paymentType
+        paymentMethod: data.paymentMethod, // Use paymentMethod directly
+        paymentType: "general", // Default payment type
         status: "completed", // Default status
         recipientType: data.recipientType,
         recipientId: parseInt(data.recipientId),
         // Optional fields
+        categoryId: data.categoryId ? parseInt(data.categoryId) : undefined,
+        reference: data.reference,
         projectId: data.projectId ? parseInt(data.projectId) : undefined,
         purchaseOrderId: data.purchaseOrderId ? parseInt(data.purchaseOrderId) : undefined,
         createdBy: user.id, // Use authenticated user ID
@@ -181,11 +184,14 @@ export default function PaymentForm({
         amount: parseFloat(data.amount), // Convert to number
         date: data.date.toISOString(), // Convert Date to ISO string
         description: data.description || "Pago actualizado",
-        paymentType: data.paymentMethod, // Map paymentMethod to paymentType
+        paymentMethod: data.paymentMethod, // Use paymentMethod directly
+        paymentType: "general", // Default payment type
         status: "completed", // Default status
         recipientType: data.recipientType,
         recipientId: parseInt(data.recipientId),
         // Optional fields
+        categoryId: data.categoryId ? parseInt(data.categoryId) : undefined,
+        reference: data.reference,
         projectId: data.projectId ? parseInt(data.projectId) : undefined,
         purchaseOrderId: data.purchaseOrderId ? parseInt(data.purchaseOrderId) : undefined,
         createdBy: user.id, // Use authenticated user ID
