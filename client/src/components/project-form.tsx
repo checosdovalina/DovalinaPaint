@@ -112,22 +112,15 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
         documents,
       };
 
-      console.log("Project mutation data:", projectData);
-      console.log("Is update?", !!initialData?.id);
-      console.log("Initial data:", initialData);
-
       if (initialData?.id) {
         // Update
-        console.log("Making PUT request to:", `/api/projects/${initialData.id}`);
         return apiRequest("PUT", `/api/projects/${initialData.id}`, projectData);
       } else {
         // Create
-        console.log("Making POST request to:", "/api/projects");
         return apiRequest("POST", "/api/projects", projectData);
       }
     },
-    onSuccess: (response) => {
-      console.log("Project mutation success:", response);
+    onSuccess: () => {
       toast({
         title: initialData?.id
           ? "Project updated"
@@ -140,7 +133,6 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
       onSuccess();
     },
     onError: (error) => {
-      console.error("Project mutation error:", error);
       toast({
         title: "Error",
         description: `Could not ${initialData?.id ? "update" : "create"} project: ${error.message}`,
@@ -150,13 +142,6 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
   });
 
   const onSubmit = (data: ProjectFormValues) => {
-    console.log("Form onSubmit called with data:", data);
-    console.log("Form validation errors:", form.formState.errors);
-    console.log("Form is valid:", form.formState.isValid);
-    console.log("Current images:", images);
-    console.log("Current documents:", documents);
-    console.log("Current assignedStaff:", assignedStaff);
-    
     // Asegurarse de que las fechas sean instancias de Date antes de enviarlas
     // El backend espera objetos Date, no strings
     const submissionData = {
@@ -168,7 +153,6 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
       documents,
     };
     
-    console.log("About to call mutation with:", submissionData);
     mutation.mutate(submissionData);
   };
 
