@@ -115,6 +115,13 @@ export interface IStorage {
   updatePurchaseOrderItem(id: number, item: Partial<InsertPurchaseOrderItem>): Promise<PurchaseOrderItem | undefined>;
   deletePurchaseOrderItem(id: number): Promise<boolean>;
   
+  // Settings methods
+  getSettings(): Promise<Setting[]>;
+  getSetting(key: string): Promise<Setting | undefined>;
+  createSetting(setting: InsertSetting): Promise<Setting>;
+  updateSetting(key: string, value: any): Promise<Setting | undefined>;
+  deleteSetting(key: string): Promise<boolean>;
+  
   // Session store
   sessionStore: any;
 }
@@ -1196,6 +1203,70 @@ export class DatabaseStorage implements IStorage {
       return true;
     } catch (error) {
       console.error("Error deleting purchase order item:", error);
+      return false;
+    }
+  }
+
+  // Settings methods
+  async getSettings(): Promise<Setting[]> {
+    try {
+      return await db.select().from(settings);
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      return [];
+    }
+  }
+
+  async getSetting(key: string): Promise<Setting | undefined> {
+    try {
+      const [setting] = await db.select().from(settings).where(eq(settings.key, key));
+      return setting || undefined;
+    } catch (error) {
+      console.error("Error fetching setting:", error);
+      return undefined;
+    }
+  }
+
+  async createSetting(setting: InsertSetting): Promise<Setting> {
+    try {
+      const [newSetting] = await db
+        .insert(settings)
+        .values({
+          ...setting,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+      return newSetting;
+    } catch (error) {
+      console.error("Error creating setting:", error);
+      throw error;
+    }
+  }
+
+  async updateSetting(key: string, value: any): Promise<Setting | undefined> {
+    try {
+      const [updatedSetting] = await db
+        .update(settings)
+        .set({
+          value,
+          updatedAt: new Date()
+        })
+        .where(eq(settings.key, key))
+        .returning();
+      return updatedSetting || undefined;
+    } catch (error) {
+      console.error("Error updating setting:", error);
+      return undefined;
+    }
+  }
+
+  async deleteSetting(key: string): Promise<boolean> {
+    try {
+      await db.delete(settings).where(eq(settings.key, key));
+      return true;
+    } catch (error) {
+      console.error("Error deleting setting:", error);
       return false;
     }
   }

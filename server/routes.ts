@@ -2242,6 +2242,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Settings routes for Google Calendar integration
+  app.get("/api/settings", isAuthenticated, async (req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.get("/api/settings/:key", isAuthenticated, async (req, res) => {
+    try {
+      const setting = await storage.getSetting(req.params.key);
+      if (!setting) {
+        return res.status(404).json({ message: "Setting not found" });
+      }
+      res.json(setting);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.post("/api/settings", isAuthenticated, async (req, res) => {
+    try {
+      const settingData = insertSettingsSchema.parse(req.body);
+      
+      // Check if setting already exists
+      const existingSetting = await storage.getSetting(settingData.key);
+      if (existingSetting) {
+        // Update existing setting
+        const updated = await storage.updateSetting(settingData.key, settingData.value);
+        return res.json(updated);
+      }
+      
+      // Create new setting
+      const newSetting = await storage.createSetting(settingData);
+      res.status(201).json(newSetting);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid setting data", errors: error.errors });
+      }
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.put("/api/settings/:key", isAuthenticated, async (req, res) => {
+    try {
+      const { value } = req.body;
+      const updated = await storage.updateSetting(req.params.key, value);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Setting not found" });
+      }
+      
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.delete("/api/settings/:key", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteSetting(req.params.key);
+      
+      if (deleted) {
+        res.sendStatus(204);
+      } else {
+        res.status(404).json({ message: "Setting not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
