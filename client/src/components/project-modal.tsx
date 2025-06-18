@@ -212,7 +212,7 @@ export function ProjectModal({ open, onOpenChange, project, onEdit }: ProjectMod
             
             {assignedStaff.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-500">Equipo Asignado</h4>
+                <h4 className="text-sm font-medium text-gray-500">Assigned Team</h4>
                 <div className="flex mt-1 -space-x-2">
                   {assignedStaff.map((staff, index) => (
                     <Avatar key={staff.id} className="border-2 border-white">
@@ -226,13 +226,13 @@ export function ProjectModal({ open, onOpenChange, project, onEdit }: ProjectMod
             )}
             
             <div>
-              <h4 className="text-sm font-medium text-gray-500">Imágenes del Proyecto</h4>
+              <h4 className="text-sm font-medium text-gray-500">Project Images</h4>
               <div className="grid grid-cols-3 gap-2 mt-1">
                 {projectImages.slice(0, 3).map((img, index) => (
                   <img
                     key={index}
                     src={img}
-                    alt={`Imagen del proyecto ${index + 1}`}
+                    alt={`Project image ${index + 1}`}
                     className="w-full h-20 object-cover rounded"
                   />
                 ))}
