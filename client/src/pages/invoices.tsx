@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,9 +73,20 @@ const InvoiceForm = ({
   const [selectedQuoteId, setSelectedQuoteId] = useState<number | null>(editingInvoice?.quoteId || null);
   const [showCreateClient, setShowCreateClient] = useState(false);
   const [showCreateProject, setShowCreateProject] = useState(false);
-  const [items, setItems] = useState<InvoiceItem[]>(editingInvoice?.items || []);
+  const [items, setItems] = useState<InvoiceItem[]>(editingInvoice?.items || [{
+    description: "",
+    quantity: 1,
+    unitPrice: 0,
+    total: 0,
+    discount: 0
+  }]);
   const [baseAmount, setBaseAmount] = useState<number>(0);
   const [globalDiscount, setGlobalDiscount] = useState<number>(0);
+
+  // Efecto para recalcular el total cuando cambien los items o descuento global
+  useEffect(() => {
+    calculateTotal();
+  }, [items, globalDiscount]);
 
   // Consultas para obtener datos
   const { data: clients } = useQuery({ queryKey: ["/api/clients"] });
@@ -200,8 +211,11 @@ const InvoiceForm = ({
 
   // Función para calcular el total de la factura
   const calculateTotal = () => {
-    const itemsTotal = items.reduce((sum, item) => sum + (item.total - (item.discount || 0)), 0);
-    const finalTotal = itemsTotal - globalDiscount;
+    const itemsTotal = items.reduce((sum, item) => {
+      const itemTotal = (item.quantity * item.unitPrice) - (item.discount || 0);
+      return sum + itemTotal;
+    }, 0);
+    const finalTotal = Math.max(0, itemsTotal - globalDiscount);
     form.setValue("totalAmount", finalTotal.toString());
     return finalTotal;
   };
@@ -222,8 +236,11 @@ const InvoiceForm = ({
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     
+    // Recalcular el total del item cuando cambia cantidad o precio unitario
     if (field === 'quantity' || field === 'unitPrice') {
-      newItems[index].total = newItems[index].quantity * newItems[index].unitPrice;
+      const quantity = field === 'quantity' ? value : newItems[index].quantity;
+      const unitPrice = field === 'unitPrice' ? value : newItems[index].unitPrice;
+      newItems[index].total = quantity * unitPrice;
     }
     
     setItems(newItems);
@@ -263,13 +280,21 @@ const InvoiceForm = ({
   });
 
   const onSubmit = (data: InvoiceFormValues) => {
+    // Validar que hay al menos un elemento con descripción
+    if (items.length === 0 || items.every(item => !item.description.trim())) {
+      toast({
+        title: "Error de Validación",
+        description: "Debe agregar al menos un elemento a la factura",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const finalTotal = calculateTotal();
-    const itemsTotal = items.reduce((sum, item) => sum + (item.total - (item.discount || 0)), 0);
     createMutation.mutate({ 
       ...data, 
-      totalAmount: finalTotal.toString(),
-      amount: itemsTotal.toString(),
-      tax: "0"
+      totalAmount: finalTotal,
+      items: items.filter(item => item.description.trim())
     });
   };
 
