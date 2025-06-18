@@ -498,15 +498,15 @@ const InvoiceForm = ({
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar estado" />
+                          <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="draft">Borrador</SelectItem>
-                        <SelectItem value="sent">Enviada</SelectItem>
-                        <SelectItem value="paid">Pagada</SelectItem>
-                        <SelectItem value="overdue">Vencida</SelectItem>
-                        <SelectItem value="cancelled">Cancelada</SelectItem>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="sent">Sent</SelectItem>
+                        <SelectItem value="paid">Paid</SelectItem>
+                        <SelectItem value="overdue">Overdue</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -515,13 +515,13 @@ const InvoiceForm = ({
               />
             </div>
 
-            {/* Sección de Items */}
+            {/* Items Section */}
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <Label className="text-lg font-semibold">Elementos de la Factura</Label>
+                <Label className="text-lg font-semibold">Invoice Items</Label>
                 <Button type="button" onClick={addItem} variant="outline">
                   <Plus className="h-4 w-4 mr-2" />
-                  Agregar Elemento
+                  Add Item
                 </Button>
               </div>
 
@@ -529,15 +529,15 @@ const InvoiceForm = ({
                 <div key={index} className="border rounded-lg p-4 space-y-3">
                   <div className="grid grid-cols-12 gap-2">
                     <div className="col-span-4">
-                      <Label>Descripción</Label>
+                      <Label>Description</Label>
                       <Input
                         value={item.description}
                         onChange={(e) => updateItem(index, 'description', e.target.value)}
-                        placeholder="Descripción del servicio/producto"
+                        placeholder="Service/product description"
                       />
                     </div>
                     <div className="col-span-2">
-                      <Label>Cantidad</Label>
+                      <Label>Quantity</Label>
                       <Input
                         type="number"
                         value={item.quantity}
@@ -547,7 +547,7 @@ const InvoiceForm = ({
                       />
                     </div>
                     <div className="col-span-2">
-                      <Label>Precio Unitario</Label>
+                      <Label>Unit Price</Label>
                       <Input
                         type="number"
                         value={item.unitPrice}
@@ -557,7 +557,7 @@ const InvoiceForm = ({
                       />
                     </div>
                     <div className="col-span-2">
-                      <Label>Descuento</Label>
+                      <Label>Discount</Label>
                       <Input
                         type="number"
                         value={item.discount || 0}
@@ -586,10 +586,10 @@ const InvoiceForm = ({
                 </div>
               ))}
 
-              {/* Descuento Global */}
+              {/* Global Discount */}
               <div className="flex justify-end">
                 <div className="w-64 space-y-2">
-                  <Label>Descuento Global</Label>
+                  <Label>Global Discount</Label>
                   <Input
                     type="number"
                     value={globalDiscount}
@@ -684,11 +684,11 @@ const InvoiceForm = ({
           </DialogContent>
         </Dialog>
 
-        {/* Modal para crear proyecto */}
+        {/* Modal to create project */}
         <Dialog open={showCreateProject} onOpenChange={setShowCreateProject}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Crear Nuevo Proyecto</DialogTitle>
+              <DialogTitle>Create New Project</DialogTitle>
             </DialogHeader>
             <form onSubmit={(e) => {
               e.preventDefault();
@@ -703,11 +703,11 @@ const InvoiceForm = ({
               createProjectMutation.mutate(projectData);
             }} className="space-y-4">
               <div>
-                <Label htmlFor="project-title">Título*</Label>
+                <Label htmlFor="project-title">Title*</Label>
                 <Input id="project-title" name="title" required />
               </div>
               <div>
-                <Label htmlFor="project-description">Descripción*</Label>
+                <Label htmlFor="project-description">Description*</Label>
                 <Textarea id="project-description" name="description" rows={2} required />
               </div>
               <div>
