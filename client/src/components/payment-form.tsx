@@ -582,10 +582,10 @@ export default function PaymentForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción (Opcional)</FormLabel>
+              <FormLabel>Description (Optional)</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Detalles adicionales sobre este pago"
+                  placeholder="Additional details about this payment"
                   {...field}
                   disabled={isLoading}
                   rows={3}
@@ -603,11 +603,11 @@ export default function PaymentForm({
             onClick={onCancel}
             disabled={isLoading}
           >
-            Cancelar
+            Cancel
           </Button>
           <Button type="submit" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {payment ? "Actualizar Pago" : "Registrar Pago"}
+            {payment ? "Update Payment" : "Register Payment"}
           </Button>
         </div>
       </form>
