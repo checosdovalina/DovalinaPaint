@@ -22,6 +22,7 @@ import FinancialReports from "@/pages/financial-reports";
 import Suppliers from "@/pages/suppliers";
 import PurchaseOrders from "@/pages/purchase-orders";
 import SimpleQuotes from "@/pages/simple-quotes";
+import Settings from "@/pages/settings";
 
 function Router() {
   return (
@@ -43,6 +44,7 @@ function Router() {
       <ProtectedRoute path="/payments" component={Payments} />
       <ProtectedRoute path="/financial-reports" component={FinancialReports} />
       <ProtectedRoute path="/reports" component={Reports} />
+      <ProtectedRoute path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
   );
