@@ -1896,6 +1896,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Invoice routes
+  app.get("/api/invoices", isAuthenticated, async (req, res) => {
+    try {
+      const invoices = await storage.getAllInvoices();
+      res.json(invoices);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.get("/api/invoices/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(id);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      
+      res.json(invoice);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.post("/api/invoices", isAuthenticated, async (req, res) => {
+    try {
+      const invoiceData = insertInvoiceSchema.parse({
+        ...req.body,
+        issueDate: req.body.issueDate ? new Date(req.body.issueDate) : new Date(),
+        dueDate: req.body.dueDate ? new Date(req.body.dueDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      });
+      
+      // Generate invoice number
+      const invoiceCount = await storage.getInvoiceCount();
+      const invoiceNumber = `INV-${String(invoiceCount + 1).padStart(6, '0')}`;
+      
+      const invoice = await storage.createInvoice({
+        ...invoiceData,
+        invoiceNumber,
+        amount: invoiceData.totalAmount,
+        tax: 0, // Default tax to 0, can be updated later
+      });
+      
+      // Create activity for invoice creation
+      await storage.createActivity({
+        type: "invoice_created",
+        description: `Factura ${invoiceNumber} creada`,
+        userId: req.user!.id,
+        projectId: invoice.projectId,
+        clientId: invoice.clientId
+      });
+      
+      res.status(201).json(invoice);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid invoice data", errors: error.errors });
+      }
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.patch("/api/invoices/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updateData = insertInvoiceSchema.partial().parse({
+        ...req.body,
+        issueDate: req.body.issueDate ? new Date(req.body.issueDate) : undefined,
+        dueDate: req.body.dueDate ? new Date(req.body.dueDate) : undefined,
+        paidDate: req.body.paidDate ? new Date(req.body.paidDate) : undefined,
+      });
+      
+      const existingInvoice = await storage.getInvoice(id);
+      if (!existingInvoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      
+      const updatedInvoice = await storage.updateInvoice(id, {
+        ...updateData,
+        amount: updateData.totalAmount || existingInvoice.amount,
+      });
+      
+      if (!updatedInvoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      
+      // Create activity for invoice update
+      await storage.createActivity({
+        type: "invoice_updated",
+        description: `Factura ${existingInvoice.invoiceNumber} actualizada`,
+        userId: req.user!.id,
+        projectId: updatedInvoice.projectId,
+        clientId: updatedInvoice.clientId
+      });
+      
+      res.json(updatedInvoice);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid invoice data", errors: error.errors });
+      }
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.delete("/api/invoices/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(id);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      
+      const deleted = await storage.deleteInvoice(id);
+      
+      if (deleted) {
+        // Create activity for invoice deletion
+        await storage.createActivity({
+          type: "invoice_deleted",
+          description: `Factura ${invoice.invoiceNumber} eliminada`,
+          userId: req.user!.id,
+          projectId: invoice.projectId,
+          clientId: invoice.clientId
+        });
+        
+        res.sendStatus(204);
+      } else {
+        res.status(500).json({ message: "Failed to delete invoice" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
