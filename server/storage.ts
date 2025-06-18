@@ -73,6 +73,7 @@ export interface IStorage {
   getInvoicesByProject(projectId: number): Promise<Invoice[]>;
   getInvoicesByClient(clientId: number): Promise<Invoice[]>;
   getInvoicesByStatus(status: string): Promise<Invoice[]>;
+  getInvoiceCount(): Promise<number>;
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
   updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined>;
   deleteInvoice(id: number): Promise<boolean>;
@@ -714,6 +715,16 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error deleting invoice:", error);
       return false;
+    }
+  }
+  
+  async getInvoiceCount(): Promise<number> {
+    try {
+      const result = await db.select().from(invoices);
+      return result.length;
+    } catch (error) {
+      console.error("Error getting invoice count:", error);
+      return 0;
     }
   }
   

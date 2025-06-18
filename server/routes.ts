@@ -1899,7 +1899,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Invoice routes
   app.get("/api/invoices", isAuthenticated, async (req, res) => {
     try {
-      const invoices = await storage.getAllInvoices();
+      const invoices = await storage.getInvoices();
       res.json(invoices);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
@@ -1936,7 +1936,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const invoice = await storage.createInvoice({
         ...invoiceData,
         invoiceNumber,
-        amount: invoiceData.totalAmount,
+        amount: invoiceData.totalAmount.toString(),
         tax: 0, // Default tax to 0, can be updated later
       });
       

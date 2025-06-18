@@ -120,8 +120,8 @@ export default function PaymentForm({
       
       const paymentData = {
         // Required fields from schema
-        amount: data.amount, // Keep as string, server will parse it
-        date: data.date, // Date object
+        amount: parseFloat(data.amount), // Convert to number
+        date: data.date.toISOString(), // Convert Date to ISO string
         description: data.description || "Pago registrado",
         paymentType: data.paymentMethod, // Map paymentMethod to paymentType
         status: "completed", // Default status
@@ -178,8 +178,8 @@ export default function PaymentForm({
       
       const paymentData = {
         // Required fields from schema
-        amount: data.amount, // Keep as string, server will parse it
-        date: data.date, // Date object
+        amount: parseFloat(data.amount), // Convert to number
+        date: data.date.toISOString(), // Convert Date to ISO string
         description: data.description || "Pago actualizado",
         paymentType: data.paymentMethod, // Map paymentMethod to paymentType
         status: "completed", // Default status
