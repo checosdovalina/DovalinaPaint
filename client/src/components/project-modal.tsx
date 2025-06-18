@@ -147,9 +147,9 @@ export function ProjectModal({ open, onOpenChange, project, onEdit }: ProjectMod
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Detalles del Proyecto</DialogTitle>
+          <DialogTitle>Project Details</DialogTitle>
           <DialogDescription>
-            Información completa del proyecto seleccionado
+            Complete information of the selected project
           </DialogDescription>
         </DialogHeader>
         
@@ -158,7 +158,7 @@ export function ProjectModal({ open, onOpenChange, project, onEdit }: ProjectMod
             <div className="flex justify-between">
               <div>
                 <h4 className="font-bold text-gray-700">{project.title}</h4>
-                <p className="text-sm text-gray-500">Cliente {client ? getClassificationLabel(client.classification) : ""}</p>
+                <p className="text-sm text-gray-500">Client {client ? getClassificationLabel(client.classification) : ""}</p>
               </div>
               <Badge className={getPriorityClasses(project.priority)}>
                 {getPriorityLabel(project.priority)}
@@ -168,7 +168,7 @@ export function ProjectModal({ open, onOpenChange, project, onEdit }: ProjectMod
           
           <div className="space-y-4">
             <div>
-              <h4 className="text-sm font-medium text-gray-500">Dirección</h4>
+              <h4 className="text-sm font-medium text-gray-500">Address</h4>
               <p className="text-gray-900 flex items-center">
                 <MapPin className="h-4 w-4 mr-1 text-gray-400" />
                 {project.address}
@@ -176,34 +176,34 @@ export function ProjectModal({ open, onOpenChange, project, onEdit }: ProjectMod
             </div>
             
             <div>
-              <h4 className="text-sm font-medium text-gray-500">Tipo de Servicio</h4>
+              <h4 className="text-sm font-medium text-gray-500">Service Type</h4>
               <p className="text-gray-900">{project.serviceType}</p>
             </div>
             
             <div>
-              <h4 className="text-sm font-medium text-gray-500">Estado Actual</h4>
+              <h4 className="text-sm font-medium text-gray-500">Current Status</h4>
               <p className="text-gray-900">
                 {getStatusLabel(project.status)}
                 {project.status === "in_progress" && project.progress !== undefined && 
-                  ` (${project.progress}% completado)`
+                  ` (${project.progress}% completed)`
                 }
               </p>
             </div>
             
             <div>
-              <h4 className="text-sm font-medium text-gray-500">Fechas</h4>
+              <h4 className="text-sm font-medium text-gray-500">Dates</h4>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <p className="text-xs text-gray-500 flex items-center">
                     <Calendar className="h-3 w-3 mr-1" />
-                    Inicio:
+                    Start:
                   </p>
                   <p className="text-sm">{formatDate(project.startDate)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 flex items-center">
                     <Clock className="h-3 w-3 mr-1" />
-                    Entrega estimada:
+                    Estimated delivery:
                   </p>
                   <p className="text-sm">{formatDate(project.dueDate)}</p>
                 </div>

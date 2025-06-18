@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { Project, Client } from "@shared/schema";
 import { Layout } from "@/components/layout";
 import { ProjectForm } from "@/components/project-form";
@@ -39,6 +39,7 @@ import { Search, Plus, Network, List, GridIcon, Filter, Trash } from "lucide-rea
 
 export default function Projects() {
   const [match, params] = useRoute("/projects/:id");
+  const [location, setLocation] = useLocation();
   const isViewingSpecificProject = match && params?.id;
   
   const [showProjectForm, setShowProjectForm] = useState(false);
@@ -215,7 +216,7 @@ export default function Projects() {
       <Layout title={`Project: ${specificProject.title}`}>
         <ProjectModal
           open={true}
-          onOpenChange={() => {}} // Prevent closing from modal when viewing specific project
+          onOpenChange={() => setLocation("/projects")} // Navigate back to projects list
           project={specificProject}
           onEdit={handleEditProject}
         />
