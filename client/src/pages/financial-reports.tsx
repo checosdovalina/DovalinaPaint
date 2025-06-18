@@ -262,45 +262,45 @@ export default function FinancialReportsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardHeader className="py-4">
-                <CardTitle className="text-lg font-medium">Ingresos Totales</CardTitle>
+                <CardTitle className="text-lg font-medium">Total Income</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">
                   {invoicesData?.totalRevenue 
-                    ? new Intl.NumberFormat('es-MX', {
+                    ? new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: 'USD'
                       }).format(invoicesData.totalRevenue)
-                    : isLoading ? "Cargando..." : "$0.00"}
+                    : isLoading ? "Loading..." : "$0.00"}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {invoicesData?.invoiceCount || 0} facturas en el período
+                  {invoicesData?.invoiceCount || 0} invoices in period
                 </p>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader className="py-4">
-                <CardTitle className="text-lg font-medium">Gastos Totales</CardTitle>
+                <CardTitle className="text-lg font-medium">Total Expenses</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-red-600">
                   {paymentsData?.totalExpenses
-                    ? new Intl.NumberFormat('es-MX', {
+                    ? new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: 'USD'
                       }).format(paymentsData.totalExpenses)
-                    : isLoading ? "Cargando..." : "$0.00"}
+                    : isLoading ? "Loading..." : "$0.00"}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {paymentsData?.paymentCount || 0} pagos en el período
+                  {paymentsData?.paymentCount || 0} payments in period
                 </p>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader className="py-4">
-                <CardTitle className="text-lg font-medium">Beneficio Neto</CardTitle>
+                <CardTitle className="text-lg font-medium">Net Benefit</CardTitle>
               </CardHeader>
               <CardContent>
                 {!isLoading ? (
