@@ -108,11 +108,11 @@ export default function PaymentsPage() {
         ) : (
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="mb-4">
-              <TabsTrigger value="all">Todos los Pagos</TabsTrigger>
-              <TabsTrigger value="subcontractors">Subcontratistas</TabsTrigger>
-              <TabsTrigger value="employees">Empleados</TabsTrigger>
-              <TabsTrigger value="suppliers">Proveedores</TabsTrigger>
-              <TabsTrigger value="other">Otros</TabsTrigger>
+              <TabsTrigger value="all">All Payments</TabsTrigger>
+              <TabsTrigger value="subcontractors">Subcontractors</TabsTrigger>
+              <TabsTrigger value="employees">Employees</TabsTrigger>
+              <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
+              <TabsTrigger value="other">Other</TabsTrigger>
             </TabsList>
             
             <TabsContent value="all">

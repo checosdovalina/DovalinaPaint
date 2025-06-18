@@ -65,9 +65,9 @@ export default function PaymentList({
 
   // Get project title by id
   const getProjectTitle = (projectId: number) => {
-    if (!projects) return "Proyecto no encontrado";
+    if (!projects) return "Project not found";
     const project = projects.find((p: any) => p.id === projectId);
-    return project ? project.title : "Proyecto no encontrado";
+    return project ? project.title : "Project not found";
   };
 
   // Format currency
@@ -101,13 +101,13 @@ export default function PaymentList({
   const getRecipientTypeLabel = (type: string) => {
     switch (type) {
       case 'subcontractor':
-        return 'Subcontratista';
+        return 'Subcontractor';
       case 'employee':
-        return 'Empleado';
+        return 'Employee';
       case 'supplier':
-        return 'Proveedor';
+        return 'Supplier';
       default:
-        return 'Otro';
+        return 'Other';
     }
   };
 
@@ -115,15 +115,15 @@ export default function PaymentList({
   const getPaymentMethodLabel = (method: string) => {
     switch (method) {
       case 'cash':
-        return 'Efectivo';
+        return 'Cash';
       case 'check':
-        return 'Cheque';
+        return 'Check';
       case 'transfer':
-        return 'Transferencia';
+        return 'Transfer';
       case 'credit_card':
-        return 'Tarjeta de Crédito';
+        return 'Credit Card';
       case 'debit_card':
-        return 'Tarjeta de Débito';
+        return 'Debit Card';
       case 'venmo':
         return 'Venmo';
       case 'paypal':
@@ -131,7 +131,7 @@ export default function PaymentList({
       case 'zelle':
         return 'Zelle';
       default:
-        return 'Otro';
+        return 'Other';
     }
   };
 
@@ -144,15 +144,15 @@ export default function PaymentList({
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Error al eliminar el pago");
+        throw new Error(errorData.message || "Error deleting payment");
       }
       
       return await response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Éxito",
-        description: "Pago eliminado correctamente.",
+        title: "Success",
+        description: "Payment deleted successfully.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/payments'] });
       refetch();
@@ -161,7 +161,7 @@ export default function PaymentList({
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message || "No se pudo eliminar el pago. Intente de nuevo.",
+        description: error.message || "Could not delete payment. Please try again.",
         variant: "destructive",
       });
       setShowDeleteDialog(false);
