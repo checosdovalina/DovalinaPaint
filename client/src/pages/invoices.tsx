@@ -75,8 +75,14 @@ const InvoiceForm = ({
   const [showCreateClient, setShowCreateClient] = useState(false);
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [items, setItems] = useState<InvoiceItem[]>(editingInvoice?.items || [{
-    description: "",
-    quantity: 1,
+    description: "Material 1",
+    quantity: 25,
+    unitPrice: 0,
+    total: 0,
+    discount: 0
+  }, {
+    description: "Mano de obra 1",
+    quantity: 5008,
     unitPrice: 0,
     total: 0,
     discount: 0
@@ -406,13 +412,20 @@ const InvoiceForm = ({
                       if (value === "none") {
                         setSelectedQuoteId(null);
                         form.setValue("quoteId", undefined);
-                        setItems([]);
+                        setItems([{
+                          description: "Material 1",
+                          quantity: 25,
+                          unitPrice: 0,
+                          total: 0,
+                          discount: 0
+                        }]);
                         setBaseAmount(0);
+                        form.setValue("totalAmount", 0);
                       } else {
                         const quoteId = parseInt(value);
                         setSelectedQuoteId(quoteId);
                         form.setValue("quoteId", quoteId);
-                        loadQuoteData(quoteId);
+                        loadFromQuote(quoteId);
                       }
                     }}
                   >
