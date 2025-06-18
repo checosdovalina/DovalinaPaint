@@ -34,36 +34,36 @@ import { useAuth } from "@/hooks/use-auth";
 // Define the form validation schema
 const paymentFormSchema = z.object({
   date: z.date({
-    required_error: "La fecha de pago es requerida.",
+    required_error: "Payment date is required.",
   }),
-  amount: z.string().min(1, "El monto es requerido."),
-  recipientType: z.string().min(1, "El tipo de destinatario es requerido."),
-  recipientId: z.string().min(1, "El destinatario es requerido."),
-  categoryId: z.string().min(1, "La categoría es requerida."),
+  amount: z.string().min(1, "Amount is required."),
+  recipientType: z.string().min(1, "Recipient type is required."),
+  recipientId: z.string().min(1, "Recipient is required."),
+  categoryId: z.string().min(1, "Category is required."),
   projectId: z.string().optional(),
   purchaseOrderId: z.string().optional(),
   description: z.string().optional(),
   reference: z.string().optional(),
-  paymentMethod: z.string().min(1, "El método de pago es requerido."),
+  paymentMethod: z.string().min(1, "Payment method is required."),
 });
 
 const paymentMethods = [
-  { id: "cash", name: "Efectivo" },
-  { id: "check", name: "Cheque" },
-  { id: "transfer", name: "Transferencia Bancaria" },
-  { id: "credit_card", name: "Tarjeta de Crédito" },
-  { id: "debit_card", name: "Tarjeta de Débito" },
+  { id: "cash", name: "Cash" },
+  { id: "check", name: "Check" },
+  { id: "transfer", name: "Bank Transfer" },
+  { id: "credit_card", name: "Credit Card" },
+  { id: "debit_card", name: "Debit Card" },
   { id: "venmo", name: "Venmo" },
   { id: "paypal", name: "PayPal" },
   { id: "zelle", name: "Zelle" },
-  { id: "other", name: "Otro" },
+  { id: "other", name: "Other" },
 ];
 
 const recipientTypes = [
-  { id: "subcontractor", name: "Subcontratista" },
-  { id: "employee", name: "Empleado" },
-  { id: "supplier", name: "Proveedor" },
-  { id: "other", name: "Otro" },
+  { id: "subcontractor", name: "Subcontractor" },
+  { id: "employee", name: "Employee" },
+  { id: "supplier", name: "Supplier" },
+  { id: "other", name: "Other" },
 ];
 
 type PaymentFormProps = {
@@ -144,7 +144,7 @@ export default function PaymentForm({
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Error al crear el pago");
+        throw new Error(errorData.message || "Error creating payment");
       }
       
       // Si el pago está asociado a una orden de compra, también actualizar el estado de la orden

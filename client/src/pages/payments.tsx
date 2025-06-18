@@ -51,10 +51,10 @@ export default function PaymentsPage() {
     setShowPaymentForm(false);
     setEditingPayment(null);
     toast({
-      title: "Éxito",
+      title: "Success",
       description: editingPayment 
-        ? "Pago actualizado correctamente." 
-        : "Pago registrado correctamente.",
+        ? "Payment updated successfully." 
+        : "Payment registered successfully.",
     });
     refetch();
   };
@@ -65,20 +65,20 @@ export default function PaymentsPage() {
   };
 
   return (
-    <Layout title="Gestión de Pagos">
+    <Layout title="Payment Management">
       <Helmet>
-        <title>Pagos | Dovalina Painting LLC</title>
+        <title>Payments | Dovalina Painting LLC</title>
       </Helmet>
 
       <div className="container mx-auto py-6 space-y-6">
         <PageHeader
-          title="Gestión de Pagos"
-          description="Registra y administra todos los pagos a subcontratistas, empleados y proveedores."
+          title="Payment Management"
+          description="Register and manage all payments to subcontractors, employees and suppliers."
           actions={
             !showPaymentForm && (
               <Button onClick={handleAddNew}>
                 <Plus className="mr-2 h-4 w-4" />
-                Nuevo Pago
+                New Payment
               </Button>
             )
           }
@@ -87,11 +87,11 @@ export default function PaymentsPage() {
         {showPaymentForm ? (
           <Card>
             <CardHeader>
-              <CardTitle>{editingPayment ? "Editar Pago" : "Registrar Nuevo Pago"}</CardTitle>
+              <CardTitle>{editingPayment ? "Edit Payment" : "Register New Payment"}</CardTitle>
               <CardDescription>
                 {editingPayment
-                  ? "Actualiza la información del pago seleccionado."
-                  : "Completa el formulario para registrar un nuevo pago."}
+                  ? "Update the information for the selected payment."
+                  : "Complete the form to register a new payment."}
               </CardDescription>
             </CardHeader>
             <CardContent>
