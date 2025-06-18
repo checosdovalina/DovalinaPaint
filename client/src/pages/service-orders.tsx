@@ -404,11 +404,46 @@ export default function ServiceOrders() {
                   </div>
                 )}
 
-                {/* Images indicator */}
+                {/* Images preview */}
                 {(serviceOrder.beforeImages || serviceOrder.afterImages) && (
-                  <div className="flex items-center text-sm text-primary">
-                    <Image className="h-4 w-4 mr-2" />
-                    <span>Contains attached images</span>
+                  <div className="mt-3">
+                    <div className="flex items-center text-sm mb-2">
+                      <Image className="h-4 w-4 mr-2 text-gray-400" />
+                      <span>Project Images:</span>
+                    </div>
+                    <div className="flex space-x-2">
+                      {serviceOrder.beforeImages && Array.isArray(serviceOrder.beforeImages) && serviceOrder.beforeImages.slice(0, 3).map((image: any, index: number) => (
+                        <div key={`before-${index}`} className="relative">
+                          <img 
+                            src={image} 
+                            alt={`Before ${index + 1}`}
+                            className="w-16 h-12 object-cover rounded border"
+                          />
+                          <div className="absolute -top-1 -left-1 bg-blue-500 text-white text-xs px-1 rounded">
+                            Before
+                          </div>
+                        </div>
+                      ))}
+                      {serviceOrder.afterImages && Array.isArray(serviceOrder.afterImages) && serviceOrder.afterImages.slice(0, 3).map((image: any, index: number) => (
+                        <div key={`after-${index}`} className="relative">
+                          <img 
+                            src={image} 
+                            alt={`After ${index + 1}`}
+                            className="w-16 h-12 object-cover rounded border"
+                          />
+                          <div className="absolute -top-1 -left-1 bg-green-500 text-white text-xs px-1 rounded">
+                            After
+                          </div>
+                        </div>
+                      ))}
+                      {((serviceOrder.beforeImages && Array.isArray(serviceOrder.beforeImages) ? serviceOrder.beforeImages.length : 0) + 
+                        (serviceOrder.afterImages && Array.isArray(serviceOrder.afterImages) ? serviceOrder.afterImages.length : 0)) > 3 && (
+                        <div className="w-16 h-12 bg-gray-100 border rounded flex items-center justify-center text-xs text-gray-600">
+                          +{((serviceOrder.beforeImages && Array.isArray(serviceOrder.beforeImages) ? serviceOrder.beforeImages.length : 0) + 
+                            (serviceOrder.afterImages && Array.isArray(serviceOrder.afterImages) ? serviceOrder.afterImages.length : 0)) - 3} more
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -496,6 +531,45 @@ export default function ServiceOrders() {
                           )}
                         </div>
                         <p className="text-sm text-gray-700 mt-2 line-clamp-1">{serviceOrder.details}</p>
+                        
+                        {/* Images preview in list view */}
+                        {(serviceOrder.beforeImages || serviceOrder.afterImages) && (
+                          <div className="mt-2">
+                            <div className="flex space-x-1">
+                              {serviceOrder.beforeImages && Array.isArray(serviceOrder.beforeImages) && serviceOrder.beforeImages.slice(0, 2).map((image: any, index: number) => (
+                                <div key={`before-${index}`} className="relative">
+                                  <img 
+                                    src={image} 
+                                    alt={`Before ${index + 1}`}
+                                    className="w-12 h-9 object-cover rounded border"
+                                  />
+                                  <div className="absolute -top-1 -left-1 bg-blue-500 text-white text-xs px-1 rounded">
+                                    B
+                                  </div>
+                                </div>
+                              ))}
+                              {serviceOrder.afterImages && Array.isArray(serviceOrder.afterImages) && serviceOrder.afterImages.slice(0, 2).map((image: any, index: number) => (
+                                <div key={`after-${index}`} className="relative">
+                                  <img 
+                                    src={image} 
+                                    alt={`After ${index + 1}`}
+                                    className="w-12 h-9 object-cover rounded border"
+                                  />
+                                  <div className="absolute -top-1 -left-1 bg-green-500 text-white text-xs px-1 rounded">
+                                    A
+                                  </div>
+                                </div>
+                              ))}
+                              {((serviceOrder.beforeImages && Array.isArray(serviceOrder.beforeImages) ? serviceOrder.beforeImages.length : 0) + 
+                                (serviceOrder.afterImages && Array.isArray(serviceOrder.afterImages) ? serviceOrder.afterImages.length : 0)) > 2 && (
+                                <div className="w-12 h-9 bg-gray-100 border rounded flex items-center justify-center text-xs text-gray-600">
+                                  +{((serviceOrder.beforeImages && Array.isArray(serviceOrder.beforeImages) ? serviceOrder.beforeImages.length : 0) + 
+                                    (serviceOrder.afterImages && Array.isArray(serviceOrder.afterImages) ? serviceOrder.afterImages.length : 0)) - 2}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                       
                       {/* Assigned staff avatars */}
