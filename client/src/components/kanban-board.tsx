@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 import { ProjectCard } from "@/components/project-card";
 import { Project } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface KanbanBoardProps {
   projects: Project[];
@@ -20,6 +22,7 @@ interface KanbanColumn {
 
 export function KanbanBoard({ projects, onProjectClick }: KanbanBoardProps) {
   const { toast } = useToast();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [columns, setColumns] = useState<KanbanColumn[]>([]);
   
   // Initialize columns
@@ -126,12 +129,56 @@ export function KanbanBoard({ projects, onProjectClick }: KanbanBoardProps) {
       }
     }
   };
+
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+    }
+  };
   
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="relative">
-        <div className="overflow-x-scroll scrollbar-thin scrollbar-always-visible pb-6" style={{ width: '100%' }}>
-          <div className="flex space-x-3" style={{ minWidth: 'max(1800px, calc(100vw + 400px))' }}>
+        {/* Navigation Arrows */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg"
+          onClick={scrollLeft}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg"
+          onClick={scrollRight}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        
+        <div 
+          ref={scrollContainerRef}
+          className="overflow-x-scroll scrollbar-thin scrollbar-always-visible pb-6" 
+          style={{ 
+            width: '100%',
+            maxWidth: '100%',
+            overflowX: 'scroll'
+          }}
+        >
+          <div 
+            className="flex space-x-3" 
+            style={{ 
+              minWidth: '2400px',
+              width: '2400px'
+            }}
+          >
             {columns.map(column => (
               <div 
                 key={column.id}
