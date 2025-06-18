@@ -130,8 +130,8 @@ export function KanbanBoard({ projects, onProjectClick }: KanbanBoardProps) {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="relative">
-        <div className="overflow-x-auto scrollbar-thin pb-6">
-          <div className="flex space-x-3" style={{ minWidth: '1800px' }}>
+        <div className="overflow-x-scroll scrollbar-thin scrollbar-always-visible pb-6" style={{ width: '100%' }}>
+          <div className="flex space-x-3" style={{ minWidth: 'max(1800px, calc(100vw + 400px))' }}>
             {columns.map(column => (
               <div 
                 key={column.id}
