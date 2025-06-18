@@ -615,6 +615,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/service-orders/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const serviceOrder = await storage.getServiceOrder(id);
+      
+      if (!serviceOrder) {
+        return res.status(404).json({ message: "Service order not found" });
+      }
+      
+      // Get project for activity
+      const project = await storage.getProject(serviceOrder.projectId);
+      
+      const deleted = await storage.deleteServiceOrder(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Service order not found" });
+      }
+      
+      // Create activity for service order deletion
+      await storage.createActivity({
+        type: "service_order_deleted",
+        description: `Service order deleted for project "${project?.title || 'Unknown'}"`,
+        userId: req.user.id,
+        projectId: serviceOrder.projectId,
+        clientId: project?.clientId
+      });
+      
+      res.status(200).json({ message: "Service order deleted successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Staff routes
   app.get("/api/staff", isAuthenticated, async (req, res) => {
     try {
