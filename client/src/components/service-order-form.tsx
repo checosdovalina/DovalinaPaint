@@ -38,6 +38,10 @@ import { useState } from "react";
 import { StaffAssignment } from "@/components/staff-assignment";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { InheritedAttachments } from "@/components/inherited-attachments";
+import { ClientForm } from "@/components/client-form";
+import { ProjectForm } from "@/components/project-form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
 
 // Extend the schema to handle the form
 const formSchema = insertServiceOrderSchema
@@ -75,8 +79,23 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
   const [afterImages, setAfterImages] = useState<string[]>(
     initialData?.afterImages as string[] || []
   );
+  
+  // Client and project selection state
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [showClientForm, setShowClientForm] = useState(false);
+  const [showProjectForm, setShowProjectForm] = useState(false);
 
-  // Fetch projects for the dropdown
+  // Fetch clients for the dropdown
+  const { data: clients } = useQuery({
+    queryKey: ["/api/clients"],
+    queryFn: async () => {
+      const res = await fetch("/api/clients");
+      if (!res.ok) throw new Error("Failed to fetch clients");
+      return res.json();
+    },
+  });
+
+  // Fetch projects for the dropdown (filtered by selected client)
   const { data: projects } = useQuery({
     queryKey: ["/api/projects"],
     queryFn: async () => {
@@ -85,6 +104,11 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
       return res.json();
     },
   });
+
+  // Filter projects by selected client
+  const filteredProjects = selectedClientId 
+    ? projects?.filter((project: any) => project.clientId === selectedClientId) 
+    : [];
   
   // Fetch subcontractors for the dropdown
   const { data: subcontractors } = useQuery({
@@ -173,38 +197,95 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
-        console.log("Form validation errors:", errors);
-        console.log("Form state:", form.formState);
-      })} className="space-y-6 max-h-[90vh] overflow-y-auto pb-4">
-        <FormField
-          control={form.control}
-          name="projectId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Project</FormLabel>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+          console.log("Form validation errors:", errors);
+          console.log("Form state:", form.formState);
+        })} className="space-y-6 max-h-[90vh] overflow-y-auto pb-4">
+        {/* Client Selection */}
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">Client</label>
+            <div className="flex gap-2 mt-1">
               <Select
-                onValueChange={(value) => field.onChange(parseInt(value))}
-                defaultValue={field.value?.toString()}
+                value={selectedClientId?.toString() || ""}
+                onValueChange={(value) => {
+                  setSelectedClientId(parseInt(value));
+                  // Clear project selection when client changes
+                  form.setValue("projectId", undefined as any);
+                }}
               >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a project" />
-                  </SelectTrigger>
-                </FormControl>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
                 <SelectContent>
-                  {projects?.map((project: any) => (
-                    <SelectItem key={project.id} value={project.id.toString()}>
-                      {project.title}
+                  {clients?.map((client: any) => (
+                    <SelectItem key={client.id} value={client.id.toString()}>
+                      {client.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <FormMessage />
-            </FormItem>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => setShowClientForm(true)}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Project Selection - Only show if client is selected */}
+          {selectedClientId && (
+            <FormField
+              control={form.control}
+              name="projectId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project</FormLabel>
+                  <div className="flex gap-2">
+                    <Select
+                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      defaultValue={field.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select a project" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {filteredProjects?.map((project: any) => (
+                          <SelectItem key={project.id} value={project.id.toString()}>
+                            {project.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setShowProjectForm(true)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           )}
-        />
+
+          {/* Show message if no client is selected */}
+          {!selectedClientId && (
+            <div className="text-sm text-gray-500 bg-gray-50 p-3 rounded">
+              Please select a client first to choose a project.
+            </div>
+          )}
+        </div>
 
         {/* Show inherited attachments if editing an existing service order */}
         {initialData?.images || initialData?.documents ? (
@@ -706,7 +787,41 @@ export function ServiceOrderForm({ initialData, onSuccess }: ServiceOrderFormPro
               : "Create Service Order"}
           </Button>
         </div>
-      </form>
-    </Form>
+        </form>
+      </Form>
+
+    {/* Client Creation Dialog */}
+    <Dialog open={showClientForm} onOpenChange={setShowClientForm}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Create New Client</DialogTitle>
+        </DialogHeader>
+        <ClientForm 
+          onSuccess={(newClient) => {
+            setShowClientForm(false);
+            setSelectedClientId(newClient.id);
+            queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+          }} 
+        />
+      </DialogContent>
+    </Dialog>
+
+    {/* Project Creation Dialog */}
+    <Dialog open={showProjectForm} onOpenChange={setShowProjectForm}>
+      <DialogContent className="max-w-4xl">
+        <DialogHeader>
+          <DialogTitle>Create New Project</DialogTitle>
+        </DialogHeader>
+        <ProjectForm 
+          initialClientId={selectedClientId || undefined}
+          onSuccess={(newProject) => {
+            setShowProjectForm(false);
+            form.setValue("projectId", newProject.id);
+            queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+          }} 
+        />
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
