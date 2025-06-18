@@ -1,25 +1,13 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Subcontractor } from "@shared/schema";
-import { Layout } from "@/components/layout";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { insertSubcontractorSchema } from "@shared/schema";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Plus, Edit, Trash2, Phone, Mail, DollarSign } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -52,23 +40,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Search,
-  Plus,
-  Mail,
-  Phone,
-  Edit,
-  Trash,
-  Home,
-  Briefcase,
-  Shield,
-  DollarSign,
-} from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { Subcontractor } from "@shared/schema";
 
-// Extend the schema to handle the form
-const formSchema = insertSubcontractorSchema.extend({});
+const formSchema = z.object({
+  name: z.string().min(1, "Full name is required"),
+  company: z.string().optional(),
+  specialty: z.string().min(1, "Specialty is required"),
+  phone: z.string().min(1, "Phone number is required"),
+  email: z.string().email("Invalid email address"),
+  address: z.string().min(1, "Address is required"),
+  hourlyRate: z.number().min(0, "Rate must be positive"),
+  rateType: z.enum(["hourly", "daily", "fixed"]),
+  notes: z.string().optional(),
+  status: z.enum(["active", "inactive", "blacklisted"]).default("active"),
+});
 
 type SubcontractorFormValues = z.infer<typeof formSchema>;
 
@@ -76,18 +65,10 @@ export default function Subcontractors() {
   const [showSubcontractorForm, setShowSubcontractorForm] = useState(false);
   const [subcontractorToEdit, setSubcontractorToEdit] = useState<Subcontractor | null>(null);
   const [subcontractorToDelete, setSubcontractorToDelete] = useState<Subcontractor | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [specialtyFilter, setSpecialtyFilter] = useState("all");
   const { toast } = useToast();
 
-  // Fetch subcontractors
   const { data: subcontractors, isLoading } = useQuery<Subcontractor[]>({
     queryKey: ["/api/subcontractors"],
-    queryFn: async () => {
-      const res = await fetch("/api/subcontractors");
-      if (!res.ok) throw new Error("Failed to fetch subcontractors");
-      return res.json();
-    },
   });
 
   const form = useForm<SubcontractorFormValues>({
@@ -96,71 +77,28 @@ export default function Subcontractors() {
       name: "",
       company: "",
       specialty: "",
-      email: "",
       phone: "",
+      email: "",
       address: "",
-      taxId: "",
-      insuranceInfo: "",
-      rate: undefined,
+      hourlyRate: 0,
       rateType: "hourly",
       notes: "",
       status: "active",
     },
   });
 
-  // Reset form when subcontractorToEdit changes
-  useEffect(() => {
-    if (subcontractorToEdit) {
-      form.reset({
-        name: subcontractorToEdit.name,
-        company: subcontractorToEdit.company || "",
-        specialty: subcontractorToEdit.specialty,
-        email: subcontractorToEdit.email || "",
-        phone: subcontractorToEdit.phone,
-        address: subcontractorToEdit.address || "",
-        taxId: subcontractorToEdit.taxId || "",
-        insuranceInfo: subcontractorToEdit.insuranceInfo || "",
-        rate: subcontractorToEdit.rate,
-        rateType: subcontractorToEdit.rateType || "hourly",
-        notes: subcontractorToEdit.notes || "",
-        status: subcontractorToEdit.status,
-      });
-    } else {
-      form.reset({
-        name: "",
-        company: "",
-        specialty: "",
-        email: "",
-        phone: "",
-        address: "",
-        taxId: "",
-        insuranceInfo: "",
-        rate: undefined,
-        rateType: "hourly",
-        notes: "",
-        status: "active",
-      });
-    }
-  }, [subcontractorToEdit, form]);
-
   const mutation = useMutation({
     mutationFn: async (data: SubcontractorFormValues) => {
-      if (subcontractorToEdit?.id) {
-        // Update
+      if (subcontractorToEdit) {
         return apiRequest("PUT", `/api/subcontractors/${subcontractorToEdit.id}`, data);
       } else {
-        // Create
         return apiRequest("POST", "/api/subcontractors", data);
       }
     },
     onSuccess: () => {
       toast({
-        title: subcontractorToEdit?.id
-          ? "Subcontratista actualizado"
-          : "Subcontratista creado",
-        description: subcontractorToEdit?.id
-          ? "El subcontratista ha sido actualizado exitosamente"
-          : "El subcontratista ha sido añadido exitosamente",
+        title: subcontractorToEdit ? "Subcontractor updated" : "Subcontractor created",
+        description: `The subcontractor has been successfully ${subcontractorToEdit ? "updated" : "created"}.`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/subcontractors"] });
       handleCloseForm();
@@ -168,51 +106,78 @@ export default function Subcontractors() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: `No se pudo ${subcontractorToEdit?.id ? "actualizar" : "crear"} el subcontratista: ${error.message}`,
+        description: `Could not ${subcontractorToEdit ? "update" : "create"} subcontractor: ${error.message}`,
         variant: "destructive",
       });
     },
   });
 
-  const handleEditSubcontractor = (subcontractor: Subcontractor) => {
-    setSubcontractorToEdit(subcontractor);
-    setShowSubcontractorForm(true);
-  };
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/subcontractors/${id}`),
+    onSuccess: () => {
+      toast({
+        title: "Subcontractor deleted",
+        description: "The subcontractor has been successfully deleted.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/subcontractors"] });
+      setSubcontractorToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Could not delete subcontractor: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleNewSubcontractor = () => {
     setSubcontractorToEdit(null);
+    form.reset({
+      name: "",
+      company: "",
+      specialty: "",
+      phone: "",
+      email: "",
+      address: "",
+      hourlyRate: 0,
+      rateType: "hourly",
+      notes: "",
+      status: "active",
+    });
+    setShowSubcontractorForm(true);
+  };
+
+  const handleEditSubcontractor = (subcontractor: Subcontractor) => {
+    setSubcontractorToEdit(subcontractor);
+    form.reset({
+      name: subcontractor.name,
+      company: subcontractor.company || "",
+      specialty: subcontractor.specialty,
+      phone: subcontractor.phone,
+      email: subcontractor.email,
+      address: subcontractor.address,
+      hourlyRate: subcontractor.hourlyRate,
+      rateType: subcontractor.rateType,
+      notes: subcontractor.notes || "",
+      status: subcontractor.status,
+    });
     setShowSubcontractorForm(true);
   };
 
   const handleCloseForm = () => {
     setShowSubcontractorForm(false);
     setSubcontractorToEdit(null);
+    form.reset();
   };
 
   const handleDeleteClick = (subcontractor: Subcontractor) => {
     setSubcontractorToDelete(subcontractor);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!subcontractorToDelete) return;
-
-    try {
-      await apiRequest("DELETE", `/api/subcontractors/${subcontractorToDelete.id}`, undefined);
-      
-      toast({
-        title: "Subcontratista eliminado",
-        description: "El subcontratista ha sido eliminado exitosamente",
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ["/api/subcontractors"] });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: `No se pudo eliminar el subcontratista: ${(error as Error).message}`,
-        variant: "destructive",
-      });
-    } finally {
-      setSubcontractorToDelete(null);
+  const handleDeleteConfirm = () => {
+    if (subcontractorToDelete) {
+      deleteMutation.mutate(subcontractorToDelete.id);
     }
   };
 
@@ -220,197 +185,121 @@ export default function Subcontractors() {
     mutation.mutate(data);
   };
 
-  // Get unique specialties for filter
-  const uniqueSpecialties = subcontractors 
-    ? Array.from(new Set(subcontractors.map(s => s.specialty)))
-    : [];
-
-  // Filter subcontractors
-  const filteredSubcontractors = subcontractors?.filter(subcontractor => {
-    // Filter by specialty
-    if (specialtyFilter !== "all" && subcontractor.specialty !== specialtyFilter) {
-      return false;
-    }
-    
-    // Filter by search term
-    if (searchTerm) {
-      const searchTermLower = searchTerm.toLowerCase();
-      return (
-        subcontractor.name.toLowerCase().includes(searchTermLower) ||
-        (subcontractor.company && subcontractor.company.toLowerCase().includes(searchTermLower)) ||
-        subcontractor.specialty.toLowerCase().includes(searchTermLower) ||
-        (subcontractor.email && subcontractor.email.toLowerCase().includes(searchTermLower)) ||
-        subcontractor.phone.toLowerCase().includes(searchTermLower)
-      );
-    }
-    
-    return true;
-  });
-
-  // Helper to get status badge
-  const getStatusBadge = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case "active":
-        return <Badge className="bg-green-100 text-green-800">Activo</Badge>;
-      case "inactive":
-        return <Badge className="bg-gray-100 text-gray-800">Inactivo</Badge>;
-      case "blacklisted":
-        return <Badge className="bg-red-100 text-red-800">Lista Negra</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
+      case "active": return "bg-green-100 text-green-800";
+      case "inactive": return "bg-yellow-100 text-yellow-800";
+      case "blacklisted": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
-  // Helper function to format rate display
-  const formatRate = (rate: number | null | undefined, rateType: string) => {
-    if (!rate) return "No especificado";
-    
-    const formatter = new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
-    });
-    
-    const formattedRate = formatter.format(rate);
-    
+  const getRateDisplay = (rate: number, rateType: string) => {
+    const formattedRate = rate.toFixed(2);
     switch (rateType) {
-      case "hourly":
-        return `${formattedRate}/hora`;
-      case "daily":
-        return `${formattedRate}/día`;
-      case "fixed":
-        return `${formattedRate} (fijo)`;
-      default:
-        return formattedRate;
+      case "hourly": return `$${formattedRate}/hr`;
+      case "daily": return `$${formattedRate}/day`;
+      case "fixed": return `$${formattedRate}`;
+      default: return `$${formattedRate}`;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
-    <Layout title="Subcontratistas">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center space-x-2 w-full max-w-md">
-          <div className="relative w-full">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Buscar subcontratistas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8"
-            />
-          </div>
-          <Select
-            value={specialtyFilter}
-            onValueChange={setSpecialtyFilter}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Especialidad" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas</SelectItem>
-              {uniqueSpecialties.map((specialty) => (
-                <SelectItem key={specialty} value={specialty}>
-                  {specialty}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Subcontractors</h1>
+          <p className="text-muted-foreground">
+            Manage your subcontractor network and their rates
+          </p>
         </div>
         <Button onClick={handleNewSubcontractor}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Subcontratista
+          <Plus className="mr-2 h-4 w-4" />
+          New Subcontractor
         </Button>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-20">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-        </div>
-      ) : filteredSubcontractors && filteredSubcontractors.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSubcontractors.map((subcontractor) => (
-            <Card key={subcontractor.id} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg">{subcontractor.name}</CardTitle>
-                    <p className="text-sm text-gray-500">
-                      {subcontractor.company ? subcontractor.company : "Independiente"}
-                    </p>
-                  </div>
-                  {getStatusBadge(subcontractor.status)}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {subcontractors?.map((subcontractor) => (
+          <Card key={subcontractor.id} className="hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-lg">{subcontractor.name}</CardTitle>
+                  {subcontractor.company && (
+                    <p className="text-sm text-muted-foreground">{subcontractor.company}</p>
+                  )}
                 </div>
-              </CardHeader>
-              <CardContent className="pb-2 space-y-2">
-                <div className="flex items-center text-sm">
-                  <Briefcase className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>{subcontractor.specialty}</span>
+                <Badge className={getStatusColor(subcontractor.status)}>
+                  {subcontractor.status}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm font-medium text-primary">{subcontractor.specialty}</p>
+                <div className="flex items-center text-sm text-muted-foreground mt-1">
+                  <DollarSign className="h-3 w-3 mr-1" />
+                  {getRateDisplay(subcontractor.hourlyRate, subcontractor.rateType)}
                 </div>
-                
-                {subcontractor.email && (
-                  <div className="flex items-center text-sm">
-                    <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                    <span>{subcontractor.email}</span>
-                  </div>
-                )}
-                
-                <div className="flex items-center text-sm">
-                  <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>{subcontractor.phone}</span>
-                </div>
-                
-                {subcontractor.address && (
-                  <div className="flex items-center text-sm">
-                    <Home className="h-4 w-4 mr-2 text-gray-400" />
-                    <span>{subcontractor.address}</span>
-                  </div>
-                )}
+              </div>
 
-                {subcontractor.rate && (
-                  <div className="flex items-center text-sm">
-                    <DollarSign className="h-4 w-4 mr-2 text-gray-400" />
-                    <span>{formatRate(subcontractor.rate, subcontractor.rateType || "hourly")}</span>
-                  </div>
-                )}
-                
-                {subcontractor.insuranceInfo && (
-                  <div className="flex items-center text-sm">
-                    <Shield className="h-4 w-4 mr-2 text-gray-400" />
-                    <span>{subcontractor.insuranceInfo}</span>
-                  </div>
-                )}
-              </CardContent>
-              <CardFooter className="pt-2 flex justify-end space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => handleDeleteClick(subcontractor)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
+              <div className="space-y-2">
+                <div className="flex items-center text-sm">
+                  <Phone className="h-3 w-3 mr-2 text-muted-foreground" />
+                  {subcontractor.phone}
+                </div>
+                <div className="flex items-center text-sm">
+                  <Mail className="h-3 w-3 mr-2 text-muted-foreground" />
+                  {subcontractor.email}
+                </div>
+              </div>
+
+              {subcontractor.notes && (
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {subcontractor.notes}
+                </p>
+              )}
+
+              <div className="flex justify-end space-x-2 pt-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleEditSubcontractor(subcontractor)}
                 >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Editar
+                  <Edit className="h-3 w-3" />
                 </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-20 text-gray-500">
-          {searchTerm || specialtyFilter !== "all"
-            ? "No se encontraron subcontratistas con los filtros aplicados"
-            : "No hay subcontratistas registrados. Cree uno nuevo haciendo clic en 'Nuevo Subcontratista'"}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDeleteClick(subcontractor)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {(!subcontractors || subcontractors.length === 0) && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No subcontractors found. Create your first one to get started.</p>
         </div>
       )}
 
       {/* Subcontractor Form Dialog */}
       <Dialog open={showSubcontractorForm} onOpenChange={setShowSubcontractorForm}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {subcontractorToEdit ? "Edit Subcontractor" : "New Subcontractor"}
@@ -422,111 +311,31 @@ export default function Subcontractors() {
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              {/* Personal Information Section */}
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="company"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Company (optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="ABC Company LLC" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Personal Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="specialty"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Specialty</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a specialty" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Painter">Painter</SelectItem>
-                          <SelectItem value="Electrician">Electrician</SelectItem>
-                          <SelectItem value="Plumber">Plumber</SelectItem>
-                          <SelectItem value="Carpenter">Carpenter</SelectItem>
-                          <SelectItem value="Mason">Mason</SelectItem>
-                          <SelectItem value="Designer">Designer</SelectItem>
-                          <SelectItem value="Architect">Architect</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-
-              {/* Contact Information Section */}
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="email@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone</FormLabel>
-                        <FormControl>
-                          <Input placeholder="555-1234" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
 
                 <FormField
                   control={form.control}
-                  name="address"
+                  name="company"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Address</FormLabel>
+                      <FormLabel>Company (optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="Street, City, State, ZIP" {...field} />
+                        <Input placeholder="ABC Company LLC" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -534,78 +343,118 @@ export default function Subcontractors() {
                 />
               </div>
 
-              {/* Business Information Section */}
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="taxId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tax ID</FormLabel>
-                        <FormControl>
-                          <Input placeholder="123-45-6789" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <FormField
+                control={form.control}
+                name="specialty"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Specialty</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a specialty" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Painter">Painter</SelectItem>
+                        <SelectItem value="Electrician">Electrician</SelectItem>
+                        <SelectItem value="Plumber">Plumber</SelectItem>
+                        <SelectItem value="Carpenter">Carpenter</SelectItem>
+                        <SelectItem value="Mason">Mason</SelectItem>
+                        <SelectItem value="Designer">Designer</SelectItem>
+                        <SelectItem value="Architect">Architect</SelectItem>
+                        <SelectItem value="Flooring">Flooring</SelectItem>
+                        <SelectItem value="Roofing">Roofing</SelectItem>
+                        <SelectItem value="Landscaping">Landscaping</SelectItem>
+                        <SelectItem value="Demolition">Demolition</SelectItem>
+                        <SelectItem value="General Labor">General Labor</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name="insuranceInfo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Insurance Information</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Policy #12345" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              {/* Contact Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input type="tel" placeholder="(555) 123-4567" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="rate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Rate</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="0.00" 
-                            step="0.01"
-                            onChange={(e) => {
-                              const value = e.target.value ? parseFloat(e.target.value) : undefined;
-                              field.onChange(value);
-                            }}
-                            value={field.value === undefined ? "" : field.value}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="john@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                  <FormField
-                    control={form.control}
-                    name="rateType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Rate Type</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select rate type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Full address including city, state, zip" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Rate Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="hourlyRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rate Amount ($)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="25.00" 
+                          step="0.01"
+                          {...field}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="rateType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rate Type</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select rate type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
                           <SelectItem value="hourly">Hourly</SelectItem>
                           <SelectItem value="daily">Daily</SelectItem>
                           <SelectItem value="fixed">Fixed Amount</SelectItem>
@@ -641,10 +490,7 @@ export default function Subcontractors() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select status" />
@@ -661,59 +507,8 @@ export default function Subcontractors() {
                 )}
               />
 
-              {/* Additional Information Section */}
-              <div className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notes</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Additional information about the subcontractor" 
-                          className="resize-none" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="inactive">Inactive</SelectItem>
-                          <SelectItem value="blacklisted">Blacklisted</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCloseForm}
-                >
+              <div className="flex justify-end space-x-3 pt-4">
+                <Button type="button" variant="outline" onClick={handleCloseForm}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={mutation.isPending}>
@@ -725,7 +520,6 @@ export default function Subcontractors() {
                   ) : subcontractorToEdit ? "Update" : "Create"}
                 </Button>
               </div>
-            </div>
             </form>
           </Form>
         </DialogContent>
@@ -752,6 +546,6 @@ export default function Subcontractors() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Layout>
+    </div>
   );
 }
