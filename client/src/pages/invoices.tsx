@@ -711,32 +711,32 @@ const InvoiceForm = ({
                 <Textarea id="project-description" name="description" rows={2} required />
               </div>
               <div>
-                <Label htmlFor="project-address">Dirección*</Label>
+                <Label htmlFor="project-address">Address*</Label>
                 <Input id="project-address" name="address" required />
               </div>
               <div>
-                <Label htmlFor="project-serviceType">Tipo de Servicio*</Label>
+                <Label htmlFor="project-serviceType">Service Type*</Label>
                 <select 
                   id="project-serviceType" 
                   name="serviceType" 
                   required 
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <option value="">Seleccionar tipo de servicio</option>
-                  <option value="Pintura Exterior">Pintura Exterior</option>
-                  <option value="Pintura Interior">Pintura Interior</option>
-                  <option value="Pintura Comercial">Pintura Comercial</option>
-                  <option value="Lavado a Presión">Lavado a Presión</option>
-                  <option value="Tinción de Terrazas">Tinción de Terrazas</option>
-                  <option value="Otro">Otro</option>
+                  <option value="">Select service type</option>
+                  <option value="Exterior Painting">Exterior Painting</option>
+                  <option value="Interior Painting">Interior Painting</option>
+                  <option value="Commercial Painting">Commercial Painting</option>
+                  <option value="Pressure Washing">Pressure Washing</option>
+                  <option value="Deck Staining">Deck Staining</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setShowCreateProject(false)}>
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button type="submit" disabled={createProjectMutation.isPending}>
-                  {createProjectMutation.isPending ? "Creando..." : "Crear Proyecto"}
+                  {createProjectMutation.isPending ? "Creating..." : "Create Project"}
                 </Button>
               </div>
             </form>
@@ -747,7 +747,7 @@ const InvoiceForm = ({
   );
 };
 
-// Componente principal de facturas
+// Main invoices component
 export default function Invoices() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>();
@@ -758,20 +758,20 @@ export default function Invoices() {
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
-      draft: { label: "Borrador", variant: "secondary" as const },
-      sent: { label: "Enviada", variant: "default" as const },
-      paid: { label: "Pagada", variant: "default" as const },
-      overdue: { label: "Vencida", variant: "destructive" as const },
-      cancelled: { label: "Cancelada", variant: "outline" as const },
+      draft: { label: "Draft", variant: "secondary" as const },
+      sent: { label: "Sent", variant: "default" as const },
+      paid: { label: "Paid", variant: "default" as const },
+      overdue: { label: "Overdue", variant: "destructive" as const },
+      cancelled: { label: "Cancelled", variant: "outline" as const },
     };
     
     return statusMap[status as keyof typeof statusMap] || { label: status, variant: "secondary" as const };
   };
 
   const getClientName = (clientId: number) => {
-    if (!Array.isArray(clients)) return "Cliente desconocido";
+    if (!Array.isArray(clients)) return "Unknown client";
     const client = clients.find((c: Client) => c.id === clientId);
-    return client ? client.name : "Cliente desconocido";
+    return client ? client.name : "Unknown client";
   };
 
   const getProjectTitle = (projectId?: number) => {
@@ -805,23 +805,23 @@ export default function Invoices() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p>Cargando facturas...</p>
+          <p>Loading invoices...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <Layout title="Facturas">
+    <Layout title="Invoices">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Facturas</h1>
-            <p className="text-muted-foreground">Gestiona las facturas de tus proyectos</p>
+            <h1 className="text-3xl font-bold">Invoices</h1>
+            <p className="text-muted-foreground">Manage your project invoices</p>
           </div>
           <Button onClick={handleCreate}>
             <Plus className="h-4 w-4 mr-2" />
-            Nueva Factura
+            New Invoice
           </Button>
         </div>
 
@@ -831,12 +831,12 @@ export default function Invoices() {
             <div className="text-center space-y-4">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto" />
               <div>
-                <h3 className="text-lg font-semibold">No hay facturas creadas</h3>
-                <p className="text-muted-foreground">Comienza creando tu primera factura</p>
+                <h3 className="text-lg font-semibold">No invoices created</h3>
+                <p className="text-muted-foreground">Start by creating your first invoice</p>
               </div>
               <Button onClick={handleCreate}>
                 <Plus className="h-4 w-4 mr-2" />
-                Crear Primera Factura
+                Create First Invoice
               </Button>
             </div>
           </CardContent>
@@ -849,7 +849,7 @@ export default function Invoices() {
                 <div className="flex justify-between items-start">
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold">Factura #{invoice.invoiceNumber}</h3>
+                      <h3 className="font-semibold">Invoice #{invoice.invoiceNumber}</h3>
                       <Badge variant={getStatusBadge(invoice.status).variant}>
                         {getStatusBadge(invoice.status).label}
                       </Badge>
@@ -870,9 +870,9 @@ export default function Invoices() {
                       
                       <div className="flex items-center space-x-2">
                         <Calendar className="h-4 w-4" />
-                        <span>Emitida: {new Date(invoice.issueDate).toLocaleDateString()}</span>
+                        <span>Issued: {new Date(invoice.issueDate).toLocaleDateString()}</span>
                         <span>•</span>
-                        <span>Vence: {new Date(invoice.dueDate).toLocaleDateString()}</span>
+                        <span>Due: {new Date(invoice.dueDate).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
@@ -890,7 +890,7 @@ export default function Invoices() {
                         onClick={() => handleEdit(invoice)}
                       >
                         <Edit className="h-4 w-4 mr-1" />
-                        Editar
+                        Edit
                       </Button>
                     </div>
                   </div>
