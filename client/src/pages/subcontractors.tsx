@@ -410,7 +410,7 @@ export default function Subcontractors() {
 
       {/* Subcontractor Form Dialog */}
       <Dialog open={showSubcontractorForm} onOpenChange={setShowSubcontractorForm}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {subcontractorToEdit ? "Edit Subcontractor" : "New Subcontractor"}
