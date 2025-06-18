@@ -182,10 +182,10 @@ const InvoiceForm = ({
   const loadQuoteData = (quoteId: number) => {
     const quote = Array.isArray(quotes) ? quotes.find((q: Quote) => q.id === quoteId) : null;
     if (quote) {
-      // Cargar elementos del presupuesto como items de factura
+      // Load quote elements as invoice items
       const quoteItems: InvoiceItem[] = [];
       
-      // Agregar materiales del presupuesto
+      // Add materials from quote
       if (quote.materialsEstimate && Array.isArray(quote.materialsEstimate)) {
         quote.materialsEstimate.forEach((material: any, index: number) => {
           const quantity = parseFloat(material.quantity) || 1;
@@ -302,7 +302,7 @@ const InvoiceForm = ({
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: `Error al ${editingInvoice ? "actualizar" : "crear"} factura: ${error.message}`,
+        description: `Error ${editingInvoice ? "updating" : "creating"} invoice: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -609,17 +609,17 @@ const InvoiceForm = ({
               </div>
             </div>
 
-            {/* Notas */}
+            {/* Notes */}
             <FormField
               control={form.control}
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notas</FormLabel>
+                  <FormLabel>Notes</FormLabel>
                   <FormControl>
                     <Textarea 
                       {...field} 
-                      placeholder="Añadir notas o información adicional para esta factura"
+                      placeholder="Add notes or additional information for this invoice"
                       rows={3}
                     />
                   </FormControl>
@@ -630,20 +630,20 @@ const InvoiceForm = ({
 
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancelar
+                Cancel
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? "Guardando..." : "Crear factura"}
+                {createMutation.isPending ? "Saving..." : "Create Invoice"}
               </Button>
             </div>
           </form>
         </Form>
 
-        {/* Modal para crear cliente */}
+        {/* Modal to create client */}
         <Dialog open={showCreateClient} onOpenChange={setShowCreateClient}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Crear Nuevo Cliente</DialogTitle>
+              <DialogTitle>Create New Client</DialogTitle>
             </DialogHeader>
             <form onSubmit={(e) => {
               e.preventDefault();
@@ -657,7 +657,7 @@ const InvoiceForm = ({
               createClientMutation.mutate(clientData);
             }} className="space-y-4">
               <div>
-                <Label htmlFor="client-name">Nombre*</Label>
+                <Label htmlFor="client-name">Name*</Label>
                 <Input id="client-name" name="name" required />
               </div>
               <div>
@@ -665,19 +665,19 @@ const InvoiceForm = ({
                 <Input id="client-email" name="email" type="email" required />
               </div>
               <div>
-                <Label htmlFor="client-phone">Teléfono</Label>
+                <Label htmlFor="client-phone">Phone</Label>
                 <Input id="client-phone" name="phone" type="tel" />
               </div>
               <div>
-                <Label htmlFor="client-address">Dirección</Label>
+                <Label htmlFor="client-address">Address</Label>
                 <Textarea id="client-address" name="address" rows={2} />
               </div>
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setShowCreateClient(false)}>
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button type="submit" disabled={createClientMutation.isPending}>
-                  {createClientMutation.isPending ? "Creando..." : "Crear Cliente"}
+                  {createClientMutation.isPending ? "Creating..." : "Create Client"}
                 </Button>
               </div>
             </form>
