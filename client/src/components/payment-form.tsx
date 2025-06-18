@@ -122,7 +122,7 @@ export default function PaymentForm({
         // Required fields from schema
         amount: parseFloat(data.amount), // Convert to number
         date: data.date.toISOString(), // Convert Date to ISO string
-        description: data.description || "Pago registrado",
+        description: data.description || "Payment registered",
         paymentMethod: data.paymentMethod, // Use paymentMethod directly
         paymentType: "general", // Default payment type
         status: "completed", // Default status
@@ -300,7 +300,7 @@ export default function PaymentForm({
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {error.message || "Ocurrió un error. Intente de nuevo."}
+              {error.message || "An error occurred. Please try again."}
             </AlertDescription>
           </Alert>
         )}
@@ -312,7 +312,7 @@ export default function PaymentForm({
               name="date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Fecha de Pago</FormLabel>
+                  <FormLabel>Payment Date</FormLabel>
                   <FormControl>
                     <DatePicker
                       date={field.value}
@@ -330,7 +330,7 @@ export default function PaymentForm({
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Monto ($)</FormLabel>
+                  <FormLabel>Amount ($)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="0.00"
@@ -351,7 +351,7 @@ export default function PaymentForm({
               name="paymentMethod"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Método de Pago</FormLabel>
+                  <FormLabel>Payment Method</FormLabel>
                   <Select
                     disabled={isLoading}
                     onValueChange={field.onChange}
@@ -359,7 +359,7 @@ export default function PaymentForm({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar método de pago" />
+                        <SelectValue placeholder="Select payment method" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -380,7 +380,7 @@ export default function PaymentForm({
               name="reference"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Referencia/No. de Cheque (Opcional)</FormLabel>
+                  <FormLabel>Reference/Check Number (Optional)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Número de referencia o de cheque"
