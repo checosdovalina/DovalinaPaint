@@ -129,59 +129,61 @@ export function KanbanBoard({ projects, onProjectClick }: KanbanBoardProps) {
   
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="overflow-x-auto pb-6">
-        <div className="flex space-x-3" style={{ minWidth: '1800px' }}>
-          {columns.map(column => (
-            <div 
-              key={column.id}
-              className="flex flex-col w-56 bg-gray-100 rounded-md min-h-[65vh] flex-shrink-0"
-            >
-              <div className="p-3 border-b flex justify-between items-center bg-gray-200 rounded-t-md">
-                <h3 className="font-medium text-gray-900">{column.title}</h3>
-                <span className="bg-gray-300 text-gray-700 rounded-full px-2 py-1 text-xs">
-                  {column.projects.length}
-                </span>
+      <div className="relative">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 pb-6">
+          <div className="flex space-x-3" style={{ minWidth: '1800px' }}>
+            {columns.map(column => (
+              <div 
+                key={column.id}
+                className="flex flex-col w-56 bg-gray-100 rounded-md min-h-[65vh] flex-shrink-0"
+              >
+                <div className="p-3 border-b flex justify-between items-center bg-gray-200 rounded-t-md">
+                  <h3 className="font-medium text-gray-900">{column.title}</h3>
+                  <span className="bg-gray-300 text-gray-700 rounded-full px-2 py-1 text-xs">
+                    {column.projects.length}
+                  </span>
+                </div>
+                
+                <Droppable droppableId={column.id}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={cn(
+                        "p-2 flex-1 overflow-y-auto",
+                        snapshot.isDraggingOver ? "bg-gray-200" : ""
+                      )}
+                    >
+                      {column.projects.map((project, index) => (
+                        <Draggable
+                          key={project.id.toString()}
+                          draggableId={project.id.toString()}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={cn(
+                                snapshot.isDragging ? "opacity-50" : ""
+                              )}
+                            >
+                              <ProjectCard
+                                project={project}
+                                onClick={onProjectClick}
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               </div>
-              
-              <Droppable droppableId={column.id}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={cn(
-                      "p-2 flex-1 overflow-y-auto",
-                      snapshot.isDraggingOver ? "bg-gray-200" : ""
-                    )}
-                  >
-                    {column.projects.map((project, index) => (
-                      <Draggable
-                        key={project.id.toString()}
-                        draggableId={project.id.toString()}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={cn(
-                              snapshot.isDragging ? "opacity-50" : ""
-                            )}
-                          >
-                            <ProjectCard
-                              project={project}
-                              onClick={onProjectClick}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </DragDropContext>
