@@ -309,11 +309,11 @@ const InvoiceForm = ({
   });
 
   const onSubmit = (data: InvoiceFormValues) => {
-    // Validar que hay al menos un elemento con descripción
+    // Validate that there is at least one item with description
     if (items.length === 0 || items.every(item => !item.description.trim())) {
       toast({
-        title: "Error de Validación",
-        description: "Debe agregar al menos un elemento a la factura",
+        title: "Validation Error",
+        description: "You must add at least one item to the invoice",
         variant: "destructive",
       });
       return;
@@ -332,15 +332,15 @@ const InvoiceForm = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editingInvoice ? "Editar Factura" : "Nueva Factura"}</DialogTitle>
+          <DialogTitle>{editingInvoice ? "Edit Invoice" : "New Invoice"}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Selección de Cliente */}
+              {/* Client Selection */}
               <div className="space-y-2">
-                <FormLabel>Cliente*</FormLabel>
+                <FormLabel>Client*</FormLabel>
                 <div className="flex gap-2">
                   <Select
                     value={selectedClientId?.toString() || ""}
@@ -355,10 +355,10 @@ const InvoiceForm = ({
                     }}
                   >
                     <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Seleccionar cliente" />
+                      <SelectValue placeholder="Select client" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="create">+ Crear nuevo cliente</SelectItem>
+                      <SelectItem value="create">+ Create new client</SelectItem>
                       {Array.isArray(clients) && clients.map((client: Client) => (
                         <SelectItem key={client.id} value={client.id.toString()}>
                           {client.name}
@@ -369,9 +369,9 @@ const InvoiceForm = ({
                 </div>
               </div>
 
-              {/* Selección de Proyecto */}
+              {/* Project Selection */}
               <div className="space-y-2">
-                <FormLabel>Proyecto (Opcional)</FormLabel>
+                <FormLabel>Project (Optional)</FormLabel>
                 <div className="flex gap-2">
                   <Select
                     value={selectedProjectId?.toString() || "none"}
@@ -382,8 +382,8 @@ const InvoiceForm = ({
                       } else if (value === "create") {
                         if (!selectedClientId) {
                           toast({
-                            title: "Cliente Requerido",
-                            description: "Por favor selecciona un cliente primero antes de crear un proyecto.",
+                            title: "Client Required",
+                            description: "Please select a client first before creating a project.",
                             variant: "destructive",
                           });
                           return;
@@ -397,11 +397,11 @@ const InvoiceForm = ({
                     }}
                   >
                     <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Seleccionar proyecto" />
+                      <SelectValue placeholder="Select project" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Sin proyecto</SelectItem>
-                      <SelectItem value="create">+ Crear nuevo proyecto</SelectItem>
+                      <SelectItem value="none">No project</SelectItem>
+                      <SelectItem value="create">+ Create new project</SelectItem>
                       {Array.isArray(projects) && projects
                         .filter((project: Project) => !selectedClientId || project.clientId === selectedClientId)
                         .map((project: Project) => (
@@ -414,10 +414,10 @@ const InvoiceForm = ({
                 </div>
               </div>
 
-              {/* Selección de Presupuesto */}
+              {/* Quote Selection */}
               {selectedProjectId && (
                 <div className="space-y-2">
-                  <FormLabel>Presupuesto (Opcional)</FormLabel>
+                  <FormLabel>Quote (Optional)</FormLabel>
                   <Select
                     value={selectedQuoteId?.toString() || "none"}
                     onValueChange={(value) => {
@@ -442,15 +442,15 @@ const InvoiceForm = ({
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar presupuesto" />
+                      <SelectValue placeholder="Select quote" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Sin presupuesto</SelectItem>
+                      <SelectItem value="none">No quote</SelectItem>
                       {Array.isArray(quotes) && quotes
                         .filter((quote: Quote) => quote.projectId === selectedProjectId)
                         .map((quote: Quote) => (
                           <SelectItem key={quote.id} value={quote.id.toString()}>
-                            Presupuesto - ${quote.totalEstimate}
+                            Quote - ${quote.totalEstimate}
                           </SelectItem>
                         ))}
                     </SelectContent>
@@ -458,13 +458,13 @@ const InvoiceForm = ({
                 </div>
               )}
 
-              {/* Fecha de emisión */}
+              {/* Issue Date */}
               <FormField
                 control={form.control}
                 name="issueDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fecha de emisión*</FormLabel>
+                    <FormLabel>Issue Date*</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -473,13 +473,13 @@ const InvoiceForm = ({
                 )}
               />
 
-              {/* Fecha de vencimiento */}
+              {/* Due Date */}
               <FormField
                 control={form.control}
                 name="dueDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fecha de vencimiento*</FormLabel>
+                    <FormLabel>Due Date*</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -488,13 +488,13 @@ const InvoiceForm = ({
                 )}
               />
 
-              {/* Estado */}
+              {/* Status */}
               <FormField
                 control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Estado*</FormLabel>
+                    <FormLabel>Status*</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
