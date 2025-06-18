@@ -415,6 +415,87 @@ export function CalendarView({
         </div>
       </div>
 
+      {/* Filter Panel */}
+      {showFilters && (
+        <Card className="mb-4">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Staff Filter */}
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Filter by Staff</Label>
+                <div className="space-y-2">
+                  {staff && staff.length > 0 ? (
+                    staff.map((member) => (
+                      <div key={member.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`staff-${member.id}`}
+                          checked={selectedStaffFilter.includes(member.id.toString())}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedStaffFilter([...selectedStaffFilter, member.id.toString()]);
+                            } else {
+                              setSelectedStaffFilter(selectedStaffFilter.filter(id => id !== member.id.toString()));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`staff-${member.id}`} className="text-sm">
+                          {member.name}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">No staff members available</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Subcontractor Filter */}
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Filter by Subcontractors</Label>
+                <div className="space-y-2">
+                  {subcontractors && subcontractors.length > 0 ? (
+                    subcontractors.map((subcontractor) => (
+                      <div key={subcontractor.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`subcontractor-${subcontractor.id}`}
+                          checked={selectedSubcontractorFilter.includes(subcontractor.id.toString())}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedSubcontractorFilter([...selectedSubcontractorFilter, subcontractor.id.toString()]);
+                            } else {
+                              setSelectedSubcontractorFilter(selectedSubcontractorFilter.filter(id => id !== subcontractor.id.toString()));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`subcontractor-${subcontractor.id}`} className="text-sm">
+                          {subcontractor.name}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">No subcontractors available</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Clear Filters Button */}
+            <div className="flex justify-end mt-4 space-x-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  setSelectedStaffFilter([]);
+                  setSelectedSubcontractorFilter([]);
+                }}
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardContent className="p-4">
           {isLoadingProjects || isLoadingServiceOrders ? (
@@ -430,7 +511,7 @@ export function CalendarView({
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay',
               }}
-              events={events.filter(e => 
+              events={filteredEvents.filter(e => 
                 e.extendedProps?.type !== 'googleEvent' || showGoogleEvents
               )}
               eventClick={handleEventClick}
