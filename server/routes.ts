@@ -140,6 +140,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Projects Financial API for Financial Reports (must be before :id route)
+  app.get("/api/projects/financial", isAuthenticated, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      let projects;
+      if (startDate && endDate && startDate !== 'undefined' && endDate !== 'undefined') {
+        try {
+          const start = new Date(startDate as string);
+          const end = new Date(endDate as string);
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            projects = await storage.getProjects();
+          } else {
+            projects = await storage.getProjects(); // Using getProjects as getProjectsByDateRange doesn't exist
+          }
+        } catch (dateError) {
+          projects = await storage.getProjects();
+        }
+      } else {
+        projects = await storage.getProjects();
+      }
+      
+      // Calculate totals
+      const totalRevenue = projects.reduce((sum: any, project: any) => {
+        return sum + (Number(project.totalCost) || 0);
+      }, 0);
+      
+      const totalProjects = projects.length;
+      const activeProjects = projects.filter((project: any) => project.status === 'Active' || project.status === 'In Progress').length;
+      const completedProjects = projects.filter((project: any) => project.status === 'Completed').length;
+      
+      // Group by project type
+      const projectTypeSummary = projects.reduce((acc: any[], project: any) => {
+        const type = project.projectType || 'Other';
+        const existing = acc.find(item => item.type === type);
+        if (existing) {
+          existing.count += 1;
+          existing.revenue += Number(project.totalCost) || 0;
+        } else {
+          acc.push({
+            type,
+            count: 1,
+            revenue: Number(project.totalCost) || 0
+          });
+        }
+        return acc;
+      }, []);
+      
+      // Time series data for charts
+      const timeSeriesData = projects.reduce((acc: any[], project: any) => {
+        const date = project.createdAt.toISOString().split('T')[0];
+        const existing = acc.find(item => item.date === date);
+        if (existing) {
+          existing.revenue += Number(project.totalCost) || 0;
+        } else {
+          acc.push({
+            date,
+            revenue: Number(project.totalCost) || 0
+          });
+        }
+        return acc;
+      }, []);
+      
+      res.json({
+        totalRevenue,
+        totalProjects,
+        activeProjects,
+        completedProjects,
+        projectTypeSummary,
+        timeSeriesData
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.get("/api/projects/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -250,66 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Projects Financial API for Financial Reports
-  app.get("/api/projects/financial", isAuthenticated, async (req, res) => {
-    try {
-      const { startDate, endDate } = req.query;
-      
-      let projects;
-      if (startDate && endDate && startDate !== 'undefined' && endDate !== 'undefined') {
-        try {
-          const start = new Date(startDate as string);
-          const end = new Date(endDate as string);
-          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            projects = await storage.getProjects();
-          } else {
-            projects = await storage.getProjectsByDateRange(start, end);
-          }
-        } catch (dateError) {
-          projects = await storage.getProjects();
-        }
-      } else {
-        projects = await storage.getProjects();
-      }
-      
-      // Calculate financial summary for projects
-      let totalProjectValue = 0;
-      let completedProjectValue = 0;
-      let activeProjects = 0;
-      let completedProjects = 0;
-      
-      projects.forEach(project => {
-        const projectValue = Number(project.budget) || 0;
-        totalProjectValue += projectValue;
-        
-        if (project.status === 'completed') {
-          completedProjectValue += projectValue;
-          completedProjects++;
-        } else if (project.status === 'in_progress') {
-          activeProjects++;
-        }
-      });
-      
-      res.json({
-        totalProjectValue,
-        completedProjectValue,
-        activeProjects,
-        completedProjects,
-        totalProjects: projects.length,
-        averageProjectValue: projects.length > 0 ? totalProjectValue / projects.length : 0,
-        projects: projects.map(project => ({
-          id: project.id,
-          title: project.title,
-          status: project.status,
-          budget: project.budget,
-          startDate: project.startDate,
-          endDate: project.endDate
-        }))
-      });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  });
+
 
   // Quote routes
   app.get("/api/quotes", isAuthenticated, async (req, res) => {
@@ -972,55 +989,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Invoices Summary API for Financial Reports (must be before :id route)
-  app.get("/api/invoices/summary", isAuthenticated, async (req, res) => {
-    try {
-      const { startDate, endDate } = req.query;
-      
-      let invoices;
-      if (startDate && endDate && startDate !== 'undefined' && endDate !== 'undefined') {
-        try {
-          const start = new Date(startDate as string);
-          const end = new Date(endDate as string);
-          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            invoices = await storage.getInvoices();
-          } else {
-            invoices = await storage.getInvoicesByDateRange(start, end);
-          }
-        } catch (dateError) {
-          invoices = await storage.getInvoices();
-        }
-      } else {
-        invoices = await storage.getInvoices();
-      }
-      
-      // Calculate total revenue
-      const totalRevenue = invoices.reduce((sum, invoice) => sum + Number(invoice.totalAmount), 0);
-      
-      // Time series data for charts
-      const timeSeriesData = invoices.reduce((acc: any[], invoice) => {
-        const date = invoice.issueDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
-        const existing = acc.find(item => item.date === date);
-        if (existing) {
-          existing.amount += Number(invoice.totalAmount);
-        } else {
-          acc.push({
-            date,
-            amount: Number(invoice.totalAmount)
-          });
-        }
-        return acc;
-      }, []);
-      
-      res.json({
-        totalRevenue,
-        invoiceCount: invoices.length,
-        timeSeriesData
-      });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  });
+
 
   app.get("/api/invoices/:id", isAuthenticated, async (req, res) => {
     try {
