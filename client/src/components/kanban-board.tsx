@@ -129,12 +129,12 @@ export function KanbanBoard({ projects, onProjectClick }: KanbanBoardProps) {
   
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="overflow-x-auto pb-10">
-        <div className="inline-flex min-w-full">
+      <div className="overflow-x-auto pb-6">
+        <div className="flex space-x-3" style={{ minWidth: '1800px' }}>
           {columns.map(column => (
             <div 
               key={column.id}
-              className="flex flex-col w-80 mx-2 bg-gray-100 rounded-md min-h-[70vh]"
+              className="flex flex-col w-56 bg-gray-100 rounded-md min-h-[65vh] flex-shrink-0"
             >
               <div className="p-3 border-b flex justify-between items-center bg-gray-200 rounded-t-md">
                 <h3 className="font-medium text-gray-900">{column.title}</h3>
