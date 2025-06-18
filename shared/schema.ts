@@ -519,11 +519,14 @@ export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   date: timestamp("date").notNull().defaultNow(),
-  description: text("description").notNull(),
-  paymentType: text("payment_type").notNull(), // invoice, subcontractor, staff, supplier
-  status: text("status").notNull().default("pending"), // pending, completed, cancelled
-  recipientType: text("recipient_type").notNull(), // subcontractor, staff, supplier
+  description: text("description"),
+  paymentType: text("payment_type").notNull().default("general"), // invoice, subcontractor, staff, supplier, general
+  status: text("status").notNull().default("completed"), // pending, completed, cancelled
+  recipientType: text("recipient_type").notNull(), // subcontractor, staff, supplier, employee, other
   recipientId: integer("recipient_id").notNull(),
+  categoryId: integer("category_id"),
+  reference: text("reference"),
+  paymentMethod: text("payment_method").notNull(), // cash, check, transfer, credit_card, etc.
   projectId: integer("project_id").references(() => projects.id),
   serviceOrderId: integer("service_order_id").references(() => serviceOrders.id),
   invoiceId: integer("invoice_id").references(() => invoices.id),
@@ -533,7 +536,7 @@ export const payments = pgTable("payments", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertPaymentSchema = createInsertSchema(payments).pick({
+const basePaymentSchema = createInsertSchema(payments).pick({
   amount: true,
   date: true,
   description: true,
@@ -541,11 +544,67 @@ export const insertPaymentSchema = createInsertSchema(payments).pick({
   status: true,
   recipientType: true,
   recipientId: true,
+  categoryId: true,
+  reference: true,
+  paymentMethod: true,
   projectId: true,
   serviceOrderId: true,
   invoiceId: true,
   purchaseOrderId: true,
   createdBy: true,
+});
+
+export const insertPaymentSchema = basePaymentSchema.extend({
+  amount: z.union([
+    z.string(),
+    z.number().transform(val => val.toString())
+  ]),
+  date: z.union([
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "Date must be valid"
+    }).transform(val => new Date(val))
+  ]),
+  recipientId: z.union([
+    z.number(),
+    z.string().transform(val => parseInt(val) || 0)
+  ]),
+  projectId: z.union([
+    z.number(),
+    z.string().transform(val => parseInt(val) || 0),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  serviceOrderId: z.union([
+    z.number(),
+    z.string().transform(val => parseInt(val) || 0),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  invoiceId: z.union([
+    z.number(),
+    z.string().transform(val => parseInt(val) || 0),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  purchaseOrderId: z.union([
+    z.number(),
+    z.string().transform(val => parseInt(val) || 0),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  createdBy: z.union([
+    z.number(),
+    z.string().transform(val => parseInt(val) || 0)
+  ]),
+  categoryId: z.union([
+    z.number(),
+    z.string().transform(val => parseInt(val) || 0),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  reference: z.string().optional(),
+  paymentMethod: z.string(),
 });
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
