@@ -1669,13 +1669,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { startDate, endDate } = req.query;
       
-      if (!startDate || !endDate) {
-        return res.status(400).json({ message: "startDate and endDate parameters are required" });
-      }
-      
       let invoices;
-      if (startDate && endDate) {
-        invoices = await storage.getInvoicesByDateRange(new Date(startDate as string), new Date(endDate as string));
+      if (startDate && endDate && startDate !== 'undefined' && endDate !== 'undefined') {
+        try {
+          const start = new Date(startDate as string);
+          const end = new Date(endDate as string);
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            invoices = await storage.getInvoices();
+          } else {
+            invoices = await storage.getInvoicesByDateRange(start, end);
+          }
+        } catch (dateError) {
+          invoices = await storage.getInvoices();
+        }
       } else {
         invoices = await storage.getInvoices();
       }

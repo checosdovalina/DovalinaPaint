@@ -81,9 +81,9 @@ export function FinancialSummary({
       
       return {
         date,
-        gastos: paymentItem ? paymentItem.amount : 0,
-        ingresos: invoiceItem ? invoiceItem.amount : 0,
-        beneficio: (invoiceItem ? invoiceItem.amount : 0) - (paymentItem ? paymentItem.amount : 0),
+        expenses: paymentItem ? paymentItem.amount : 0,
+        income: invoiceItem ? invoiceItem.amount : 0,
+        netBenefit: (invoiceItem ? invoiceItem.amount : 0) - (paymentItem ? paymentItem.amount : 0),
       };
     });
     
@@ -229,9 +229,9 @@ export function FinancialSummary({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Resumen Financiero</CardTitle>
+          <CardTitle>Financial Summary</CardTitle>
           <CardDescription>
-            Período: {formatDateRange()}
+            Period: {formatDateRange()}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -255,13 +255,13 @@ export function FinancialSummary({
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
-                <Bar yAxisId="left" dataKey="ingresos" name="Ingresos" fill="#4CAF50" />
-                <Bar yAxisId="left" dataKey="gastos" name="Gastos" fill="#FF5722" />
+                <Bar yAxisId="left" dataKey="income" name="Total Income" fill="#4CAF50" />
+                <Bar yAxisId="left" dataKey="expenses" name="Total Expenses" fill="#FF5722" />
                 <Line 
                   yAxisId="right" 
                   type="monotone" 
-                  dataKey="beneficio" 
-                  name="Beneficio" 
+                  dataKey="netBenefit" 
+                  name="Net Benefit" 
                   stroke="#2196F3" 
                   strokeWidth={2} 
                 />

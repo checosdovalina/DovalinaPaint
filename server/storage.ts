@@ -2,7 +2,7 @@ import { users, type User, type InsertUser, InsertClient, Client, clients, Proje
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, gte, lte } from "drizzle-orm";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 
@@ -734,8 +734,8 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(invoices)
         .where(and(
-          db.sql`${invoices.issueDate} >= ${startDate.toISOString().split('T')[0]}`,
-          db.sql`${invoices.issueDate} <= ${endDate.toISOString().split('T')[0]}`
+          gte(invoices.issueDate, startDate.toISOString().split('T')[0]),
+          lte(invoices.issueDate, endDate.toISOString().split('T')[0])
         ));
     } catch (error) {
       console.error("Error fetching invoices by date range:", error);
@@ -909,8 +909,8 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(payments)
         .where(and(
-          db.sql`${payments.date} >= ${startDate.toISOString().split('T')[0]}`,
-          db.sql`${payments.date} <= ${endDate.toISOString().split('T')[0]}`
+          gte(payments.date, startDate.toISOString().split('T')[0]),
+          lte(payments.date, endDate.toISOString().split('T')[0])
         ));
     } catch (error) {
       console.error("Error fetching payments by date range:", error);
