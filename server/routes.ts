@@ -972,6 +972,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Invoices Summary API for Financial Reports (must be before :id route)
+  app.get("/api/invoices/summary", isAuthenticated, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      let invoices;
+      if (startDate && endDate && startDate !== 'undefined' && endDate !== 'undefined') {
+        try {
+          const start = new Date(startDate as string);
+          const end = new Date(endDate as string);
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            invoices = await storage.getInvoices();
+          } else {
+            invoices = await storage.getInvoicesByDateRange(start, end);
+          }
+        } catch (dateError) {
+          invoices = await storage.getInvoices();
+        }
+      } else {
+        invoices = await storage.getInvoices();
+      }
+      
+      // Calculate total revenue
+      const totalRevenue = invoices.reduce((sum, invoice) => sum + Number(invoice.totalAmount), 0);
+      
+      // Time series data for charts
+      const timeSeriesData = invoices.reduce((acc: any[], invoice) => {
+        const date = invoice.issueDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
+        const existing = acc.find(item => item.date === date);
+        if (existing) {
+          existing.amount += Number(invoice.totalAmount);
+        } else {
+          acc.push({
+            date,
+            amount: Number(invoice.totalAmount)
+          });
+        }
+        return acc;
+      }, []);
+      
+      res.json({
+        totalRevenue,
+        invoiceCount: invoices.length,
+        timeSeriesData
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.get("/api/invoices/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -1465,6 +1515,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payments Summary API for Financial Reports (must be before :id route)
+  app.get("/api/payments/summary", isAuthenticated, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      let payments;
+      if (startDate && endDate && startDate !== 'undefined' && endDate !== 'undefined') {
+        try {
+          const start = new Date(startDate as string);
+          const end = new Date(endDate as string);
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            payments = await storage.getPayments();
+          } else {
+            payments = await storage.getPaymentsByDateRange(start, end);
+          }
+        } catch (dateError) {
+          payments = await storage.getPayments();
+        }
+      } else {
+        payments = await storage.getPayments();
+      }
+      
+      // Calculate total expenses
+      const totalExpenses = payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+      
+      // Group by categories for summary
+      const categorySummary = payments.reduce((acc: any[], payment) => {
+        const category = payment.category || 'Other';
+        const existing = acc.find(item => item.category === category);
+        if (existing) {
+          existing.amount += Number(payment.amount);
+          existing.count += 1;
+        } else {
+          acc.push({
+            category,
+            amount: Number(payment.amount),
+            count: 1
+          });
+        }
+        return acc;
+      }, []);
+      
+      // Group by recipients for summary
+      const recipientSummary = payments.reduce((acc: any[], payment) => {
+        const recipient = payment.recipientName || payment.recipientType || 'Unknown';
+        const existing = acc.find(item => item.recipient === recipient);
+        if (existing) {
+          existing.amount += Number(payment.amount);
+          existing.count += 1;
+        } else {
+          acc.push({
+            recipient,
+            amount: Number(payment.amount),
+            count: 1
+          });
+        }
+        return acc;
+      }, []);
+      
+      // Time series data for charts
+      const timeSeriesData = payments.reduce((acc: any[], payment) => {
+        const date = payment.date.toISOString().split('T')[0];
+        const existing = acc.find(item => item.date === date);
+        if (existing) {
+          existing.amount += Number(payment.amount);
+        } else {
+          acc.push({
+            date,
+            amount: Number(payment.amount)
+          });
+        }
+        return acc;
+      }, []);
+      
+      res.json({
+        totalExpenses,
+        paymentCount: payments.length,
+        categorySummary,
+        recipientSummary,
+        timeSeriesData
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.get("/api/payments/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -1653,87 +1789,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Payments Summary API for Financial Reports
-  app.get("/api/payments/summary", isAuthenticated, async (req, res) => {
-    try {
-      const { startDate, endDate } = req.query;
-      
-      let payments;
-      if (startDate && endDate && startDate !== 'undefined' && endDate !== 'undefined') {
-        try {
-          const start = new Date(startDate as string);
-          const end = new Date(endDate as string);
-          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            payments = await storage.getPayments();
-          } else {
-            payments = await storage.getPaymentsByDateRange(start, end);
-          }
-        } catch (dateError) {
-          payments = await storage.getPayments();
-        }
-      } else {
-        payments = await storage.getPayments();
-      }
-      
-      // Calculate total expenses
-      const totalExpenses = payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
-      
-      // Group by category
-      const categorySummary = payments.reduce((acc: any[], payment) => {
-        const existing = acc.find(item => item.name === payment.category);
-        if (existing) {
-          existing.total += Number(payment.amount);
-        } else {
-          acc.push({
-            name: payment.category || 'Uncategorized',
-            total: Number(payment.amount)
-          });
-        }
-        return acc;
-      }, []);
-      
-      // Group by recipient type
-      const recipientSummary = payments.reduce((acc: any[], payment) => {
-        const existing = acc.find(item => item.type === payment.recipientType);
-        if (existing) {
-          existing.total += Number(payment.amount);
-        } else {
-          acc.push({
-            type: payment.recipientType,
-            total: Number(payment.amount)
-          });
-        }
-        return acc;
-      }, []);
-      
-      // Time series data for charts
-      const timeSeriesData = payments.reduce((acc: any[], payment) => {
-        const date = payment.date.toISOString().split('T')[0];
-        const existing = acc.find(item => item.date === date);
-        if (existing) {
-          existing.amount += Number(payment.amount);
-        } else {
-          acc.push({
-            date,
-            amount: Number(payment.amount)
-          });
-        }
-        return acc;
-      }, []);
-      
-      res.json({
-        totalExpenses,
-        paymentCount: payments.length,
-        categorySummary,
-        recipientSummary,
-        timeSeriesData
-      });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // Invoices Summary API for Financial Reports
+  // Invoices Summary API for Financial Reports (must be before :id route)
   app.get("/api/invoices/summary", isAuthenticated, async (req, res) => {
     try {
       const { startDate, endDate } = req.query;
