@@ -1937,7 +1937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...invoiceData,
         invoiceNumber,
         amount: invoiceData.totalAmount.toString(),
-        tax: 0, // Default tax to 0, can be updated later
+        tax: "0", // Default tax to 0, can be updated later
       });
       
       // Create activity for invoice creation

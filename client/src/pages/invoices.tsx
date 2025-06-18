@@ -202,7 +202,7 @@ const InvoiceForm = ({
   const calculateTotal = () => {
     const itemsTotal = items.reduce((sum, item) => sum + (item.total - (item.discount || 0)), 0);
     const finalTotal = itemsTotal - globalDiscount;
-    form.setValue("totalAmount", finalTotal);
+    form.setValue("totalAmount", finalTotal.toString());
     return finalTotal;
   };
 
@@ -264,7 +264,13 @@ const InvoiceForm = ({
 
   const onSubmit = (data: InvoiceFormValues) => {
     const finalTotal = calculateTotal();
-    createMutation.mutate({ ...data, totalAmount: finalTotal });
+    const itemsTotal = items.reduce((sum, item) => sum + (item.total - (item.discount || 0)), 0);
+    createMutation.mutate({ 
+      ...data, 
+      totalAmount: finalTotal.toString(),
+      amount: itemsTotal.toString(),
+      tax: "0"
+    });
   };
 
   return (
@@ -811,7 +817,7 @@ export default function Invoices() {
                   <div className="text-right space-y-2">
                     <div className="flex items-center space-x-2 text-lg font-semibold">
                       <DollarSign className="h-5 w-5" />
-                      <span>${invoice.totalAmount.toFixed(2)}</span>
+                      <span>${parseFloat(invoice.totalAmount).toFixed(2)}</span>
                     </div>
                     
                     <div className="space-x-2">

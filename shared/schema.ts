@@ -372,8 +372,20 @@ const baseInvoiceSchema = createInsertSchema(invoices).pick({
   stripeInvoiceId: true,
 });
 
-// Añadir validación personalizada para fechas
+// Añadir validación personalizada para fechas y conversión de números
 export const insertInvoiceSchema = baseInvoiceSchema.extend({
+  amount: z.union([
+    z.string(),
+    z.number().transform(val => val.toString())
+  ]),
+  totalAmount: z.union([
+    z.string(),
+    z.number().transform(val => val.toString())
+  ]),
+  tax: z.union([
+    z.string(),
+    z.number().transform(val => val.toString())
+  ]).optional(),
   issueDate: z.union([
     z.date(),
     z.string().refine((val) => !isNaN(Date.parse(val)), {
