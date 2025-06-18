@@ -86,7 +86,10 @@ const InvoiceForm = ({
 
   // Efecto para recalcular el total cuando cambien los items o descuento global
   useEffect(() => {
-    calculateTotal();
+    const timer = setTimeout(() => {
+      calculateTotal();
+    }, 100);
+    return () => clearTimeout(timer);
   }, [items, globalDiscount]);
 
   // Consultas para obtener datos
@@ -179,12 +182,14 @@ const InvoiceForm = ({
       // Agregar materiales del presupuesto
       if (quote.materialsEstimate && Array.isArray(quote.materialsEstimate)) {
         quote.materialsEstimate.forEach((material: any, index: number) => {
+          const quantity = parseFloat(material.quantity) || 1;
+          const unitPrice = parseFloat(material.unitPrice) || parseFloat(material.cost) || 0;
           quoteItems.push({
             id: index + 1,
-            description: material.item || `Material ${index + 1}`,
-            quantity: parseFloat(material.quantity) || 1,
-            unitPrice: parseFloat(material.cost) || 0,
-            total: (parseFloat(material.quantity) || 1) * (parseFloat(material.cost) || 0),
+            description: material.item || material.description || `Material ${index + 1}`,
+            quantity: quantity,
+            unitPrice: unitPrice,
+            total: quantity * unitPrice,
             discount: 0
           });
         });
@@ -193,12 +198,14 @@ const InvoiceForm = ({
       // Agregar mano de obra del presupuesto
       if (quote.laborEstimate && Array.isArray(quote.laborEstimate)) {
         quote.laborEstimate.forEach((labor: any, index: number) => {
+          const quantity = parseFloat(labor.hours) || 1;
+          const unitPrice = parseFloat(labor.hourlyRate) || parseFloat(labor.rate) || 0;
           quoteItems.push({
             id: quoteItems.length + index + 1,
-            description: labor.task || `Mano de obra ${index + 1}`,
-            quantity: parseFloat(labor.hours) || 1,
-            unitPrice: parseFloat(labor.rate) || 0,
-            total: (parseFloat(labor.hours) || 1) * (parseFloat(labor.rate) || 0),
+            description: labor.task || labor.description || `Mano de obra ${index + 1}`,
+            quantity: quantity,
+            unitPrice: unitPrice,
+            total: quantity * unitPrice,
             discount: 0
           });
         });
@@ -206,7 +213,11 @@ const InvoiceForm = ({
 
       setItems(quoteItems);
       setBaseAmount(parseFloat(quote.totalEstimate) || 0);
-      form.setValue("totalAmount", parseFloat(quote.totalEstimate) || 0);
+      
+      // Calcular el total después de establecer los items
+      setTimeout(() => {
+        calculateTotal();
+      }, 100);
     }
   };
 
@@ -217,7 +228,7 @@ const InvoiceForm = ({
       return sum + itemTotal;
     }, 0);
     const finalTotal = Math.max(0, itemsTotal - globalDiscount);
-    form.setValue("totalAmount", finalTotal.toString());
+    form.setValue("totalAmount", finalTotal);
     return finalTotal;
   };
 
@@ -533,7 +544,7 @@ const InvoiceForm = ({
                     <div className="col-span-1">
                       <Label>Total</Label>
                       <div className="h-10 flex items-center">
-                        ${((item.total || 0) - (item.discount || 0)).toFixed(2)}
+                        ${(((item.quantity * item.unitPrice) || 0) - (item.discount || 0)).toFixed(2)}
                       </div>
                     </div>
                     <div className="col-span-1 flex items-end">
