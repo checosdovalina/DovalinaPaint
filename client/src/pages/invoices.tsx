@@ -134,14 +134,14 @@ const InvoiceForm = ({
       form.setValue("clientId", newClient.id);
       setShowCreateClient(false);
       toast({
-        title: "Cliente Creado",
-        description: `${newClient.name} ha sido creado exitosamente.`,
+        title: "Client Created",
+        description: `${newClient.name} has been created successfully.`,
       });
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: `Error al crear cliente: ${error.message}`,
+        description: `Error creating client: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -165,20 +165,20 @@ const InvoiceForm = ({
       form.setValue("projectId", newProject.id);
       setShowCreateProject(false);
       toast({
-        title: "Proyecto Creado",
-        description: `${newProject.title} ha sido creado exitosamente.`,
+        title: "Project Created",
+        description: `${newProject.title} has been created successfully.`,
       });
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: `Error al crear proyecto: ${error.message}`,
+        description: `Error creating project: ${error.message}`,
         variant: "destructive",
       });
     },
   });
 
-  // Función para cargar datos del presupuesto cuando se selecciona
+  // Function to load quote data when selected
   const loadQuoteData = (quoteId: number) => {
     const quote = Array.isArray(quotes) ? quotes.find((q: Quote) => q.id === quoteId) : null;
     if (quote) {
