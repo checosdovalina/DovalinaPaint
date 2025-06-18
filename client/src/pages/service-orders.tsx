@@ -25,6 +25,8 @@ import {
   CheckCircle,
   Briefcase,
   HardHat,
+  Grid3X3,
+  List,
 } from "lucide-react";
 import {
   Dialog,
@@ -70,6 +72,7 @@ export default function ServiceOrders() {
   const [serviceOrderToView, setServiceOrderToView] = useState<ServiceOrder | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const { toast } = useToast();
 
   // Fetch service orders
@@ -298,10 +301,33 @@ export default function ServiceOrders() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={handleNewServiceOrder}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Service Order
-        </Button>
+        
+        <div className="flex items-center space-x-2">
+          {/* View Toggle */}
+          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <Button
+              variant={viewMode === "cards" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("cards")}
+              className="h-8 px-3"
+            >
+              <Grid3X3 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className="h-8 px-3"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <Button onClick={handleNewServiceOrder}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Service Order
+          </Button>
+        </div>
       </div>
 
       {isLoadingServiceOrders ? (
@@ -309,9 +335,10 @@ export default function ServiceOrders() {
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
         </div>
       ) : filteredServiceOrders && filteredServiceOrders.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredServiceOrders.map((serviceOrder) => (
-            <Card key={serviceOrder.id} className="overflow-hidden">
+        viewMode === "cards" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredServiceOrders.map((serviceOrder) => (
+              <Card key={serviceOrder.id} className="overflow-hidden">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-lg truncate">
@@ -427,9 +454,113 @@ export default function ServiceOrders() {
                   </Button>
                 </div>
               </CardFooter>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredServiceOrders.map((serviceOrder) => (
+              <Card key={serviceOrder.id} className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <h3 className="text-lg font-semibold truncate">
+                            {getProjectName(serviceOrder.projectId)}
+                          </h3>
+                          {getStatusBadge(serviceOrder.status)}
+                        </div>
+                        <div className="flex items-center space-x-6 mt-2 text-sm text-gray-600">
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-1" />
+                            <span>Start: {formatDate(serviceOrder.startDate)}</span>
+                          </div>
+                          {serviceOrder.endDate && (
+                            <div className="flex items-center">
+                              <Calendar className="h-4 w-4 mr-1" />
+                              <span>End: {formatDate(serviceOrder.endDate)}</span>
+                            </div>
+                          )}
+                          {serviceOrder.assignedSubcontractorId && (
+                            <div className="flex items-center">
+                              <Briefcase className="h-4 w-4 mr-1" />
+                              <span>{getSubcontractorName(serviceOrder.assignedSubcontractorId)?.company || 'Not assigned'}</span>
+                            </div>
+                          )}
+                          {serviceOrder.supervisorId && (
+                            <div className="flex items-center">
+                              <HardHat className="h-4 w-4 mr-1" />
+                              <span>{getSupervisorName(serviceOrder.supervisorId)?.name || 'Not assigned'}</span>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-700 mt-2 line-clamp-1">{serviceOrder.details}</p>
+                      </div>
+                      
+                      {/* Assigned staff avatars */}
+                      {serviceOrder.assignedStaff && (
+                        <div className="flex -space-x-2">
+                          {getAssignedStaff(serviceOrder.assignedStaff as number[]).slice(0, 3).map(staff => (
+                            <Avatar key={staff.id} className="border-2 border-white h-8 w-8">
+                              <AvatarImage src={getStaffAvatar(staff)} alt={staff.name} />
+                              <AvatarFallback>
+                                {staff.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                          ))}
+                          {getAssignedStaff(serviceOrder.assignedStaff as number[]).length > 3 && (
+                            <div className="h-8 w-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs">
+                              +{getAssignedStaff(serviceOrder.assignedStaff as number[]).length - 3}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Action buttons */}
+                  <div className="flex items-center space-x-2 ml-4">
+                    {serviceOrder.status !== "completed" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-green-600 border-green-600 hover:bg-green-50"
+                        onClick={() => handleUpdateStatus(serviceOrder, "completed")}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Complete
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDeleteClick(serviceOrder)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewServiceOrder(serviceOrder)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditServiceOrder(serviceOrder)}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )
       ) : (
         <div className="text-center py-20 text-gray-500">
           {searchTerm || statusFilter !== "all"

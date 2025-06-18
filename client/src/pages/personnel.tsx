@@ -275,13 +275,13 @@ export default function Personnel() {
   };
 
   return (
-    <Layout title="Control de Personal">
+    <Layout title="Personnel Management">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-2 w-full max-w-md">
           <div className="relative w-full">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Buscar personal..."
+              placeholder="Search staff..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8"
@@ -292,19 +292,19 @@ export default function Personnel() {
             onValueChange={setAvailabilityFilter}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Disponibilidad" />
+              <SelectValue placeholder="Availability" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="available">Disponible</SelectItem>
-              <SelectItem value="assigned">Asignado</SelectItem>
-              <SelectItem value="on_leave">Permiso</SelectItem>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="available">Available</SelectItem>
+              <SelectItem value="assigned">Assigned</SelectItem>
+              <SelectItem value="on_leave">On Leave</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <Button onClick={handleNewStaff}>
           <Plus className="h-4 w-4 mr-2" />
-          Nuevo Personal
+          New Staff
         </Button>
       </div>
 
@@ -544,17 +544,17 @@ export default function Personnel() {
                   variant="outline"
                   onClick={handleCloseForm}
                 >
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={mutation.isPending}
                 >
                   {mutation.isPending
-                    ? "Guardando..."
+                    ? "Saving..."
                     : staffToEdit?.id
-                    ? "Actualizar Personal"
-                    : "Crear Personal"}
+                    ? "Update Staff"
+                    : "Create Staff"}
                 </Button>
               </div>
             </form>
