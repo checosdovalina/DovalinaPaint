@@ -322,6 +322,7 @@ const InvoiceForm = ({
     const finalTotal = calculateTotal();
     createMutation.mutate({ 
       ...data, 
+      amount: finalTotal,
       totalAmount: finalTotal,
       items: items.filter(item => item.description.trim())
     });
