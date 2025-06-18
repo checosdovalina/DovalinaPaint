@@ -126,7 +126,8 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
         return apiRequest("POST", "/api/projects", projectData);
       }
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      console.log("Project mutation success:", response);
       toast({
         title: initialData?.id
           ? "Project updated"
@@ -139,6 +140,7 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
       onSuccess();
     },
     onError: (error) => {
+      console.error("Project mutation error:", error);
       toast({
         title: "Error",
         description: `Could not ${initialData?.id ? "update" : "create"} project: ${error.message}`,
@@ -148,16 +150,26 @@ export function ProjectForm({ initialData, onSuccess }: ProjectFormProps) {
   });
 
   const onSubmit = (data: ProjectFormValues) => {
+    console.log("Form onSubmit called with data:", data);
+    console.log("Form validation errors:", form.formState.errors);
+    console.log("Form is valid:", form.formState.isValid);
+    console.log("Current images:", images);
+    console.log("Current documents:", documents);
+    console.log("Current assignedStaff:", assignedStaff);
+    
     // Asegurarse de que las fechas sean instancias de Date antes de enviarlas
     // El backend espera objetos Date, no strings
-    mutation.mutate({
+    const submissionData = {
       ...data,
       startDate: data.startDate instanceof Date ? data.startDate : undefined,
       dueDate: data.dueDate instanceof Date ? data.dueDate : undefined,
       assignedStaff,
       images,
       documents,
-    });
+    };
+    
+    console.log("About to call mutation with:", submissionData);
+    mutation.mutate(submissionData);
   };
 
   const handleClientCreated = () => {

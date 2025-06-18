@@ -177,29 +177,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/projects/:id", isAuthenticated, async (req, res) => {
     try {
+      console.log("PUT /api/projects/:id - Request received");
+      console.log("Project ID:", req.params.id);
+      console.log("Request body:", JSON.stringify(req.body, null, 2));
+      console.log("User:", req.user?.id, req.user?.username);
+      
       const id = parseInt(req.params.id);
       const projectData = insertProjectSchema.partial().parse(req.body);
+      
+      console.log("Parsed project data:", JSON.stringify(projectData, null, 2));
+      
       const updatedProject = await storage.updateProject(id, projectData);
       
       if (!updatedProject) {
+        console.log("Project not found for ID:", id);
         return res.status(404).json({ message: "Project not found" });
       }
+      
+      console.log("Project updated successfully:", updatedProject.id);
       
       // Create activity for project update
       await storage.createActivity({
         type: "project_updated",
         description: `Project "${updatedProject.title}" updated`,
-        userId: req.user.id,
+        userId: req.user!.id,
         projectId: updatedProject.id,
         clientId: updatedProject.clientId
       });
       
       res.json(updatedProject);
     } catch (error) {
+      console.error("Error updating project:", error);
       if (error instanceof z.ZodError) {
+        console.log("Validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid project data", errors: error.errors });
       }
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ message: (error as Error).message });
     }
   });
 
