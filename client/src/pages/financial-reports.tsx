@@ -317,13 +317,13 @@ export default function FinancialReportsPage() {
                               ? 'text-green-600' 
                               : 'text-red-600'
                           }`}>
-                            {new Intl.NumberFormat('es-MX', {
+                            {new Intl.NumberFormat('en-US', {
                               style: 'currency',
                               currency: 'USD'
                             }).format(netBenefit)}
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">
-                            Margen: {profitData?.averageMargin 
+                            Margin: {profitData?.averageMargin 
                               ? `${profitData.averageMargin.toFixed(2)}%` 
                               : "N/A"}
                           </p>
@@ -332,7 +332,7 @@ export default function FinancialReportsPage() {
                     })()}
                   </>
                 ) : (
-                  <div className="text-3xl font-bold">Cargando...</div>
+                  <div className="text-3xl font-bold">Loading...</div>
                 )}
               </CardContent>
             </Card>
@@ -340,10 +340,10 @@ export default function FinancialReportsPage() {
           
           <Tabs defaultValue="summary" className="w-full mb-6">
             <TabsList className="mb-4">
-              <TabsTrigger value="summary">Resumen</TabsTrigger>
-              <TabsTrigger value="expense-categories">Categorías de Gastos</TabsTrigger>
-              <TabsTrigger value="projects">Proyectos</TabsTrigger>
-              <TabsTrigger value="recipients">Destinatarios</TabsTrigger>
+              <TabsTrigger value="summary">Summary</TabsTrigger>
+              <TabsTrigger value="expense-categories">Expense Categories</TabsTrigger>
+              <TabsTrigger value="projects">Projects</TabsTrigger>
+              <TabsTrigger value="recipients">Recipients</TabsTrigger>
             </TabsList>
             
             <TabsContent value="summary">
