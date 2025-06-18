@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Plus, Edit, Trash2, FileText, DollarSign, Calendar, User } from "lucide-react";
 import type { Client, Project, Quote } from "@shared/schema";
+import { Layout } from "@/components/layout";
 
 // Schema para validación de facturas
 const invoiceFormSchema = z.object({
@@ -775,17 +776,18 @@ export default function Invoices() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Facturas</h1>
-          <p className="text-muted-foreground">Gestiona las facturas de tus proyectos</p>
+    <Layout title="Facturas">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Facturas</h1>
+            <p className="text-muted-foreground">Gestiona las facturas de tus proyectos</p>
+          </div>
+          <Button onClick={handleCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva Factura
+          </Button>
         </div>
-        <Button onClick={handleCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva Factura
-        </Button>
-      </div>
 
       {!Array.isArray(invoices) || invoices.length === 0 ? (
         <Card>
@@ -869,6 +871,7 @@ export default function Invoices() {
         onSuccess={handleFormSuccess}
         editingInvoice={editingInvoice}
       />
-    </div>
+      </div>
+    </Layout>
   );
 }
