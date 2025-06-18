@@ -190,25 +190,25 @@ export default function Dashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatsCard
-          title="Proyectos Activos"
+          title="Active Projects"
           value={activeProjects}
           icon={<ChartGantt className="text-white h-5 w-5" />}
           iconBgColor="bg-primary"
         />
         <StatsCard
-          title="Presupuestos Pendientes"
+          title="Pending Quotes"
           value={pendingQuotes}
           icon={<File className="text-white h-5 w-5" />}
           iconBgColor="bg-yellow-500"
         />
         <StatsCard
-          title="Ingresos (Mes Actual)"
+          title="Revenue (Current Month)"
           value={`$${currentMonthIncome.toLocaleString()}`}
           icon={<DollarSign className="text-white h-5 w-5" />}
           iconBgColor="bg-green-500"
         />
         <StatsCard
-          title="Nuevos Clientes (Mes)"
+          title="New Clients (Month)"
           value={newClients}
           icon={<UserPlus className="text-white h-5 w-5" />}
           iconBgColor="bg-blue-500"
