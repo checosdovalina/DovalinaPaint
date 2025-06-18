@@ -80,7 +80,7 @@ export default function Projects() {
       if (!res.ok) throw new Error("Failed to fetch project");
       return res.json();
     },
-    enabled: isViewingSpecificProject,
+    enabled: Boolean(isViewingSpecificProject),
   });
 
   // Auto-open project details when viewing specific project
@@ -169,21 +169,21 @@ export default function Projects() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "pending":
-        return "Pendiente por visitar";
+        return "Pending Visit";
       case "quoted":
-        return "Presupuesto enviado";
+        return "Quote Sent";
       case "approved":
-        return "Presupuesto aprobado";
+        return "Quote Approved";
       case "preparing":
-        return "En preparación";
+        return "In Preparation";
       case "in_progress":
-        return "En proceso";
+        return "In Progress";
       case "reviewing":
-        return "En revisión final";
+        return "Final Review";
       case "completed":
-        return "Finalizado";
+        return "Completed";
       case "archived":
-        return "Archivado";
+        return "Archived";
       default:
         return status;
     }
@@ -253,7 +253,7 @@ export default function Projects() {
             <div className="relative w-full">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Buscar proyectos..."
+                placeholder="Search projects..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-8"
@@ -270,7 +270,7 @@ export default function Projects() {
             </Button>
             <Button onClick={handleNewProject}>
               <Plus className="h-4 w-4 mr-2" />
-              Nuevo Proyecto
+              New Project
             </Button>
           </div>
         </div>
@@ -281,18 +281,18 @@ export default function Projects() {
             onValueChange={setStatusFilter}
           >
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Estado del proyecto" />
+              <SelectValue placeholder="Project Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="pending">Pendiente por visitar</SelectItem>
-              <SelectItem value="quoted">Presupuesto enviado</SelectItem>
-              <SelectItem value="approved">Presupuesto aprobado</SelectItem>
-              <SelectItem value="preparing">En preparación</SelectItem>
-              <SelectItem value="in_progress">En proceso</SelectItem>
-              <SelectItem value="reviewing">En revisión final</SelectItem>
-              <SelectItem value="completed">Finalizado</SelectItem>
-              <SelectItem value="archived">Archivado</SelectItem>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="pending">Pending Visit</SelectItem>
+              <SelectItem value="quoted">Quote Sent</SelectItem>
+              <SelectItem value="approved">Quote Approved</SelectItem>
+              <SelectItem value="preparing">In Preparation</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="reviewing">Final Review</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
           </Select>
           
@@ -301,10 +301,10 @@ export default function Projects() {
             onValueChange={setClientFilter}
           >
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Cliente" />
+              <SelectValue placeholder="Client" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los clientes</SelectItem>
+              <SelectItem value="all">All Clients</SelectItem>
               {clients?.map(client => (
                 <SelectItem key={client.id} value={client.id.toString()}>
                   {client.name}
@@ -452,7 +452,7 @@ export default function Projects() {
                             handleDeleteClick(project);
                           }}
                         >
-                          Eliminar
+                          Delete
                         </Button>
                       </td>
                     </tr>
