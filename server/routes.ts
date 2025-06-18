@@ -1449,7 +1449,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/payments", isAuthenticated, async (req, res) => {
     try {
+      console.log("Raw payment data received:", JSON.stringify(req.body, null, 2));
       const paymentData = insertPaymentSchema.parse(req.body);
+      console.log("Parsed payment data:", JSON.stringify(paymentData, null, 2));
       const payment = await storage.createPayment(paymentData);
       
       // If this payment is associated with a purchase order, update its status to "paid"
