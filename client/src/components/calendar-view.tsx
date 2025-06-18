@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -71,6 +72,7 @@ export function CalendarView({
   showAddEvent: externalShowAddEvent,
   onCloseAddEvent,
 }: CalendarViewProps) {
+  const [, navigate] = useLocation();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<CalendarEvent[]>([]);
   const [showGoogleEvents, setShowGoogleEvents] = useState(false);
@@ -352,7 +354,7 @@ export function CalendarView({
     <div className="calendar-container">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-semibold">Calendario</h2>
+          <h2 className="text-xl font-semibold">Calendar</h2>
           <div className="flex items-center space-x-2">
             <Switch
               id="google-sync"
@@ -360,7 +362,7 @@ export function CalendarView({
               onCheckedChange={setShowGoogleEvents}
               disabled={!googleConnected}
             />
-            <Label htmlFor="google-sync">Mostrar eventos de Google</Label>
+            <Label htmlFor="google-sync">Show Google Events</Label>
           </div>
           <Button 
             variant="outline" 
@@ -370,7 +372,7 @@ export function CalendarView({
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
-            <span>Filtros</span>
+            <span>Filters</span>
           </Button>
         </div>
         <div className="flex space-x-2">
@@ -381,7 +383,7 @@ export function CalendarView({
               disabled={isLoading}
             >
               <SiGoogle className="mr-2 h-4 w-4" />
-              Conectar con Google
+              Connect with Google
             </Button>
           ) : (
             <Button 
@@ -390,7 +392,7 @@ export function CalendarView({
               disabled={isLoading}
             >
               <RefreshCcw className="mr-2 h-4 w-4" />
-              Sincronizar con Google
+              Sync with Google
             </Button>
           )}
           <Button 
@@ -410,7 +412,7 @@ export function CalendarView({
             }}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Nuevo Evento
+            New Event
           </Button>
         </div>
       </div>
