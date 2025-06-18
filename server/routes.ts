@@ -989,7 +989,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
+  // Invoices Summary API for Financial Reports (must be before :id route)
+  app.get("/api/invoices/summary", isAuthenticated, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      let invoices;
+      if (startDate && endDate && startDate !== 'undefined' && endDate !== 'undefined') {
+        try {
+          const start = new Date(startDate as string);
+          const end = new Date(endDate as string);
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            invoices = await storage.getInvoices();
+          } else {
+            invoices = await storage.getInvoicesByDateRange(start, end);
+          }
+        } catch (dateError) {
+          invoices = await storage.getInvoices();
+        }
+      } else {
+        invoices = await storage.getInvoices();
+      }
+      
+      // Calculate total revenue
+      const totalRevenue = invoices.reduce((sum, invoice) => sum + Number(invoice.totalAmount), 0);
+      
+      // Time series data for charts
+      const timeSeriesData = invoices.reduce((acc: any[], invoice) => {
+        const date = invoice.issueDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
+        const existing = acc.find(item => item.date === date);
+        if (existing) {
+          existing.amount += Number(invoice.totalAmount);
+        } else {
+          acc.push({
+            date,
+            amount: Number(invoice.totalAmount)
+          });
+        }
+        return acc;
+      }, []);
+      
+      res.json({
+        totalRevenue,
+        invoiceCount: invoices.length,
+        timeSeriesData
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
 
   app.get("/api/invoices/:id", isAuthenticated, async (req, res) => {
     try {
@@ -1758,56 +1806,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Invoices Summary API for Financial Reports (must be before :id route)
-  app.get("/api/invoices/summary", isAuthenticated, async (req, res) => {
-    try {
-      const { startDate, endDate } = req.query;
-      
-      let invoices;
-      if (startDate && endDate && startDate !== 'undefined' && endDate !== 'undefined') {
-        try {
-          const start = new Date(startDate as string);
-          const end = new Date(endDate as string);
-          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            invoices = await storage.getInvoices();
-          } else {
-            invoices = await storage.getInvoicesByDateRange(start, end);
-          }
-        } catch (dateError) {
-          invoices = await storage.getInvoices();
-        }
-      } else {
-        invoices = await storage.getInvoices();
-      }
-      
-      // Calculate total revenue
-      const totalRevenue = invoices.reduce((sum, invoice) => sum + Number(invoice.totalAmount), 0);
-      
-      // Time series data for charts
-      const timeSeriesData = invoices.reduce((acc: any[], invoice) => {
-        const date = invoice.issueDate.toISOString().split('T')[0];
-        const existing = acc.find(item => item.date === date);
-        if (existing) {
-          existing.amount += Number(invoice.totalAmount);
-        } else {
-          acc.push({
-            date,
-            amount: Number(invoice.totalAmount)
-          });
-        }
-        return acc;
-      }, []);
-      
-      res.json({
-        totalRevenue,
-        invoiceCount: invoices.length,
-        timeSeriesData
-      });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
   // Financial Reporting Routes
   app.get("/api/reports/financial/summary", isAuthenticated, async (req, res) => {
     try {
@@ -2133,20 +2131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/invoices/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const invoice = await storage.getInvoice(id);
-      
-      if (!invoice) {
-        return res.status(404).json({ message: "Invoice not found" });
-      }
-      
-      res.json(invoice);
-    } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
-    }
-  });
+
 
   app.post("/api/invoices", isAuthenticated, async (req, res) => {
     try {
