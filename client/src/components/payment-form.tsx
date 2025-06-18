@@ -383,7 +383,7 @@ export default function PaymentForm({
                   <FormLabel>Reference/Check Number (Optional)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Número de referencia o de cheque"
+                      placeholder="Reference or check number"
                       {...field}
                       disabled={isLoading}
                     />
@@ -400,7 +400,7 @@ export default function PaymentForm({
               name="recipientType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tipo de Destinatario</FormLabel>
+                  <FormLabel>Recipient Type</FormLabel>
                   <Select
                     disabled={isLoading}
                     onValueChange={(value) => {
@@ -411,7 +411,7 @@ export default function PaymentForm({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar tipo" />
+                        <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -432,7 +432,7 @@ export default function PaymentForm({
               name="recipientId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Destinatario</FormLabel>
+                  <FormLabel>Recipient</FormLabel>
                   <Select
                     disabled={
                       isLoading || !selectedRecipientType || filteredRecipients.length === 0
@@ -445,7 +445,7 @@ export default function PaymentForm({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar destinatario" />
+                        <SelectValue placeholder="Select recipient" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -466,7 +466,7 @@ export default function PaymentForm({
               name="categoryId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Categoría</FormLabel>
+                  <FormLabel>Category</FormLabel>
                   <Select
                     disabled={isLoading || !categories}
                     onValueChange={field.onChange}
@@ -474,7 +474,7 @@ export default function PaymentForm({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar categoría" />
+                        <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -495,7 +495,7 @@ export default function PaymentForm({
               name="projectId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Proyecto (Opcional)</FormLabel>
+                  <FormLabel>Project (Optional)</FormLabel>
                   <Select
                     disabled={isLoading || !projects}
                     onValueChange={(value) => {
