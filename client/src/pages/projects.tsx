@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRoute } from "wouter";
 import { Project, Client } from "@shared/schema";
 import { Layout } from "@/components/layout";
 import { ProjectForm } from "@/components/project-form";
@@ -37,6 +38,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Search, Plus, Network, List, GridIcon, Filter, Trash } from "lucide-react";
 
 export default function Projects() {
+  const [match, params] = useRoute("/projects/:id");
+  const isViewingSpecificProject = match && params?.id;
+  
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
@@ -67,6 +71,25 @@ export default function Projects() {
       return res.json();
     },
   });
+
+  // Fetch specific project when viewing individual project
+  const { data: specificProject, isLoading: isLoadingSpecificProject } = useQuery<Project>({
+    queryKey: ["/api/projects", params?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/projects/${params?.id}`);
+      if (!res.ok) throw new Error("Failed to fetch project");
+      return res.json();
+    },
+    enabled: isViewingSpecificProject,
+  });
+
+  // Auto-open project details when viewing specific project
+  useEffect(() => {
+    if (isViewingSpecificProject && specificProject) {
+      setSelectedProject(specificProject);
+      setShowProjectDetails(true);
+    }
+  }, [isViewingSpecificProject, specificProject]);
 
   const handleEditProject = (project: Project) => {
     setProjectToEdit(project);
@@ -172,8 +195,58 @@ export default function Projects() {
     return client ? client.name : `Cliente #${clientId}`;
   };
 
+  // If viewing specific project and loading, show loading state
+  if (isViewingSpecificProject && isLoadingSpecificProject) {
+    return (
+      <Layout title="Loading Project...">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+            <p>Loading project details...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // If viewing specific project, show project details modal
+  if (isViewingSpecificProject && specificProject) {
+    return (
+      <Layout title={`Project: ${specificProject.title}`}>
+        <ProjectModal
+          open={true}
+          onOpenChange={() => {}} // Prevent closing from modal when viewing specific project
+          project={specificProject}
+          onEdit={handleEditProject}
+        />
+        
+        {/* Project Form Dialog */}
+        <Dialog open={showProjectForm} onOpenChange={setShowProjectForm}>
+          <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {projectToEdit ? "Edit Project" : "New Project"}
+              </DialogTitle>
+              <DialogDescription>
+                {projectToEdit
+                  ? "Modify project details as needed"
+                  : "Complete the form to create a new project"}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="max-h-[75vh] overflow-y-auto pr-2">
+              <ProjectForm
+                initialData={projectToEdit || undefined}
+                onSuccess={handleCloseForm}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </Layout>
+    );
+  }
+
   return (
-    <Layout title="Gestión de Proyectos">
+    <Layout title="Project Management">
       <div className="flex flex-col space-y-4 mb-6">
         <div className="flex flex-wrap gap-4 justify-between items-center">
           <div className="flex items-center space-x-2 w-full max-w-md">

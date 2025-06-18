@@ -32,6 +32,7 @@ function Router() {
       <ProtectedRoute path="/quotes" component={Quotes} />
       <ProtectedRoute path="/simple-quotes" component={SimpleQuotes} />
       <ProtectedRoute path="/service-orders" component={ServiceOrders} />
+      <ProtectedRoute path="/projects/:id" component={Projects} />
       <ProtectedRoute path="/projects" component={Projects} />
       <ProtectedRoute path="/calendar" component={Calendar} />
       <ProtectedRoute path="/personnel" component={Personnel} />
