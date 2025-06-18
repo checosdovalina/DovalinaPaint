@@ -377,6 +377,8 @@ const PurchaseOrderForm = ({
     },
   });
 
+
+
   // Create project mutation
   const createProjectMutation = useMutation({
     mutationFn: async (projectData: { 
@@ -973,13 +975,12 @@ const PurchaseOrderForm = ({
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
-              const serviceTypeSelect = (e.target as HTMLFormElement).querySelector('select[name="serviceType"]') as HTMLSelectElement;
               const projectData = {
                 clientId: selectedClientId!,
                 title: formData.get('title') as string,
                 description: formData.get('description') as string,
                 address: formData.get('address') as string,
-                serviceType: serviceTypeSelect?.value || 'Other',
+                serviceType: formData.get('serviceType') as string || 'Other',
               };
               createProjectMutation.mutate(projectData);
             }} className="space-y-4">
@@ -997,19 +998,20 @@ const PurchaseOrderForm = ({
               </div>
               <div>
                 <Label htmlFor="project-serviceType">Service Type*</Label>
-                <Select name="serviceType" required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select service type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Exterior Painting">Exterior Painting</SelectItem>
-                    <SelectItem value="Interior Painting">Interior Painting</SelectItem>
-                    <SelectItem value="Commercial Painting">Commercial Painting</SelectItem>
-                    <SelectItem value="Pressure Washing">Pressure Washing</SelectItem>
-                    <SelectItem value="Deck Staining">Deck Staining</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select 
+                  id="project-serviceType" 
+                  name="serviceType" 
+                  required 
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Select service type</option>
+                  <option value="Exterior Painting">Exterior Painting</option>
+                  <option value="Interior Painting">Interior Painting</option>
+                  <option value="Commercial Painting">Commercial Painting</option>
+                  <option value="Pressure Washing">Pressure Washing</option>
+                  <option value="Deck Staining">Deck Staining</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setShowCreateProject(false)}>
