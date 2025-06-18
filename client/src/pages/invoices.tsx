@@ -217,6 +217,17 @@ const InvoiceForm = ({
         });
       }
 
+      // Si no hay elementos específicos, crear uno por defecto con el total del presupuesto
+      if (quoteItems.length === 0) {
+        quoteItems.push({
+          description: "Servicio de pintura",
+          quantity: 1,
+          unitPrice: parseFloat(quote.totalEstimate) || 0,
+          total: parseFloat(quote.totalEstimate) || 0,
+          discount: 0
+        });
+      }
+
       setItems(quoteItems);
       setBaseAmount(parseFloat(quote.totalEstimate) || 0);
       
@@ -425,7 +436,7 @@ const InvoiceForm = ({
                         const quoteId = parseInt(value);
                         setSelectedQuoteId(quoteId);
                         form.setValue("quoteId", quoteId);
-                        loadFromQuote(quoteId);
+                        loadQuoteData(quoteId);
                       }
                     }}
                   >
