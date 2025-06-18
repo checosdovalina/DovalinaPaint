@@ -159,14 +159,14 @@ export default function FinancialReportsPage() {
       for (let i = 1; i <= pageCount; i++) {
         pdf.setPage(i);
         pdf.setFontSize(10);
-        pdf.text(`Página ${i} de ${pageCount}`, 105, 295, { align: 'center' });
+        pdf.text(`Page ${i} of ${pageCount}`, 105, 295, { align: 'center' });
       }
       
       const reportPeriod = selectedPeriod === 'custom'
         ? `${format(customStartDate as Date, 'dd/MM/yyyy')}-${format(customEndDate as Date, 'dd/MM/yyyy')}`
         : getPeriodLabel(selectedPeriod);
       
-      pdf.save(`Reporte_Financiero_${reportPeriod}.pdf`);
+      pdf.save(`Financial_Report_${reportPeriod}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     }
@@ -176,21 +176,21 @@ export default function FinancialReportsPage() {
   const getPeriodLabel = (period: string) => {
     switch (period) {
       case "current_month":
-        return "Mes Actual";
+        return "Current Month";
       case "last_month":
-        return "Mes Anterior";
+        return "Last Month";
       case "last_3_months":
-        return "Últimos 3 Meses";
+        return "Last 3 Months";
       case "last_6_months":
-        return "Últimos 6 Meses";
+        return "Last 6 Months";
       case "current_year":
-        return "Año Actual";
+        return "Current Year";
       case "last_year":
-        return "Año Anterior";
+        return "Last Year";
       case "custom":
-        return "Período Personalizado";
+        return "Custom Period";
       default:
-        return "Mes Actual";
+        return "Current Month";
     }
   };
   
@@ -198,43 +198,43 @@ export default function FinancialReportsPage() {
   const isLoading = paymentsLoading || invoicesLoading || profitLoading || projectsLoading;
   
   return (
-    <Layout title="Reportes Financieros">
+    <Layout title="Financial Reports">
       <Helmet>
-        <title>Reportes Financieros | Dovalina Painting LLC</title>
+        <title>Financial Reports | Dovalina Painting LLC</title>
       </Helmet>
       
       <div className="container mx-auto py-6 space-y-6">
         <PageHeader
-          title="Reportes Financieros"
-          description="Análisis detallado de ingresos, gastos y rentabilidad por período."
+          title="Financial Reports"
+          description="Detailed analysis of income, expenses and profitability by period."
           actions={
             <Button onClick={generatePDF} variant="outline" disabled={isLoading}>
               <Download className="mr-2 h-4 w-4" />
-              Descargar PDF
+              Download PDF
             </Button>
           }
         />
       
         <Card className="mb-6">
           <CardHeader className="pb-3">
-            <CardTitle>Filtros de Reporte</CardTitle>
+            <CardTitle>Report Filters</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="period">Período</Label>
+                <Label htmlFor="period">Period</Label>
                 <Select onValueChange={handlePeriodChange} defaultValue={selectedPeriod}>
                   <SelectTrigger id="period" className="w-full">
-                    <SelectValue placeholder="Seleccionar período" />
+                    <SelectValue placeholder="Select period" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="current_month">Mes Actual</SelectItem>
-                    <SelectItem value="last_month">Mes Anterior</SelectItem>
-                    <SelectItem value="last_3_months">Últimos 3 Meses</SelectItem>
-                    <SelectItem value="last_6_months">Últimos 6 Meses</SelectItem>
-                    <SelectItem value="current_year">Año Actual</SelectItem>
-                    <SelectItem value="last_year">Año Anterior</SelectItem>
-                    <SelectItem value="custom">Personalizado</SelectItem>
+                    <SelectItem value="current_month">Current Month</SelectItem>
+                    <SelectItem value="last_month">Last Month</SelectItem>
+                    <SelectItem value="last_3_months">Last 3 Months</SelectItem>
+                    <SelectItem value="last_6_months">Last 6 Months</SelectItem>
+                    <SelectItem value="current_year">Current Year</SelectItem>
+                    <SelectItem value="last_year">Last Year</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -242,14 +242,14 @@ export default function FinancialReportsPage() {
               {selectedPeriod === "custom" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label>Fecha Inicial</Label>
+                    <Label>Start Date</Label>
                     <DatePicker
                       date={customStartDate}
                       setDate={setCustomStartDate}
                     />
                   </div>
                   <div>
-                    <Label>Fecha Final</Label>
+                    <Label>End Date</Label>
                     <DatePicker
                       date={customEndDate}
                       setDate={setCustomEndDate}
@@ -362,11 +362,11 @@ export default function FinancialReportsPage() {
             <TabsContent value="expense-categories">
               <Card>
                 <CardHeader>
-                  <CardTitle>Distribución de Gastos por Categoría</CardTitle>
+                  <CardTitle>Expense Distribution by Category</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {isLoading ? (
-                    <div className="text-center py-6">Cargando datos...</div>
+                    <div className="text-center py-6">Loading data...</div>
                   ) : paymentsData?.categorySummary && paymentsData.categorySummary.length > 0 ? (
                     <div className="space-y-4">
                       {paymentsData.categorySummary.map((category: any) => (
@@ -374,7 +374,7 @@ export default function FinancialReportsPage() {
                           <div className="flex justify-between items-center">
                             <span className="font-medium">{category.name}</span>
                             <span className="font-semibold">
-                              {new Intl.NumberFormat('es-MX', {
+                              {new Intl.NumberFormat('en-US', {
                                 style: 'currency',
                                 currency: 'USD'
                               }).format(category.total)}
@@ -389,14 +389,14 @@ export default function FinancialReportsPage() {
                             />
                           </div>
                           <p className="text-xs text-gray-500">
-                            {((category.total / paymentsData.totalExpenses) * 100).toFixed(1)}% del gasto total
+                            {((category.total / paymentsData.totalExpenses) * 100).toFixed(1)}% of total expenses
                           </p>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center py-6 text-muted-foreground">
-                      No hay datos de gastos por categoría para este período
+                      No expense category data available for this period
                     </div>
                   )}
                 </CardContent>
