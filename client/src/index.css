@@ -89,31 +89,37 @@
   /* Custom scrollbar styles for better pipeline navigation */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: rgb(156 163 175) rgb(229 231 235);
+    scrollbar-color: rgb(75 85 99) rgb(229 231 235);
   }
 
   .scrollbar-thin::-webkit-scrollbar {
-    height: 12px;
+    height: 16px;
+    width: 16px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
     background: rgb(229 231 235);
-    border-radius: 6px;
-    margin: 0 4px;
+    border-radius: 8px;
+    margin: 0 8px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgb(156 163 175);
-    border-radius: 6px;
+    background: rgb(75 85 99);
+    border-radius: 8px;
     border: 2px solid rgb(229 231 235);
+    min-height: 40px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: rgb(107 114 128);
+    background: rgb(55 65 81);
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:active {
-    background: rgb(75 85 99);
+    background: rgb(31 41 55);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-corner {
+    background: rgb(229 231 235);
   }
 }
 
