@@ -211,7 +211,7 @@ export default function PaymentList({
         <CardHeader className="py-4">
           <div className="flex justify-between items-center">
             <CardTitle className="text-xl">
-              {filterType ? `Pagos a ${getRecipientTypeLabel(filterType)}` : "Todos los Pagos"}
+              {filterType ? `Payments to ${getRecipientTypeLabel(filterType)}` : "All Payments"}
             </CardTitle>
             <div className="text-lg font-semibold">
               Total: {formatCurrency(calculateTotal())}
@@ -224,14 +224,14 @@ export default function PaymentList({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[120px]">Fecha</TableHead>
-                    <TableHead>Destinatario</TableHead>
-                    {!filterType && <TableHead>Tipo</TableHead>}
-                    <TableHead>Monto</TableHead>
-                    <TableHead>Método</TableHead>
-                    <TableHead>Referencia</TableHead>
-                    <TableHead>Proyecto</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead className="w-[120px]">Date</TableHead>
+                    <TableHead>Recipient</TableHead>
+                    {!filterType && <TableHead>Type</TableHead>}
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Method</TableHead>
+                    <TableHead>Reference</TableHead>
+                    <TableHead>Project</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -261,20 +261,20 @@ export default function PaymentList({
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
                               <ChevronDown className="h-4 w-4" />
-                              <span className="sr-only">Acciones</span>
+                              <span className="sr-only">Actions</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => onEdit(payment)}>
                               <Edit className="mr-2 h-4 w-4" />
-                              Editar
+                              Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => handleDeleteClick(payment)}
                               className="text-red-600"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
-                              Eliminar
+                              Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -287,11 +287,11 @@ export default function PaymentList({
           ) : (
             <div className="py-12 px-4 text-center">
               <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-1">No hay pagos</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-1">No payments</h3>
               <p className="text-gray-500">
                 {filterType
-                  ? `No se encontraron pagos para ${getRecipientTypeLabel(filterType)}.`
-                  : "No se encontraron pagos registrados."}
+                  ? `No payments found for ${getRecipientTypeLabel(filterType)}.`
+                  : "No payments have been registered."}
               </p>
             </div>
           )}
@@ -301,19 +301,19 @@ export default function PaymentList({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción eliminará permanentemente el pago y no podrá ser recuperado.
+              This action will permanently delete the payment and cannot be recovered.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletePaymentMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletePaymentMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
               disabled={deletePaymentMutation.isPending}
               className="bg-red-600 hover:bg-red-700"
             >
-              {deletePaymentMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+              {deletePaymentMutation.isPending ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
