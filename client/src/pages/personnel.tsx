@@ -391,12 +391,12 @@ export default function Personnel() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {staffToEdit ? "Editar Personal" : "Nuevo Personal"}
+              {staffToEdit ? "Edit Staff Member" : "New Staff Member"}
             </DialogTitle>
             <DialogDescription>
               {staffToEdit
-                ? "Modifique los datos del miembro del personal según sea necesario"
-                : "Complete el formulario para registrar un nuevo miembro del personal"}
+                ? "Modify the staff member details as needed"
+                : "Complete the form to register a new staff member"}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -407,9 +407,9 @@ export default function Personnel() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nombre Completo</FormLabel>
+                      <FormLabel>Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Juan Pérez" {...field} />
+                        <Input placeholder="John Doe" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -421,23 +421,23 @@ export default function Personnel() {
                   name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cargo / Rol</FormLabel>
+                      <FormLabel>Role / Position</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Seleccione un rol" />
+                            <SelectValue placeholder="Select a role" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Painter">Pintor</SelectItem>
-                          <SelectItem value="Project Manager">Gerente de Proyecto</SelectItem>
-                          <SelectItem value="Assistant">Asistente</SelectItem>
+                          <SelectItem value="Painter">Painter</SelectItem>
+                          <SelectItem value="Project Manager">Project Manager</SelectItem>
+                          <SelectItem value="Assistant">Assistant</SelectItem>
                           <SelectItem value="Supervisor">Supervisor</SelectItem>
-                          <SelectItem value="Technician">Técnico</SelectItem>
-                          <SelectItem value="Administrative">Administrativo</SelectItem>
+                          <SelectItem value="Technician">Technician</SelectItem>
+                          <SelectItem value="Administrative">Administrative</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -452,9 +452,9 @@ export default function Personnel() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Correo Electrónico</FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="correo@ejemplo.com" {...field} />
+                        <Input type="email" placeholder="email@example.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -466,7 +466,7 @@ export default function Personnel() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Teléfono</FormLabel>
+                      <FormLabel>Phone</FormLabel>
                       <FormControl>
                         <Input placeholder="555-1234" {...field} />
                       </FormControl>
@@ -481,20 +481,20 @@ export default function Personnel() {
                 name="availability"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Disponibilidad</FormLabel>
+                    <FormLabel>Availability</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccione la disponibilidad" />
+                          <SelectValue placeholder="Select availability" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="available">Disponible</SelectItem>
-                        <SelectItem value="assigned">Asignado</SelectItem>
-                        <SelectItem value="on_leave">Permiso</SelectItem>
+                        <SelectItem value="available">Available</SelectItem>
+                        <SelectItem value="assigned">Assigned</SelectItem>
+                        <SelectItem value="on_leave">On Leave</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -507,7 +507,7 @@ export default function Personnel() {
                 name="skills"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Habilidades</FormLabel>
+                    <FormLabel>Skills</FormLabel>
                     <div className="space-y-2">
                       <div className="flex flex-wrap gap-2">
                         {["interior", "exterior", "commercial", "industrial", "residential", "management", "client relations"].map((skill) => (
@@ -531,7 +531,7 @@ export default function Personnel() {
                           </Label>
                         ))}
                       </div>
-                      <p className="text-xs text-gray-500">Haga clic en las habilidades para seleccionarlas/deseleccionarlas</p>
+                      <p className="text-xs text-gray-500">Click skills to select/deselect them</p>
                     </div>
                     <FormMessage />
                   </FormItem>
