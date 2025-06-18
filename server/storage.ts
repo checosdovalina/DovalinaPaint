@@ -904,6 +904,19 @@ export class DatabaseStorage implements IStorage {
       return false;
     }
   }
+
+  async getPaymentsByDateRange(startDate: Date, endDate: Date): Promise<Payment[]> {
+    try {
+      return await db.select().from(payments)
+        .where(and(
+          db.sql`${payments.date} >= ${startDate.toISOString().split('T')[0]}`,
+          db.sql`${payments.date} <= ${endDate.toISOString().split('T')[0]}`
+        ));
+    } catch (error) {
+      console.error("Error fetching payments by date range:", error);
+      return [];
+    }
+  }
   
   // Purchase Order methods
   async getPurchaseOrders(): Promise<PurchaseOrder[]> {
