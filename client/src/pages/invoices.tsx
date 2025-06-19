@@ -117,9 +117,16 @@ const InvoiceForm = ({
   // Efecto para cargar datos del invoice al editar
   useEffect(() => {
     if (editingInvoice && open) {
+      console.log("Loading invoice for editing:", editingInvoice);
       setSelectedClientId(editingInvoice.clientId);
       setSelectedProjectId(editingInvoice.projectId || null);
       setSelectedQuoteId(editingInvoice.quoteId || null);
+      
+      // Load items if they exist
+      if (editingInvoice.items && Array.isArray(editingInvoice.items) && editingInvoice.items.length > 0) {
+        console.log("Setting items from editing invoice:", editingInvoice.items);
+        setItems(editingInvoice.items);
+      }
       
       // Reset form with editing data
       form.reset({
@@ -132,6 +139,21 @@ const InvoiceForm = ({
         status: editingInvoice.status,
         notes: editingInvoice.notes || "",
       });
+    } else if (!editingInvoice && open) {
+      // Reset for new invoice
+      setItems([{
+        description: "Material 1",
+        quantity: 25,
+        unitPrice: 0,
+        total: 0,
+        discount: 0
+      }, {
+        description: "Mano de obra 1",
+        quantity: 5008,
+        unitPrice: 0,
+        total: 0,
+        discount: 0
+      }]);
     }
   }, [editingInvoice, open]);
 
