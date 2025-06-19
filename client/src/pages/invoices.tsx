@@ -95,6 +95,25 @@ const InvoiceForm = ({
   const [baseAmount, setBaseAmount] = useState<number>(0);
   const [globalDiscount, setGlobalDiscount] = useState<number>(0);
 
+  // Consultas para obtener datos
+  const { data: clients } = useQuery({ queryKey: ["/api/clients"] });
+  const { data: projects } = useQuery({ queryKey: ["/api/projects"] });
+  const { data: quotes } = useQuery({ queryKey: ["/api/quotes"] });
+
+  const form = useForm<InvoiceFormValues>({
+    resolver: zodResolver(invoiceFormSchema),
+    defaultValues: {
+      clientId: editingInvoice?.clientId || 0,
+      projectId: editingInvoice?.projectId || undefined,
+      quoteId: editingInvoice?.quoteId || undefined,
+      issueDate: editingInvoice?.issueDate || new Date().toISOString().split('T')[0],
+      dueDate: editingInvoice?.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      totalAmount: editingInvoice?.totalAmount || 0,
+      status: editingInvoice?.status || "draft",
+      notes: editingInvoice?.notes || "",
+    },
+  });
+
   // Efecto para cargar datos del invoice al editar
   useEffect(() => {
     if (editingInvoice && open) {
@@ -114,7 +133,7 @@ const InvoiceForm = ({
         notes: editingInvoice.notes || "",
       });
     }
-  }, [editingInvoice, open, form]);
+  }, [editingInvoice, open]);
 
   // Efecto para recalcular el total cuando cambien los items o descuento global
   useEffect(() => {
@@ -123,25 +142,6 @@ const InvoiceForm = ({
     }, 100);
     return () => clearTimeout(timer);
   }, [items, globalDiscount]);
-
-  // Consultas para obtener datos
-  const { data: clients } = useQuery({ queryKey: ["/api/clients"] });
-  const { data: projects } = useQuery({ queryKey: ["/api/projects"] });
-  const { data: quotes } = useQuery({ queryKey: ["/api/quotes"] });
-
-  const form = useForm<InvoiceFormValues>({
-    resolver: zodResolver(invoiceFormSchema),
-    defaultValues: {
-      clientId: editingInvoice?.clientId || 0,
-      projectId: editingInvoice?.projectId || undefined,
-      quoteId: editingInvoice?.quoteId || undefined,
-      issueDate: editingInvoice?.issueDate || new Date().toISOString().split('T')[0],
-      dueDate: editingInvoice?.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      totalAmount: editingInvoice?.totalAmount || 0,
-      status: editingInvoice?.status || "draft",
-      notes: editingInvoice?.notes || "",
-    },
-  });
 
   // Mutación para crear cliente
   const createClientMutation = useMutation({
