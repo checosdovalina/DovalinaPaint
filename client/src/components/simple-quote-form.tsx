@@ -5411,26 +5411,18 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   });
                 }
                 
-                // Dormer lines subtotal
+                // Dormer subtotal (using direct quantity × unitPrice calculation)
                 if (breakdown.dormer?.enabled) {
-                  const dormerLines = breakdown.dormer?.lines || [];
-                  dormerLines.forEach((line, index) => {
-                    const lineSubtotal = (line.quantity || 0) * (line.price || 0);
-                    total += lineSubtotal;
-                    // Update the form value for display
-                    form.setValue(`exteriorBreakdown.dormer.lines.${index}.subtotal`, lineSubtotal);
-                  });
+                  const dormerSubtotal = (breakdown.dormer?.quantity || 0) * (breakdown.dormer?.unitPrice || 0);
+                  total += dormerSubtotal;
+                  form.setValue("exteriorBreakdown.dormer.subtotal", dormerSubtotal);
                 }
                 
-                // Chimney lines subtotal
+                // Chimney subtotal (using direct quantity × price calculation)
                 if (breakdown.chimney?.enabled) {
-                  const chimneyLines = breakdown.chimney?.lines || [];
-                  chimneyLines.forEach((line, index) => {
-                    const lineSubtotal = (line.quantity || 0) * (line.price || 0);
-                    total += lineSubtotal;
-                    // Update the form value for display
-                    form.setValue(`exteriorBreakdown.chimney.lines.${index}.subtotal`, lineSubtotal);
-                  });
+                  const chimneySubtotal = (breakdown.chimney?.quantity || 0) * (breakdown.chimney?.price || 0);
+                  total += chimneySubtotal;
+                  form.setValue("exteriorBreakdown.chimney.subtotal", chimneySubtotal);
                 }
                 
                 // Porch columns and ceiling subtotal
