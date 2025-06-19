@@ -74,21 +74,47 @@ const InvoiceForm = ({
   const [selectedQuoteId, setSelectedQuoteId] = useState<number | null>(editingInvoice?.quoteId || null);
   const [showCreateClient, setShowCreateClient] = useState(false);
   const [showCreateProject, setShowCreateProject] = useState(false);
-  const [items, setItems] = useState<InvoiceItem[]>(editingInvoice?.items || [{
-    description: "Material 1",
-    quantity: 25,
-    unitPrice: 0,
-    total: 0,
-    discount: 0
-  }, {
-    description: "Mano de obra 1",
-    quantity: 5008,
-    unitPrice: 0,
-    total: 0,
-    discount: 0
-  }]);
+  const [items, setItems] = useState<InvoiceItem[]>(() => {
+    if (editingInvoice?.items && editingInvoice.items.length > 0) {
+      return editingInvoice.items;
+    }
+    return [{
+      description: "Material 1",
+      quantity: 25,
+      unitPrice: 0,
+      total: 0,
+      discount: 0
+    }, {
+      description: "Mano de obra 1",
+      quantity: 5008,
+      unitPrice: 0,
+      total: 0,
+      discount: 0
+    }];
+  });
   const [baseAmount, setBaseAmount] = useState<number>(0);
   const [globalDiscount, setGlobalDiscount] = useState<number>(0);
+
+  // Efecto para cargar datos del invoice al editar
+  useEffect(() => {
+    if (editingInvoice && open) {
+      setSelectedClientId(editingInvoice.clientId);
+      setSelectedProjectId(editingInvoice.projectId || null);
+      setSelectedQuoteId(editingInvoice.quoteId || null);
+      
+      // Reset form with editing data
+      form.reset({
+        clientId: editingInvoice.clientId,
+        projectId: editingInvoice.projectId,
+        quoteId: editingInvoice.quoteId,
+        issueDate: editingInvoice.issueDate,
+        dueDate: editingInvoice.dueDate,
+        totalAmount: editingInvoice.totalAmount,
+        status: editingInvoice.status,
+        notes: editingInvoice.notes || "",
+      });
+    }
+  }, [editingInvoice, open, form]);
 
   // Efecto para recalcular el total cuando cambien los items o descuento global
   useEffect(() => {
