@@ -6015,12 +6015,28 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 {form.watch("exteriorBreakdown.siding.lines").map((line, index) => (
                   line.subtotal > 0 && (
                     <div key={index} className="flex justify-between text-sm">
-                      <span className="text-gray-600">Siding Line #{index + 1}:</span>
+                      <span className="text-gray-600">Siding {line.material ? `(${line.material})` : `Line #${index + 1}`}:</span>
                       <span className="font-medium">${(line.subtotal || 0).toFixed(2)}</span>
                     </div>
                   )
                 ))}
               </>
+            )}
+            
+            {/* Dormer breakdown */}
+            {form.watch("exteriorBreakdown.dormer.enabled") && form.watch("exteriorBreakdown.dormer.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Dormer ({form.watch("exteriorBreakdown.dormer.complexity")}):</span>
+                <span className="font-medium">${(form.watch("exteriorBreakdown.dormer.subtotal") || 0).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {/* Chimney breakdown */}
+            {form.watch("exteriorBreakdown.chimney.enabled") && form.watch("exteriorBreakdown.chimney.subtotal") > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Chimney ({form.watch("exteriorBreakdown.chimney.type")}):</span>
+                <span className="font-medium">${(form.watch("exteriorBreakdown.chimney.subtotal") || 0).toFixed(2)}</span>
+              </div>
             )}
             
             {/* Windows breakdown */}
