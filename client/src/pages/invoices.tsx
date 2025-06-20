@@ -963,7 +963,7 @@ export default function Invoices() {
                     </div>
                   </div>
                   <div style="text-align: right; margin-left: 20px;">
-                    <div style="font-size: 12px; color: #666;">Qty: ${item.quantity}</div>
+                    <div style="font-size: 12px; color: #666;">Cant: ${item.quantity}</div>
                     <div style="font-size: 18px; font-weight: bold; color: #2563eb;">$${(item.quantity * item.unitPrice).toFixed(2)}</div>
                   </div>
                 </div>
@@ -1074,18 +1074,18 @@ export default function Invoices() {
       <div style="border-top: 2px solid #e2e8f0; padding-top: 20px; margin-top: 40px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <div style="font-weight: bold; color: #2563eb; margin-bottom: 5px;">Payment Terms:</div>
+            <div style="font-weight: bold; color: #2563eb; margin-bottom: 5px;">Términos de Pago:</div>
             <div style="color: #666; font-size: 11px;">
-              Payment is due within 30 days of invoice date.<br>
-              Late payments may incur additional charges.<br>
-              Thank you for choosing Dovalina Painting LLC!
+              El pago vence dentro de 30 días de la fecha de facturación.<br>
+              Los pagos tardíos pueden incurrir en cargos adicionales.<br>
+              ¡Gracias por elegir Dovalina Painting LLC!
             </div>
           </div>
           <div style="text-align: right;">
-            <div style="font-weight: bold; color: #2563eb; margin-bottom: 5px;">Contact Information:</div>
+            <div style="font-weight: bold; color: #2563eb; margin-bottom: 5px;">Información de Contacto:</div>
             <div style="color: #666; font-size: 11px;">
               Email: billing@dovalina-painting.com<br>
-              Phone: (555) 123-4567<br>
+              Teléfono: (555) 123-4567<br>
               www.dovalina-painting.com
             </div>
           </div>
