@@ -921,36 +921,39 @@ export default function Invoices() {
       </div>
 
       <div style="margin-bottom: 30px;">
-        <h3 style="color: #2563eb; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">SERVICIOS DE PINTURA EXTERIOR:</h3>
+        <h3 style="color: #2563eb; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">EXTERIOR PAINTING SERVICES:</h3>
         
         ${Array.isArray(invoice.items) && invoice.items.length > 0 ? `
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
-            <h4 style="color: #2563eb; margin-bottom: 15px; font-size: 16px;">Desglose del Proyecto:</h4>
+            <h4 style="color: #2563eb; margin-bottom: 15px; font-size: 16px;">Project Breakdown:</h4>
             ${invoice.items.map((item, index) => {
               // Transform generic descriptions into professional ones
               let displayDescription = item.description;
               let serviceDetails = '';
               
+              // Professional English descriptions for painting industry standard
               if (item.description === 'Material 1' || item.description.toLowerCase().includes('material')) {
-                displayDescription = 'Cajas (Soffit, Facia, Canaletas) - Pintura y Materiales Premium';
-                serviceDetails = '• Lavado a presión y preparación de superficie<br>• Raspado y lijado según sea necesario<br>• Aplicación de pintura exterior premium<br>• Acabado profesional y limpieza';
+                displayDescription = 'Exterior House Body Painting - Siding & Main Surfaces';
+                serviceDetails = '• Complete surface preparation and power washing<br>• Professional-grade primer application<br>• Two-coat premium exterior paint system<br>• Quality control inspection and cleanup';
               } else if (item.description === 'Labor' || item.description.toLowerCase().includes('labor')) {
-                displayDescription = 'Siding (Madera Natural) - Mano de Obra Profesional';
-                serviceDetails = '• Preparación completa de superficie y imprimación<br>• Aplicación de pintura exterior de alta calidad<br>• Trabajo de detalle y pintura de molduras<br>• Técnicas de acabado profesional';
+                displayDescription = 'Trim & Detail Work - Windows, Doors & Moldings';
+                serviceDetails = '• Detailed preparation of all trim surfaces<br>• Precision brush and roll application<br>• Window sash and frame painting<br>• Door and shutter refinishing';
               } else if (item.description.includes('Servicio de pintura')) {
-                displayDescription = 'Servicio Completo de Pintura Exterior';
-                serviceDetails = '• Servicio integral de pintura de casa<br>• Preparación de superficie e imprimación<br>• Aplicación de pintura premium<br>• Acabado de calidad y limpieza';
-              } else if (item.description.includes('Boxes') || item.description.includes('Cajas')) {
-                serviceDetails = '• Lavado a presión y preparación de superficie<br>• Raspado y lijado según sea necesario<br>• Aplicación de pintura exterior premium<br>• Acabado profesional y limpieza';
-              } else if (item.description.includes('Siding')) {
-                serviceDetails = '• Preparación completa de superficie e imprimación<br>• Aplicación de pintura exterior de alta calidad<br>• Trabajo de detalle y pintura de molduras<br>• Técnicas de acabado profesional';
-              } else if (item.description.includes('Preparation') || item.description.includes('Preparación')) {
-                serviceDetails = '• Lavado a presión de todas las superficies<br>• Raspado de pintura suelta y descascarada<br>• Lijado de áreas rugosas<br>• Calafateado de grietas y espacios';
-              } else if (item.description.includes('Additional') || item.description.includes('Windows') || item.description.includes('Trim') || item.description.includes('door') || item.description.includes('Front door')) {
-                displayDescription = item.description.includes('Front door') ? 'Pintura de Puerta Principal' : displayDescription;
-                serviceDetails = '• Pintura de marcos y molduras de ventanas<br>• Refinamiento de puertas y contraventanas<br>• Trabajo de detalle y retoques<br>• Inspección final de calidad';
+                displayDescription = 'Complete Exterior Painting Package';
+                serviceDetails = '• Comprehensive house painting service<br>• Professional surface preparation<br>• Premium paint application system<br>• Final inspection and warranty';
+              } else if (item.description.includes('Exterior House Body')) {
+                serviceDetails = '• Complete surface preparation and power washing<br>• Professional-grade primer application<br>• Two-coat premium exterior paint system<br>• Quality control inspection and cleanup';
+              } else if (item.description.includes('Trim & Detail Work')) {
+                serviceDetails = '• Detailed preparation of all trim surfaces<br>• Precision brush and roll application<br>• Window sash and frame painting<br>• Door and shutter refinishing';
+              } else if (item.description.includes('Soffit, Fascia & Gutters')) {
+                serviceDetails = '• Power washing and surface preparation<br>• Scraping and sanding as needed<br>• Primer and finish coat application<br>• Professional cleanup and protection';
+              } else if (item.description.includes('Surface Preparation')) {
+                serviceDetails = '• High-pressure washing of all surfaces<br>• Scraping of loose and peeling paint<br>• Sanding of rough areas and wood repair<br>• Caulking and sealing of gaps and cracks';
+              } else if (item.description.includes('Front door') || item.description.includes('door')) {
+                displayDescription = item.description.includes('Front door') ? 'Entry Door Refinishing & Painting' : displayDescription;
+                serviceDetails = '• Complete door surface preparation<br>• Hardware removal and protection<br>• Multi-coat paint system application<br>• Hardware reinstallation and cleanup';
               } else {
-                serviceDetails = '• Servicio de pintura profesional<br>• Materiales y mano de obra de calidad<br>• Gestión completa del proyecto<br>• Satisfacción garantizada';
+                serviceDetails = '• Professional painting service<br>• Quality materials and workmanship<br>• Complete project management<br>• 100% satisfaction guarantee';
               }
               
               return `
@@ -963,7 +966,7 @@ export default function Invoices() {
                     </div>
                   </div>
                   <div style="text-align: right; margin-left: 20px;">
-                    <div style="font-size: 12px; color: #666;">Cant: ${item.quantity}</div>
+                    <div style="font-size: 12px; color: #666;">Qty: ${item.quantity}</div>
                     <div style="font-size: 18px; font-weight: bold; color: #2563eb;">$${(item.quantity * item.unitPrice).toFixed(2)}</div>
                   </div>
                 </div>
@@ -972,51 +975,51 @@ export default function Invoices() {
             }).join('')}
             
             <div style="background: #e0f2fe; padding: 15px; border-radius: 6px; border: 1px solid #bae6fd; margin-top: 20px;">
-              <h5 style="color: #1e40af; margin-bottom: 10px; font-size: 14px;">Servicios Adicionales Incluidos:</h5>
+              <h5 style="color: #1e40af; margin-bottom: 10px; font-size: 14px;">Additional Services Included:</h5>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 11px; color: #374151;">
                 <div>
-                  <strong>Protección de Superficies:</strong><br>
-                  • Lonas protectoras y cubiertas<br>
-                  • Protección de jardines y caminos<br>
-                  • Enmascarado profesional y preparación
+                  <strong>Surface Protection:</strong><br>
+                  • Drop cloths and protective coverings<br>
+                  • Landscape and walkway protection<br>
+                  • Professional masking and preparation
                 </div>
                 <div>
-                  <strong>Control de Calidad:</strong><br>
-                  • Proceso de aplicación de múltiples capas<br>
-                  • Inspecciones de control de calidad<br>
-                  • Limpieza completa del área de trabajo
+                  <strong>Quality Assurance:</strong><br>
+                  • Multi-coat application process<br>
+                  • Quality control inspections<br>
+                  • Complete job site cleanup
                 </div>
               </div>
             </div>
           </div>
         ` : `
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
-            <h4 style="color: #2563eb; margin-bottom: 15px;">Paquete Completo de Pintura Exterior</h4>
+            <h4 style="color: #2563eb; margin-bottom: 15px;">Complete Exterior Painting Package</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
               <div>
-                <h5 style="color: #1e40af; margin-bottom: 10px;">Preparación de Superficie:</h5>
+                <h5 style="color: #1e40af; margin-bottom: 10px;">Surface Preparation:</h5>
                 <ul style="text-align: left; color: #666; font-size: 12px; list-style: none; padding: 0;">
-                  <li>• Lavado a presión</li>
-                  <li>• Raspado de pintura suelta</li>
-                  <li>• Lijado de superficies rugosas</li>
-                  <li>• Calafateado de grietas y espacios</li>
-                  <li>• Aplicación de imprimación</li>
+                  <li>• High-pressure washing</li>
+                  <li>• Scraping loose and peeling paint</li>
+                  <li>• Sanding rough surfaces</li>
+                  <li>• Caulking gaps and cracks</li>
+                  <li>• Professional primer application</li>
                 </ul>
               </div>
               <div>
-                <h5 style="color: #1e40af; margin-bottom: 10px;">Servicios de Pintura:</h5>
+                <h5 style="color: #1e40af; margin-bottom: 10px;">Painting Services:</h5>
                 <ul style="text-align: left; color: #666; font-size: 12px; list-style: none; padding: 0;">
-                  <li>• Pintura del cuerpo de la casa</li>
-                  <li>• Trabajo de molduras y detalles</li>
-                  <li>• Puertas y contraventanas</li>
-                  <li>• Soffit y fascia</li>
-                  <li>• Inspección final</li>
+                  <li>• House body and siding painting</li>
+                  <li>• Trim and detail work</li>
+                  <li>• Doors and shutters</li>
+                  <li>• Soffit and fascia</li>
+                  <li>• Final quality inspection</li>
                 </ul>
               </div>
             </div>
             <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
               <div style="font-size: 18px; font-weight: bold; color: #2563eb;">
-                Valor Total del Proyecto: $${total.toFixed(2)}
+                Total Project Value: $${total.toFixed(2)}
               </div>
             </div>
           </div>
@@ -1074,18 +1077,18 @@ export default function Invoices() {
       <div style="border-top: 2px solid #e2e8f0; padding-top: 20px; margin-top: 40px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <div style="font-weight: bold; color: #2563eb; margin-bottom: 5px;">Términos de Pago:</div>
+            <div style="font-weight: bold; color: #2563eb; margin-bottom: 5px;">Payment Terms:</div>
             <div style="color: #666; font-size: 11px;">
-              El pago vence dentro de 30 días de la fecha de facturación.<br>
-              Los pagos tardíos pueden incurrir en cargos adicionales.<br>
-              ¡Gracias por elegir Dovalina Painting LLC!
+              Payment is due within 30 days of invoice date.<br>
+              Late payments may incur additional charges.<br>
+              Thank you for choosing Dovalina Painting LLC!
             </div>
           </div>
           <div style="text-align: right;">
-            <div style="font-weight: bold; color: #2563eb; margin-bottom: 5px;">Información de Contacto:</div>
+            <div style="font-weight: bold; color: #2563eb; margin-bottom: 5px;">Contact Information:</div>
             <div style="color: #666; font-size: 11px;">
               Email: billing@dovalina-painting.com<br>
-              Teléfono: (555) 123-4567<br>
+              Phone: (555) 123-4567<br>
               www.dovalina-painting.com
             </div>
           </div>
@@ -1278,31 +1281,39 @@ export default function Invoices() {
                       // Parse scope of work from the quote description or scopeOfWork field
                       const scopeText = quote.scopeOfWork || quote.description || '';
                       
-                      // Always create detailed professional descriptions instead of generic ones
+                      // Create professional English descriptions based on standard painting industry breakdown
                       const totalAmount = parseFloat(quote.totalEstimate?.toString() || '0');
                       
-                      // Create detailed breakdown based on project scope
+                      // Professional exterior painting breakdown
                       invoiceItems.push({
-                        description: `Boxes (Soffit, Facia, Gutters) - Premium Exterior Paint Application`,
+                        description: `Exterior House Body Painting - Siding & Main Surfaces`,
                         quantity: 1,
-                        unitPrice: Math.round(totalAmount * 0.45),
-                        total: Math.round(totalAmount * 0.45),
+                        unitPrice: Math.round(totalAmount * 0.50),
+                        total: Math.round(totalAmount * 0.50),
                         discount: 0
                       });
                       
                       invoiceItems.push({
-                        description: `Siding (Natural Wood) - Complete Surface Preparation & Painting`,
+                        description: `Trim & Detail Work - Windows, Doors & Moldings`,
                         quantity: 1,
-                        unitPrice: Math.round(totalAmount * 0.40),
-                        total: Math.round(totalAmount * 0.40),
+                        unitPrice: Math.round(totalAmount * 0.25),
+                        total: Math.round(totalAmount * 0.25),
                         discount: 0
                       });
                       
                       invoiceItems.push({
-                        description: `Surface Preparation - Power Washing, Scraping & Priming`,
+                        description: `Soffit, Fascia & Gutters - Complete Painting System`,
                         quantity: 1,
                         unitPrice: Math.round(totalAmount * 0.15),
                         total: Math.round(totalAmount * 0.15),
+                        discount: 0
+                      });
+                      
+                      invoiceItems.push({
+                        description: `Surface Preparation & Priming - Professional Grade`,
+                        quantity: 1,
+                        unitPrice: Math.round(totalAmount * 0.10),
+                        total: Math.round(totalAmount * 0.10),
                         discount: 0
                       });
                       
