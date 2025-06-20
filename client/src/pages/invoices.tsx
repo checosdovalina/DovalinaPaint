@@ -1052,17 +1052,9 @@ export default function Invoices() {
       <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
         <div style="width: 300px;">
           <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <td style="padding: 8px; text-align: right; font-size: 14px; color: #666;">Subtotal:</td>
-              <td style="padding: 8px; text-align: right; font-weight: bold; font-size: 16px;">$${subtotal.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; text-align: right; font-size: 14px; color: #666;">Tax (8%):</td>
-              <td style="padding: 8px; text-align: right; font-weight: bold; font-size: 16px;">$${tax.toFixed(2)}</td>
-            </tr>
             <tr style="border-top: 2px solid #2563eb;">
               <td style="padding: 12px; text-align: right; font-size: 18px; font-weight: bold; color: #2563eb;">TOTAL:</td>
-              <td style="padding: 12px; text-align: right; font-size: 20px; font-weight: bold; color: #2563eb;">$${total.toFixed(2)}</td>
+              <td style="padding: 12px; text-align: right; font-size: 20px; font-weight: bold; color: #2563eb;">$${subtotal.toFixed(2)}</td>
             </tr>
           </table>
         </div>
