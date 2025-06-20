@@ -937,7 +937,7 @@ export default function Invoices() {
               // Professional English descriptions for painting industry standard
               if (item.description === 'Material 1' || item.description.toLowerCase().includes('material')) {
                 displayDescription = 'Exterior House Body Painting - Siding & Main Surfaces';
-                serviceDetails = '• Complete surface preparation and power washing<br>• Professional-grade primer application<br>• Two-coat premium exterior paint system<br>• Quality control inspection and cleanup';
+                serviceDetails = '• Complete surface preparation and power washing<br>• Quality control inspection and cleanup';
               } else if (item.description === 'Labor' || item.description.toLowerCase().includes('labor')) {
                 displayDescription = 'Trim & Detail Work - Windows, Doors & Moldings';
                 serviceDetails = '• Detailed preparation of all trim surfaces<br>• Precision brush and roll application<br>• Window sash and frame painting<br>• Door and shutter refinishing';
@@ -945,7 +945,7 @@ export default function Invoices() {
                 displayDescription = 'Complete Exterior Painting Package';
                 serviceDetails = '• Comprehensive house painting service<br>• Professional surface preparation<br>• Premium paint application system<br>• Final inspection and warranty';
               } else if (item.description.includes('Exterior House Body')) {
-                serviceDetails = '• Complete surface preparation and power washing<br>• Professional-grade primer application<br>• Two-coat premium exterior paint system<br>• Quality control inspection and cleanup';
+                serviceDetails = '• Complete surface preparation and power washing<br>• Quality control inspection and cleanup';
               } else if (item.description.includes('Trim & Detail Work')) {
                 serviceDetails = '• Detailed preparation of all trim surfaces<br>• Precision brush and roll application<br>• Window sash and frame painting<br>• Door and shutter refinishing';
               } else if (item.description.includes('Soffit, Fascia & Gutters')) {
