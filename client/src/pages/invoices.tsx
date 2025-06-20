@@ -333,18 +333,21 @@ const InvoiceForm = ({
   // Mutación para crear/actualizar factura
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const url = editingInvoice
-        ? `/api/invoices/${editingInvoice.id}`
-        : "/api/invoices";
-      const method = editingInvoice ? "PATCH" : "POST";
+      // If editingInvoice has ID 0, treat it as a new invoice
+      const isNewInvoice = !editingInvoice || editingInvoice.id === 0;
+      const url = isNewInvoice
+        ? "/api/invoices"
+        : `/api/invoices/${editingInvoice.id}`;
+      const method = isNewInvoice ? "POST" : "PATCH";
       const res = await apiRequest(method, url, { ...data, items });
       return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
+      const isNewInvoice = !editingInvoice || editingInvoice.id === 0;
       toast({
-        title: `Factura ${editingInvoice ? "Actualizada" : "Creada"}`,
-        description: `La factura ha sido ${editingInvoice ? "actualizada" : "creada"} exitosamente.`,
+        title: `Factura ${isNewInvoice ? "Creada" : "Actualizada"}`,
+        description: `La factura ha sido ${isNewInvoice ? "creada" : "actualizada"} exitosamente.`,
       });
       onSuccess();
       onClose();
