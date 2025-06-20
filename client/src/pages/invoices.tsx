@@ -1222,133 +1222,131 @@ export default function Invoices() {
           </CardContent>
         </Card>
       ) : (
-        <>
-          {viewMode === 'cards' ? (
-        <div className="grid gap-4">
-          {filteredInvoices.map((invoice: Invoice) => (
-            <Card key={invoice.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold">Invoice #{invoice.invoiceNumber}</h3>
-                      <Badge variant={getStatusBadge(invoice.status).variant}>
-                        {getStatusBadge(invoice.status).label}
-                      </Badge>
-                    </div>
-                    
-                    <div className="space-y-1 text-sm text-muted-foreground">
+        viewMode === 'cards' ? (
+          <div className="grid gap-4">
+            {filteredInvoices.map((invoice: Invoice) => (
+              <Card key={invoice.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2">
                       <div className="flex items-center space-x-2">
-                        <User className="h-4 w-4" />
-                        <span>{getClientName(invoice.clientId)}</span>
-                      </div>
-                      
-                      {invoice.projectId && (
-                        <div className="flex items-center space-x-2">
-                          <FileText className="h-4 w-4" />
-                          <span>{getProjectTitle(invoice.projectId)}</span>
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>Issued: {new Date(invoice.issueDate).toLocaleDateString()}</span>
-                        <span>•</span>
-                        <span>Due: {new Date(invoice.dueDate).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right space-y-2">
-                    <div className="flex items-center space-x-2 text-lg font-semibold">
-                      <DollarSign className="h-5 w-5" />
-                      <span>${typeof invoice.totalAmount === 'number' ? invoice.totalAmount.toFixed(2) : parseFloat(invoice.totalAmount).toFixed(2)}</span>
-                    </div>
-                    
-                    <div className="space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => generateInvoicePDF(invoice)}
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        PDF
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(invoice)}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b bg-muted/50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-sm font-medium">Invoice #</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium">Client</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium">Project</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium">Status</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium">Issue Date</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium">Due Date</th>
-                    <th className="px-6 py-3 text-right text-sm font-medium">Amount</th>
-                    <th className="px-6 py-3 text-right text-sm font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {filteredInvoices.map((invoice: Invoice) => (
-                    <tr key={invoice.id} className="hover:bg-muted/25">
-                      <td className="px-6 py-4 text-sm font-medium">#{invoice.invoiceNumber}</td>
-                      <td className="px-6 py-4 text-sm">{getClientName(invoice.clientId)}</td>
-                      <td className="px-6 py-4 text-sm">{getProjectTitle(invoice.projectId || 0)}</td>
-                      <td className="px-6 py-4">
-                        <Badge variant={getStatusBadge(invoice.status).variant} className="text-xs">
+                        <h3 className="font-semibold">Invoice #{invoice.invoiceNumber}</h3>
+                        <Badge variant={getStatusBadge(invoice.status).variant}>
                           {getStatusBadge(invoice.status).label}
                         </Badge>
-                      </td>
-                      <td className="px-6 py-4 text-sm">{new Date(invoice.issueDate).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 text-sm">{new Date(invoice.dueDate).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 text-sm text-right font-semibold">
-                        ${typeof invoice.totalAmount === 'number' ? invoice.totalAmount.toFixed(2) : parseFloat(invoice.totalAmount).toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end space-x-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => generateInvoicePDF(invoice)}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(invoice)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                      </div>
+                      
+                      <div className="space-y-1 text-sm text-muted-foreground">
+                        <div className="flex items-center space-x-2">
+                          <User className="h-4 w-4" />
+                          <span>{getClientName(invoice.clientId)}</span>
                         </div>
-                      </td>
+                        
+                        {invoice.projectId && (
+                          <div className="flex items-center space-x-2">
+                            <FileText className="h-4 w-4" />
+                            <span>{getProjectTitle(invoice.projectId)}</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="h-4 w-4" />
+                          <span>Issued: {new Date(invoice.issueDate).toLocaleDateString()}</span>
+                          <span>•</span>
+                          <span>Due: {new Date(invoice.dueDate).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-right space-y-2">
+                      <div className="flex items-center space-x-2 text-lg font-semibold">
+                        <DollarSign className="h-5 w-5" />
+                        <span>${typeof invoice.totalAmount === 'number' ? invoice.totalAmount.toFixed(2) : parseFloat(invoice.totalAmount).toFixed(2)}</span>
+                      </div>
+                      
+                      <div className="space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => generateInvoicePDF(invoice)}
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          PDF
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(invoice)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b bg-muted/50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-sm font-medium">Invoice #</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium">Client</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium">Project</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium">Status</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium">Issue Date</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium">Due Date</th>
+                      <th className="px-6 py-3 text-right text-sm font-medium">Amount</th>
+                      <th className="px-6 py-3 text-right text-sm font-medium">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-          )}
-        </>
+                  </thead>
+                  <tbody className="divide-y">
+                    {filteredInvoices.map((invoice: Invoice) => (
+                      <tr key={invoice.id} className="hover:bg-muted/25">
+                        <td className="px-6 py-4 text-sm font-medium">#{invoice.invoiceNumber}</td>
+                        <td className="px-6 py-4 text-sm">{getClientName(invoice.clientId)}</td>
+                        <td className="px-6 py-4 text-sm">{getProjectTitle(invoice.projectId || 0)}</td>
+                        <td className="px-6 py-4">
+                          <Badge variant={getStatusBadge(invoice.status).variant} className="text-xs">
+                            {getStatusBadge(invoice.status).label}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 text-sm">{new Date(invoice.issueDate).toLocaleDateString()}</td>
+                        <td className="px-6 py-4 text-sm">{new Date(invoice.dueDate).toLocaleDateString()}</td>
+                        <td className="px-6 py-4 text-sm text-right font-semibold">
+                          ${typeof invoice.totalAmount === 'number' ? invoice.totalAmount.toFixed(2) : parseFloat(invoice.totalAmount).toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => generateInvoicePDF(invoice)}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(invoice)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )
       )}
 
       <InvoiceForm
