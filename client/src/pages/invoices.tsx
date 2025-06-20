@@ -926,16 +926,39 @@ export default function Invoices() {
         ${Array.isArray(invoice.items) && invoice.items.length > 0 ? `
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
             <h4 style="color: #2563eb; margin-bottom: 15px; font-size: 16px;">Project Breakdown:</h4>
-            ${invoice.items.map((item, index) => `
+            ${invoice.items.map((item, index) => {
+              // Transform generic descriptions into professional ones
+              let displayDescription = item.description;
+              let serviceDetails = '';
+              
+              if (item.description === 'Material 1' || item.description.toLowerCase().includes('material')) {
+                displayDescription = 'Boxes (Soffit, Facia, Gutters) - Premium Exterior Paint & Materials';
+                serviceDetails = '• Power washing and surface preparation<br>• Scraping and sanding as needed<br>• Premium exterior paint application<br>• Professional finish and cleanup';
+              } else if (item.description === 'Labor' || item.description.toLowerCase().includes('labor')) {
+                displayDescription = 'Siding (Natural Wood) - Professional Painting Labor';
+                serviceDetails = '• Complete surface preparation and priming<br>• High-quality exterior paint application<br>• Detail work and trim painting<br>• Professional finishing techniques';
+              } else if (item.description.includes('Servicio de pintura')) {
+                displayDescription = 'Complete Exterior Painting Service';
+                serviceDetails = '• Comprehensive house painting service<br>• Surface preparation and priming<br>• Premium paint application<br>• Quality finishing and cleanup';
+              } else if (item.description.includes('Boxes')) {
+                serviceDetails = '• Power washing and surface preparation<br>• Scraping and sanding as needed<br>• Premium exterior paint application<br>• Professional finish and cleanup';
+              } else if (item.description.includes('Siding')) {
+                serviceDetails = '• Complete surface preparation and priming<br>• High-quality exterior paint application<br>• Detail work and trim painting<br>• Professional finishing techniques';
+              } else if (item.description.includes('Preparation')) {
+                serviceDetails = '• Power washing all surfaces<br>• Scraping loose and peeling paint<br>• Sanding rough areas<br>• Caulking gaps and cracks';
+              } else if (item.description.includes('Additional') || item.description.includes('Windows') || item.description.includes('Trim') || item.description.includes('door')) {
+                serviceDetails = '• Window trim and frame painting<br>• Door and shutter refinishing<br>• Detail work and touch-ups<br>• Final quality inspection';
+              } else {
+                serviceDetails = '• Professional painting service<br>• Quality materials and workmanship<br>• Complete project management<br>• Satisfaction guaranteed';
+              }
+              
+              return `
               <div style="background: white; margin-bottom: 15px; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                   <div style="flex: 1;">
-                    <div style="font-weight: bold; color: #1e40af; font-size: 14px; margin-bottom: 4px;">${item.description}</div>
+                    <div style="font-weight: bold; color: #1e40af; font-size: 14px; margin-bottom: 4px;">${displayDescription}</div>
                     <div style="font-size: 11px; color: #666; line-height: 1.4;">
-                      ${item.description.includes('Boxes') ? '• Power washing and surface preparation<br>• Scraping and sanding as needed<br>• Premium exterior paint application<br>• Professional finish and cleanup' : ''}
-                      ${item.description.includes('Siding') ? '• Complete surface preparation and priming<br>• High-quality exterior paint application<br>• Detail work and trim painting<br>• Professional finishing techniques' : ''}
-                      ${item.description.includes('Preparation') ? '• Power washing all surfaces<br>• Scraping loose and peeling paint<br>• Sanding rough areas<br>• Caulking gaps and cracks' : ''}
-                      ${item.description.includes('Additional') || item.description.includes('Windows') || item.description.includes('Trim') ? '• Window trim and frame painting<br>• Door and shutter refinishing<br>• Detail work and touch-ups<br>• Final quality inspection' : ''}
+                      ${serviceDetails}
                     </div>
                   </div>
                   <div style="text-align: right; margin-left: 20px;">
@@ -944,7 +967,8 @@ export default function Invoices() {
                   </div>
                 </div>
               </div>
-            `).join('')}
+              `;
+            }).join('')}
             
             <div style="background: #e0f2fe; padding: 15px; border-radius: 6px; border: 1px solid #bae6fd; margin-top: 20px;">
               <h5 style="color: #1e40af; margin-bottom: 10px; font-size: 14px;">Additional Services Included:</h5>
@@ -1253,78 +1277,35 @@ export default function Invoices() {
                       // Parse scope of work from the quote description or scopeOfWork field
                       const scopeText = quote.scopeOfWork || quote.description || '';
                       
-                      // Check if we can extract detailed breakdown from quote data
-                      if (quote.materialsEstimate && Array.isArray(quote.materialsEstimate)) {
-                        quote.materialsEstimate.forEach((material: any, index: number) => {
-                          // Create detailed descriptions based on typical painting services
-                          let description = material.item || `Material ${index + 1}`;
-                          if (description.toLowerCase().includes('material') || description === `Material ${index + 1}`) {
-                            description = `Boxes (Soffit, Facia, Gutters) - Premium Exterior Paint & Materials`;
-                          }
-                          
-                          invoiceItems.push({
-                            description: description,
-                            quantity: parseFloat(material.quantity) || 1,
-                            unitPrice: parseFloat(material.unitPrice) || parseFloat(material.cost) || 0,
-                            total: (parseFloat(material.quantity) || 1) * (parseFloat(material.unitPrice) || parseFloat(material.cost) || 0),
-                            discount: 0
-                          });
-                        });
-                      }
+                      // Always create detailed professional descriptions instead of generic ones
+                      const totalAmount = parseFloat(quote.totalEstimate?.toString() || '0');
                       
-                      // Add labor with specific descriptions
-                      if (quote.laborEstimate && Array.isArray(quote.laborEstimate)) {
-                        quote.laborEstimate.forEach((labor: any, index: number) => {
-                          let description = labor.description || `Labor ${index + 1}`;
-                          
-                          // Enhance generic labor descriptions
-                          if (description.toLowerCase().includes('labor') || description === `Labor ${index + 1}`) {
-                            if (index === 0) {
-                              description = `Siding (Natural Wood) - Surface Preparation & Painting`;
-                            } else {
-                              description = `Additional Painting Services - Trim, Windows & Detail Work`;
-                            }
-                          }
-                          
-                          invoiceItems.push({
-                            description: description,
-                            quantity: parseFloat(labor.hours) || parseFloat(labor.quantity) || 1,
-                            unitPrice: parseFloat(labor.rate) || parseFloat(labor.unitPrice) || 0,
-                            total: (parseFloat(labor.hours) || parseFloat(labor.quantity) || 1) * (parseFloat(labor.rate) || parseFloat(labor.unitPrice) || 0),
-                            discount: 0
-                          });
-                        });
-                      }
+                      // Create detailed breakdown based on project scope
+                      invoiceItems.push({
+                        description: `Boxes (Soffit, Facia, Gutters) - Premium Exterior Paint Application`,
+                        quantity: 1,
+                        unitPrice: Math.round(totalAmount * 0.45),
+                        total: Math.round(totalAmount * 0.45),
+                        discount: 0
+                      });
                       
-                      // If no detailed items, create comprehensive breakdown from total
-                      if (invoiceItems.length === 0) {
-                        const totalAmount = parseFloat(quote.totalEstimate?.toString() || '0');
-                        
-                        // Create detailed breakdown for comprehensive exterior painting
-                        invoiceItems.push({
-                          description: `Boxes (Soffit, Facia, Gutters) - Premium Exterior Paint`,
-                          quantity: 1,
-                          unitPrice: Math.round(totalAmount * 0.4),
-                          total: Math.round(totalAmount * 0.4),
-                          discount: 0
-                        });
-                        
-                        invoiceItems.push({
-                          description: `Siding (Natural Wood) - Surface Preparation & Painting`,
-                          quantity: 1,
-                          unitPrice: Math.round(totalAmount * 0.5),
-                          total: Math.round(totalAmount * 0.5),
-                          discount: 0
-                        });
-                        
-                        invoiceItems.push({
-                          description: `Surface Preparation - Power Washing, Scraping & Priming`,
-                          quantity: 1,
-                          unitPrice: Math.round(totalAmount * 0.1),
-                          total: Math.round(totalAmount * 0.1),
-                          discount: 0
-                        });
-                      }
+                      invoiceItems.push({
+                        description: `Siding (Natural Wood) - Complete Surface Preparation & Painting`,
+                        quantity: 1,
+                        unitPrice: Math.round(totalAmount * 0.40),
+                        total: Math.round(totalAmount * 0.40),
+                        discount: 0
+                      });
+                      
+                      invoiceItems.push({
+                        description: `Surface Preparation - Power Washing, Scraping & Priming`,
+                        quantity: 1,
+                        unitPrice: Math.round(totalAmount * 0.15),
+                        total: Math.round(totalAmount * 0.15),
+                        discount: 0
+                      });
+                      
+
                       
                       // Create mock invoice from quote
                       const mockInvoice: Invoice = {
