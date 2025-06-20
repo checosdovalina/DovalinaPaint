@@ -1220,7 +1220,7 @@ export default function Invoices() {
                   <div className="text-right space-y-2">
                     <div className="flex items-center space-x-2 text-lg font-semibold">
                       <DollarSign className="h-5 w-5" />
-                      <span>${parseFloat(invoice.totalAmount).toFixed(2)}</span>
+                      <span>${typeof invoice.totalAmount === 'number' ? invoice.totalAmount.toFixed(2) : parseFloat(invoice.totalAmount).toFixed(2)}</span>
                     </div>
                     
                     <div className="space-x-2">
