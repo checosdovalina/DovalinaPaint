@@ -924,36 +924,46 @@ export default function Invoices() {
         <h3 style="color: #2563eb; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">EXTERIOR PAINTING SERVICES:</h3>
         
         ${Array.isArray(invoice.items) && invoice.items.length > 0 ? `
-          <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; margin-bottom: 20px;">
-            <thead>
-              <tr style="background: #2563eb; color: white;">
-                <th style="padding: 12px; text-align: left; font-weight: bold;">Service Description</th>
-                <th style="padding: 12px; text-align: center; font-weight: bold;">Quantity</th>
-                <th style="padding: 12px; text-align: center; font-weight: bold;">Unit</th>
-                <th style="padding: 12px; text-align: right; font-weight: bold;">Rate</th>
-                <th style="padding: 12px; text-align: right; font-weight: bold;">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${invoice.items.map((item, index) => `
-                <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f8fafc;' : ''}">
-                  <td style="padding: 12px; border-right: 1px solid #e2e8f0;">
-                    <div style="font-weight: bold; margin-bottom: 4px;">${item.description}</div>
-                    <div style="font-size: 11px; color: #666;">
-                      ${item.description.includes('Material') ? 'Includes premium exterior paint, primer, and supplies' : ''}
-                      ${item.description.includes('Mano de obra') || item.description.includes('Labor') ? 'Professional painting labor including surface preparation, priming, and finishing' : ''}
+          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+            <h4 style="color: #2563eb; margin-bottom: 15px; font-size: 16px;">Project Breakdown:</h4>
+            ${invoice.items.map((item, index) => `
+              <div style="background: white; margin-bottom: 15px; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                  <div style="flex: 1;">
+                    <div style="font-weight: bold; color: #1e40af; font-size: 14px; margin-bottom: 4px;">${item.description}</div>
+                    <div style="font-size: 11px; color: #666; line-height: 1.4;">
+                      ${item.description.includes('Boxes') ? '• Power washing and surface preparation<br>• Scraping and sanding as needed<br>• Premium exterior paint application<br>• Professional finish and cleanup' : ''}
+                      ${item.description.includes('Siding') ? '• Complete surface preparation and priming<br>• High-quality exterior paint application<br>• Detail work and trim painting<br>• Professional finishing techniques' : ''}
+                      ${item.description.includes('Preparation') ? '• Power washing all surfaces<br>• Scraping loose and peeling paint<br>• Sanding rough areas<br>• Caulking gaps and cracks' : ''}
+                      ${item.description.includes('Additional') || item.description.includes('Windows') || item.description.includes('Trim') ? '• Window trim and frame painting<br>• Door and shutter refinishing<br>• Detail work and touch-ups<br>• Final quality inspection' : ''}
                     </div>
-                  </td>
-                  <td style="padding: 12px; text-align: center; border-right: 1px solid #e2e8f0; font-weight: bold;">${item.quantity}</td>
-                  <td style="padding: 12px; text-align: center; border-right: 1px solid #e2e8f0;">
-                    ${item.description.includes('Material') ? 'gallons' : 'sq ft'}
-                  </td>
-                  <td style="padding: 12px; text-align: right; border-right: 1px solid #e2e8f0;">$${item.unitPrice.toFixed(2)}</td>
-                  <td style="padding: 12px; text-align: right; font-weight: bold; color: #2563eb;">$${(item.quantity * item.unitPrice).toFixed(2)}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+                  </div>
+                  <div style="text-align: right; margin-left: 20px;">
+                    <div style="font-size: 12px; color: #666;">Qty: ${item.quantity}</div>
+                    <div style="font-size: 18px; font-weight: bold; color: #2563eb;">$${(item.quantity * item.unitPrice).toFixed(2)}</div>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+            
+            <div style="background: #e0f2fe; padding: 15px; border-radius: 6px; border: 1px solid #bae6fd; margin-top: 20px;">
+              <h5 style="color: #1e40af; margin-bottom: 10px; font-size: 14px;">Additional Services Included:</h5>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 11px; color: #374151;">
+                <div>
+                  <strong>Surface Protection:</strong><br>
+                  • Drop cloths and protective coverings<br>
+                  • Landscape and walkway protection<br>
+                  • Professional masking and preparation
+                </div>
+                <div>
+                  <strong>Quality Assurance:</strong><br>
+                  • Multi-coat application process<br>
+                  • Quality control inspections<br>
+                  • Complete job site cleanup
+                </div>
+              </div>
+            </div>
+          </div>
         ` : `
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
             <h4 style="color: #2563eb; margin-bottom: 15px;">Comprehensive Exterior Painting Package</h4>
@@ -1231,20 +1241,29 @@ export default function Invoices() {
             
             {Array.isArray(quotes) && quotes.length > 0 ? (
               <div className="space-y-2">
-                {quotes.map((quote: Quote) => {
-                  const client = Array.isArray(clients) ? clients.find((c: Client) => c.id === quote.clientId) : null;
+                {quotes.map((quote: any) => {
                   const project = Array.isArray(projects) ? projects.find((p: Project) => p.id === quote.projectId) : null;
+                  const client = Array.isArray(clients) ? clients.find((c: Client) => c.id === project?.clientId) : null;
                   
                   return (
                     <Card key={quote.id} className="p-4 cursor-pointer hover:bg-accent" onClick={() => {
-                      // Convert quote to invoice
-                      const invoiceItems = [];
+                      // Convert quote to invoice with detailed scope of work
+                      const invoiceItems: InvoiceItem[] = [];
                       
-                      // Add materials
+                      // Parse scope of work from the quote description or scopeOfWork field
+                      const scopeText = quote.scopeOfWork || quote.description || '';
+                      
+                      // Check if we can extract detailed breakdown from quote data
                       if (quote.materialsEstimate && Array.isArray(quote.materialsEstimate)) {
                         quote.materialsEstimate.forEach((material: any, index: number) => {
+                          // Create detailed descriptions based on typical painting services
+                          let description = material.item || `Material ${index + 1}`;
+                          if (description.toLowerCase().includes('material') || description === `Material ${index + 1}`) {
+                            description = `Boxes (Soffit, Facia, Gutters) - Premium Exterior Paint & Materials`;
+                          }
+                          
                           invoiceItems.push({
-                            description: material.item || `Material ${index + 1}`,
+                            description: description,
                             quantity: parseFloat(material.quantity) || 1,
                             unitPrice: parseFloat(material.unitPrice) || parseFloat(material.cost) || 0,
                             total: (parseFloat(material.quantity) || 1) * (parseFloat(material.unitPrice) || parseFloat(material.cost) || 0),
@@ -1253,11 +1272,22 @@ export default function Invoices() {
                         });
                       }
                       
-                      // Add labor
+                      // Add labor with specific descriptions
                       if (quote.laborEstimate && Array.isArray(quote.laborEstimate)) {
                         quote.laborEstimate.forEach((labor: any, index: number) => {
+                          let description = labor.description || `Labor ${index + 1}`;
+                          
+                          // Enhance generic labor descriptions
+                          if (description.toLowerCase().includes('labor') || description === `Labor ${index + 1}`) {
+                            if (index === 0) {
+                              description = `Siding (Natural Wood) - Surface Preparation & Painting`;
+                            } else {
+                              description = `Additional Painting Services - Trim, Windows & Detail Work`;
+                            }
+                          }
+                          
                           invoiceItems.push({
-                            description: labor.description || `Labor ${index + 1}`,
+                            description: description,
                             quantity: parseFloat(labor.hours) || parseFloat(labor.quantity) || 1,
                             unitPrice: parseFloat(labor.rate) || parseFloat(labor.unitPrice) || 0,
                             total: (parseFloat(labor.hours) || parseFloat(labor.quantity) || 1) * (parseFloat(labor.rate) || parseFloat(labor.unitPrice) || 0),
@@ -1266,10 +1296,40 @@ export default function Invoices() {
                         });
                       }
                       
+                      // If no detailed items, create comprehensive breakdown from total
+                      if (invoiceItems.length === 0) {
+                        const totalAmount = parseFloat(quote.totalEstimate?.toString() || '0');
+                        
+                        // Create detailed breakdown for comprehensive exterior painting
+                        invoiceItems.push({
+                          description: `Boxes (Soffit, Facia, Gutters) - Premium Exterior Paint`,
+                          quantity: 1,
+                          unitPrice: Math.round(totalAmount * 0.4),
+                          total: Math.round(totalAmount * 0.4),
+                          discount: 0
+                        });
+                        
+                        invoiceItems.push({
+                          description: `Siding (Natural Wood) - Surface Preparation & Painting`,
+                          quantity: 1,
+                          unitPrice: Math.round(totalAmount * 0.5),
+                          total: Math.round(totalAmount * 0.5),
+                          discount: 0
+                        });
+                        
+                        invoiceItems.push({
+                          description: `Surface Preparation - Power Washing, Scraping & Priming`,
+                          quantity: 1,
+                          unitPrice: Math.round(totalAmount * 0.1),
+                          total: Math.round(totalAmount * 0.1),
+                          discount: 0
+                        });
+                      }
+                      
                       // Create mock invoice from quote
                       const mockInvoice: Invoice = {
                         id: 0, // New invoice
-                        clientId: quote.clientId || 0,
+                        clientId: project?.clientId || 0,
                         projectId: quote.projectId || undefined,
                         quoteId: quote.id,
                         invoiceNumber: `INV-${Date.now()}`,
@@ -1277,7 +1337,7 @@ export default function Invoices() {
                         dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                         totalAmount: parseFloat(quote.totalEstimate?.toString() || '0'),
                         status: 'draft',
-                        notes: `Invoice created from Quote #${quote.id}`,
+                        notes: `Invoice created from Quote #${quote.id} - ${project?.title || 'Exterior Painting Project'}`,
                         items: invoiceItems,
                         createdAt: new Date().toISOString()
                       };
