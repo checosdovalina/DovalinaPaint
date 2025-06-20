@@ -1217,6 +1217,99 @@ export default function Invoices() {
         onSuccess={handleFormSuccess}
         editingInvoice={editingInvoice}
       />
+
+      {/* Quote to Invoice Dialog */}
+      <Dialog open={showQuoteToInvoice} onOpenChange={setShowQuoteToInvoice}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create Invoice from Quote</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Select a quote to convert into an invoice. All quote details will be transferred.
+            </p>
+            
+            {Array.isArray(quotes) && quotes.length > 0 ? (
+              <div className="space-y-2">
+                {quotes.map((quote: Quote) => {
+                  const client = Array.isArray(clients) ? clients.find((c: Client) => c.id === quote.clientId) : null;
+                  const project = Array.isArray(projects) ? projects.find((p: Project) => p.id === quote.projectId) : null;
+                  
+                  return (
+                    <Card key={quote.id} className="p-4 cursor-pointer hover:bg-accent" onClick={() => {
+                      // Convert quote to invoice
+                      const invoiceItems = [];
+                      
+                      // Add materials
+                      if (quote.materialsEstimate && Array.isArray(quote.materialsEstimate)) {
+                        quote.materialsEstimate.forEach((material: any, index: number) => {
+                          invoiceItems.push({
+                            description: material.item || `Material ${index + 1}`,
+                            quantity: parseFloat(material.quantity) || 1,
+                            unitPrice: parseFloat(material.unitPrice) || parseFloat(material.cost) || 0,
+                            total: (parseFloat(material.quantity) || 1) * (parseFloat(material.unitPrice) || parseFloat(material.cost) || 0),
+                            discount: 0
+                          });
+                        });
+                      }
+                      
+                      // Add labor
+                      if (quote.laborEstimate && Array.isArray(quote.laborEstimate)) {
+                        quote.laborEstimate.forEach((labor: any, index: number) => {
+                          invoiceItems.push({
+                            description: labor.description || `Labor ${index + 1}`,
+                            quantity: parseFloat(labor.hours) || parseFloat(labor.quantity) || 1,
+                            unitPrice: parseFloat(labor.rate) || parseFloat(labor.unitPrice) || 0,
+                            total: (parseFloat(labor.hours) || parseFloat(labor.quantity) || 1) * (parseFloat(labor.rate) || parseFloat(labor.unitPrice) || 0),
+                            discount: 0
+                          });
+                        });
+                      }
+                      
+                      // Create mock invoice from quote
+                      const mockInvoice: Invoice = {
+                        id: 0, // New invoice
+                        clientId: quote.clientId || 0,
+                        projectId: quote.projectId || undefined,
+                        quoteId: quote.id,
+                        invoiceNumber: `INV-${Date.now()}`,
+                        issueDate: new Date().toISOString().split('T')[0],
+                        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                        totalAmount: parseFloat(quote.totalEstimate?.toString() || '0'),
+                        status: 'draft',
+                        notes: `Invoice created from Quote #${quote.id}`,
+                        items: invoiceItems,
+                        createdAt: new Date().toISOString()
+                      };
+                      
+                      setEditingInvoice(mockInvoice);
+                      setShowQuoteToInvoice(false);
+                      setIsFormOpen(true);
+                    }}>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-semibold">Quote #{quote.id}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {client?.name} - {project?.title}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">${parseFloat(quote.totalEstimate?.toString() || '0').toFixed(2)}</p>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No quotes available to convert</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
     </Layout>
   );
