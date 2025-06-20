@@ -805,11 +805,17 @@ export default function Invoices() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>();
   const [showQuoteToInvoice, setShowQuoteToInvoice] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
 
   const { data: invoices, isLoading } = useQuery({ queryKey: ["/api/invoices"] });
   const { data: clients } = useQuery({ queryKey: ["/api/clients"] });
   const { data: projects } = useQuery({ queryKey: ["/api/projects"] });
   const { data: quotes } = useQuery({ queryKey: ["/api/quotes"] });
+
+  // Filter invoices by selected client
+  const filteredInvoices = selectedClientId 
+    ? (Array.isArray(invoices) ? invoices.filter((invoice: Invoice) => invoice.clientId === selectedClientId) : [])
+    : invoices;
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
@@ -1158,7 +1164,27 @@ export default function Invoices() {
           </div>
         </div>
 
-      {!Array.isArray(invoices) || invoices.length === 0 ? (
+        {/* Client Filter */}
+        <div className="flex items-center space-x-4">
+          <Label htmlFor="client-filter" className="text-sm font-medium">
+            Filter by Client:
+          </Label>
+          <Select value={selectedClientId?.toString() || "all"} onValueChange={(value) => setSelectedClientId(value === "all" ? null : parseInt(value))}>
+            <SelectTrigger className="w-64">
+              <SelectValue placeholder="All Clients" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Clients</SelectItem>
+              {Array.isArray(clients) && clients.map((client: Client) => (
+                <SelectItem key={client.id} value={client.id.toString()}>
+                  {client.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+      {!Array.isArray(filteredInvoices) || filteredInvoices.length === 0 ? (
         <Card>
           <CardContent className="py-12">
             <div className="text-center space-y-4">
@@ -1176,7 +1202,7 @@ export default function Invoices() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {invoices.map((invoice: Invoice) => (
+          {filteredInvoices.map((invoice: Invoice) => (
             <Card key={invoice.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
