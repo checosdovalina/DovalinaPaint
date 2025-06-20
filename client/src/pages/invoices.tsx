@@ -1034,7 +1034,6 @@ export default function Invoices() {
             <div>
               <strong>Materials & Equipment:</strong><br>
               • Premium quality exterior paint<br>
-              • Professional-grade primer<br>
               • Drop cloths and protective materials<br>
               • Professional painting equipment
             </div>
@@ -1042,8 +1041,7 @@ export default function Invoices() {
               <strong>Labor & Expertise:</strong><br>
               • Licensed and insured crew<br>
               • Surface preparation and cleanup<br>
-              • Quality control inspection<br>
-              • 2-year workmanship warranty
+              • Quality control inspection
             </div>
           </div>
         </div>
