@@ -14,7 +14,7 @@ import { useForm, FieldValues } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Edit, Trash2, FileText, DollarSign, Calendar, User, Download } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, DollarSign, Calendar, User, Download, Grid3X3, List } from "lucide-react";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import type { Client, Project, Quote } from "@shared/schema";
@@ -806,6 +806,7 @@ export default function Invoices() {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>();
   const [showQuoteToInvoice, setShowQuoteToInvoice] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
 
   const { data: invoices, isLoading } = useQuery({ queryKey: ["/api/invoices"] });
   const { data: clients } = useQuery({ queryKey: ["/api/clients"] });
@@ -1164,24 +1165,44 @@ export default function Invoices() {
           </div>
         </div>
 
-        {/* Client Filter */}
-        <div className="flex items-center space-x-4">
-          <Label htmlFor="client-filter" className="text-sm font-medium">
-            Filter by Client:
-          </Label>
-          <Select value={selectedClientId?.toString() || "all"} onValueChange={(value) => setSelectedClientId(value === "all" ? null : parseInt(value))}>
-            <SelectTrigger className="w-64">
-              <SelectValue placeholder="All Clients" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Clients</SelectItem>
-              {Array.isArray(clients) && clients.map((client: Client) => (
-                <SelectItem key={client.id} value={client.id.toString()}>
-                  {client.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Filters and View Toggle */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Label htmlFor="client-filter" className="text-sm font-medium">
+              Filter by Client:
+            </Label>
+            <Select value={selectedClientId?.toString() || "all"} onValueChange={(value) => setSelectedClientId(value === "all" ? null : parseInt(value))}>
+              <SelectTrigger className="w-64">
+                <SelectValue placeholder="All Clients" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Clients</SelectItem>
+                {Array.isArray(clients) && clients.map((client: Client) => (
+                  <SelectItem key={client.id} value={client.id.toString()}>
+                    {client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* View Toggle */}
+          <div className="flex items-center space-x-1 border rounded-lg p-1">
+            <Button 
+              variant={viewMode === 'cards' ? 'default' : 'ghost'} 
+              size="sm"
+              onClick={() => setViewMode('cards')}
+            >
+              <Grid3X3 className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant={viewMode === 'list' ? 'default' : 'ghost'} 
+              size="sm"
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
       {!Array.isArray(filteredInvoices) || filteredInvoices.length === 0 ? (
@@ -1201,6 +1222,8 @@ export default function Invoices() {
           </CardContent>
         </Card>
       ) : (
+        <>
+          {viewMode === 'cards' ? (
         <div className="grid gap-4">
           {filteredInvoices.map((invoice: Invoice) => (
             <Card key={invoice.id} className="hover:shadow-md transition-shadow">
@@ -1266,6 +1289,66 @@ export default function Invoices() {
             </Card>
           ))}
         </div>
+      ) : (
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b bg-muted/50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-sm font-medium">Invoice #</th>
+                    <th className="px-6 py-3 text-left text-sm font-medium">Client</th>
+                    <th className="px-6 py-3 text-left text-sm font-medium">Project</th>
+                    <th className="px-6 py-3 text-left text-sm font-medium">Status</th>
+                    <th className="px-6 py-3 text-left text-sm font-medium">Issue Date</th>
+                    <th className="px-6 py-3 text-left text-sm font-medium">Due Date</th>
+                    <th className="px-6 py-3 text-right text-sm font-medium">Amount</th>
+                    <th className="px-6 py-3 text-right text-sm font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {filteredInvoices.map((invoice: Invoice) => (
+                    <tr key={invoice.id} className="hover:bg-muted/25">
+                      <td className="px-6 py-4 text-sm font-medium">#{invoice.invoiceNumber}</td>
+                      <td className="px-6 py-4 text-sm">{getClientName(invoice.clientId)}</td>
+                      <td className="px-6 py-4 text-sm">{getProjectTitle(invoice.projectId || 0)}</td>
+                      <td className="px-6 py-4">
+                        <Badge variant={getStatusBadge(invoice.status).variant} className="text-xs">
+                          {getStatusBadge(invoice.status).label}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 text-sm">{new Date(invoice.issueDate).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 text-sm">{new Date(invoice.dueDate).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 text-sm text-right font-semibold">
+                        ${typeof invoice.totalAmount === 'number' ? invoice.totalAmount.toFixed(2) : parseFloat(invoice.totalAmount).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => generateInvoicePDF(invoice)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(invoice)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+          )}
+        </>
       )}
 
       <InvoiceForm
