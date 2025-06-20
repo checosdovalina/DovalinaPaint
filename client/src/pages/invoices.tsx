@@ -14,7 +14,9 @@ import { useForm, FieldValues } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Edit, Trash2, FileText, DollarSign, Calendar, User } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, DollarSign, Calendar, User, Download } from "lucide-react";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import type { Client, Project, Quote } from "@shared/schema";
 import { Layout } from "@/components/layout";
 
@@ -799,10 +801,12 @@ const InvoiceForm = ({
 export default function Invoices() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>();
+  const [showQuoteToInvoice, setShowQuoteToInvoice] = useState(false);
 
   const { data: invoices, isLoading } = useQuery({ queryKey: ["/api/invoices"] });
   const { data: clients } = useQuery({ queryKey: ["/api/clients"] });
   const { data: projects } = useQuery({ queryKey: ["/api/projects"] });
+  const { data: quotes } = useQuery({ queryKey: ["/api/quotes"] });
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
@@ -848,6 +852,250 @@ export default function Invoices() {
     setEditingInvoice(undefined);
   };
 
+  const generateInvoicePDF = async (invoice: Invoice) => {
+    const client = Array.isArray(clients) ? clients.find((c: Client) => c.id === invoice.clientId) : null;
+    const project = Array.isArray(projects) ? projects.find((p: Project) => p.id === invoice.projectId) : null;
+
+    // Create a temporary div for PDF content
+    const pdfContent = document.createElement('div');
+    pdfContent.style.width = '8.5in';
+    pdfContent.style.minHeight = '11in';
+    pdfContent.style.padding = '0.5in';
+    pdfContent.style.backgroundColor = 'white';
+    pdfContent.style.fontFamily = 'Arial, sans-serif';
+    pdfContent.style.fontSize = '12px';
+    pdfContent.style.lineHeight = '1.4';
+    pdfContent.style.color = '#000';
+
+    // Calculate totals
+    const subtotal = Array.isArray(invoice.items) 
+      ? invoice.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0)
+      : 0;
+    const tax = subtotal * 0.08; // 8% tax
+    const total = subtotal + tax;
+
+    pdfContent.innerHTML = `
+      <div style="border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <h1 style="color: #2563eb; font-size: 32px; font-weight: bold; margin: 0;">INVOICE</h1>
+            <div style="margin-top: 10px; color: #666;">
+              <div style="font-weight: bold; font-size: 14px;">Dovalina Painting LLC</div>
+              <div>Professional Exterior Painting Services</div>
+              <div>Phone: (555) 123-4567</div>
+              <div>Email: info@dovalina-painting.com</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Invoice Number</div>
+              <div style="font-size: 18px; font-weight: bold; color: #2563eb;">#${invoice.invoiceNumber}</div>
+              <div style="margin-top: 10px; font-size: 14px; color: #666;">Issue Date</div>
+              <div style="font-weight: bold;">${new Date(invoice.issueDate).toLocaleDateString('en-US')}</div>
+              <div style="margin-top: 10px; font-size: 14px; color: #666;">Due Date</div>
+              <div style="font-weight: bold;">${new Date(invoice.dueDate).toLocaleDateString('en-US')}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
+        <div style="width: 48%;">
+          <h3 style="color: #2563eb; font-size: 16px; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">BILL TO:</h3>
+          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">${client?.name || 'Unknown Client'}</div>
+            <div style="color: #666; margin-bottom: 4px;">${client?.email || ''}</div>
+            <div style="color: #666; margin-bottom: 4px;">${client?.phone || ''}</div>
+            <div style="color: #666;">${client?.address || ''}</div>
+          </div>
+        </div>
+        
+        <div style="width: 48%;">
+          <h3 style="color: #2563eb; font-size: 16px; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">PROJECT:</h3>
+          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">${project?.title || 'General Services'}</div>
+            <div style="color: #666; margin-bottom: 4px;">${project?.address || ''}</div>
+            <div style="color: #666;">${project?.description || ''}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <h3 style="color: #2563eb; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">EXTERIOR PAINTING SERVICES:</h3>
+        
+        ${Array.isArray(invoice.items) && invoice.items.length > 0 ? `
+          <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+            <thead>
+              <tr style="background: #2563eb; color: white;">
+                <th style="padding: 12px; text-align: left; font-weight: bold;">Service Description</th>
+                <th style="padding: 12px; text-align: center; font-weight: bold;">Quantity</th>
+                <th style="padding: 12px; text-align: center; font-weight: bold;">Unit</th>
+                <th style="padding: 12px; text-align: right; font-weight: bold;">Rate</th>
+                <th style="padding: 12px; text-align: right; font-weight: bold;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${invoice.items.map((item, index) => `
+                <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f8fafc;' : ''}">
+                  <td style="padding: 12px; border-right: 1px solid #e2e8f0;">
+                    <div style="font-weight: bold; margin-bottom: 4px;">${item.description}</div>
+                    <div style="font-size: 11px; color: #666;">
+                      ${item.description.includes('Material') ? 'Includes premium exterior paint, primer, and supplies' : ''}
+                      ${item.description.includes('Mano de obra') || item.description.includes('Labor') ? 'Professional painting labor including surface preparation, priming, and finishing' : ''}
+                    </div>
+                  </td>
+                  <td style="padding: 12px; text-align: center; border-right: 1px solid #e2e8f0; font-weight: bold;">${item.quantity}</td>
+                  <td style="padding: 12px; text-align: center; border-right: 1px solid #e2e8f0;">
+                    ${item.description.includes('Material') ? 'gallons' : 'sq ft'}
+                  </td>
+                  <td style="padding: 12px; text-align: right; border-right: 1px solid #e2e8f0;">$${item.unitPrice.toFixed(2)}</td>
+                  <td style="padding: 12px; text-align: right; font-weight: bold; color: #2563eb;">$${(item.quantity * item.unitPrice).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        ` : `
+          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
+            <h4 style="color: #2563eb; margin-bottom: 15px;">Comprehensive Exterior Painting Package</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div>
+                <h5 style="color: #1e40af; margin-bottom: 10px;">Surface Preparation:</h5>
+                <ul style="text-align: left; color: #666; font-size: 12px; list-style: none; padding: 0;">
+                  <li>• Power washing</li>
+                  <li>• Scraping loose paint</li>
+                  <li>• Sanding rough surfaces</li>
+                  <li>• Caulking gaps and cracks</li>
+                  <li>• Primer application</li>
+                </ul>
+              </div>
+              <div>
+                <h5 style="color: #1e40af; margin-bottom: 10px;">Painting Services:</h5>
+                <ul style="text-align: left; color: #666; font-size: 12px; list-style: none; padding: 0;">
+                  <li>• House body painting</li>
+                  <li>• Trim and detail work</li>
+                  <li>• Doors and shutters</li>
+                  <li>• Soffit and fascia</li>
+                  <li>• Final inspection</li>
+                </ul>
+              </div>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 18px; font-weight: bold; color: #2563eb;">
+                Total Project Value: $${total.toFixed(2)}
+              </div>
+            </div>
+          </div>
+        `}
+        
+        <div style="margin-top: 20px; background: #f0f9ff; padding: 15px; border-radius: 8px; border: 1px solid #bae6fd;">
+          <h4 style="color: #1e40af; margin-bottom: 10px;">What's Included in Your Service:</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 12px; color: #374151;">
+            <div>
+              <strong>Materials & Equipment:</strong><br>
+              • Premium quality exterior paint<br>
+              • Professional-grade primer<br>
+              • Drop cloths and protective materials<br>
+              • Professional painting equipment
+            </div>
+            <div>
+              <strong>Labor & Expertise:</strong><br>
+              • Licensed and insured crew<br>
+              • Surface preparation and cleanup<br>
+              • Quality control inspection<br>
+              • 2-year workmanship warranty
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
+        <div style="width: 300px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px; text-align: right; font-size: 14px; color: #666;">Subtotal:</td>
+              <td style="padding: 8px; text-align: right; font-weight: bold; font-size: 16px;">$${subtotal.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; text-align: right; font-size: 14px; color: #666;">Tax (8%):</td>
+              <td style="padding: 8px; text-align: right; font-weight: bold; font-size: 16px;">$${tax.toFixed(2)}</td>
+            </tr>
+            <tr style="border-top: 2px solid #2563eb;">
+              <td style="padding: 12px; text-align: right; font-size: 18px; font-weight: bold; color: #2563eb;">TOTAL:</td>
+              <td style="padding: 12px; text-align: right; font-size: 20px; font-weight: bold; color: #2563eb;">$${total.toFixed(2)}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      ${invoice.notes ? `
+        <div style="margin-bottom: 30px;">
+          <h3 style="color: #2563eb; font-size: 16px; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">NOTES:</h3>
+          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            ${invoice.notes}
+          </div>
+        </div>
+      ` : ''}
+
+      <div style="border-top: 2px solid #e2e8f0; padding-top: 20px; margin-top: 40px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: bold; color: #2563eb; margin-bottom: 5px;">Payment Terms:</div>
+            <div style="color: #666; font-size: 11px;">
+              Payment is due within 30 days of invoice date.<br>
+              Late payments may incur additional charges.<br>
+              Thank you for choosing Dovalina Painting LLC!
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-weight: bold; color: #2563eb; margin-bottom: 5px;">Contact Information:</div>
+            <div style="color: #666; font-size: 11px;">
+              Email: billing@dovalina-painting.com<br>
+              Phone: (555) 123-4567<br>
+              www.dovalina-painting.com
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Temporarily add to DOM
+    document.body.appendChild(pdfContent);
+
+    try {
+      // Convert to canvas
+      const canvas = await html2canvas(pdfContent, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+
+      // Create PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 0;
+
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      
+      // Download PDF
+      pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    } finally {
+      // Remove temporary element
+      document.body.removeChild(pdfContent);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -867,10 +1115,16 @@ export default function Invoices() {
             <h1 className="text-3xl font-bold">Invoices</h1>
             <p className="text-muted-foreground">Manage your project invoices</p>
           </div>
-          <Button onClick={handleCreate}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Invoice
-          </Button>
+          <div className="space-x-2">
+            <Button onClick={handleCreate}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Invoice
+            </Button>
+            <Button variant="outline" onClick={() => setShowQuoteToInvoice(true)}>
+              <FileText className="h-4 w-4 mr-2" />
+              From Quote
+            </Button>
+          </div>
         </div>
 
       {!Array.isArray(invoices) || invoices.length === 0 ? (
@@ -932,6 +1186,14 @@ export default function Invoices() {
                     </div>
                     
                     <div className="space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => generateInvoicePDF(invoice)}
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        PDF
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
