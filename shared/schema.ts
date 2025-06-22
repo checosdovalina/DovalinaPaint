@@ -340,6 +340,7 @@ export const invoices = pgTable("invoices", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").notNull(),
   clientId: integer("client_id").notNull(),
+  quoteId: integer("quote_id"), // Reference to the quote this invoice was created from
   invoiceNumber: text("invoice_number").notNull().unique(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   tax: decimal("tax", { precision: 10, scale: 2 }).notNull().default("0"),
@@ -361,6 +362,7 @@ export const invoices = pgTable("invoices", {
 const baseInvoiceSchema = createInsertSchema(invoices).pick({
   projectId: true,
   clientId: true,
+  quoteId: true,
   invoiceNumber: true,
   amount: true,
   tax: true,
