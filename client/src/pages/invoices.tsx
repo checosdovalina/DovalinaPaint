@@ -500,7 +500,10 @@ const InvoiceForm = ({
                     <SelectContent>
                       <SelectItem value="none">No quote</SelectItem>
                       {Array.isArray(quotes) && quotes
-                        .filter((quote: Quote) => quote.projectId === selectedProjectId)
+                        .filter((quote: Quote) => 
+                          quote.projectId === selectedProjectId && 
+                          quote.status === 'approved'
+                        )
                         .map((quote: Quote) => (
                           <SelectItem key={quote.id} value={quote.id.toString()}>
                             Quote - ${quote.totalEstimate}
