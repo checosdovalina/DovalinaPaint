@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,11 +16,16 @@ import {
   Brush,
   Shield,
   Clock,
-  DollarSign
+  DollarSign,
+  Menu,
+  X
 } from "lucide-react";
 import { Link } from "wouter";
+import { ContactForm } from "@/components/contact-form";
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const services = [
     {
       title: "Exterior House Painting",
@@ -95,8 +101,15 @@ export default function LandingPage() {
     }
   ];
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background scroll-smooth">
       {/* Header */}
       <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -109,10 +122,10 @@ export default function LandingPage() {
           </div>
           
           <nav className="hidden md:flex items-center space-x-6">
-            <a href="#services" className="text-gray-700 hover:text-blue-600 transition-colors">Services</a>
-            <a href="#about" className="text-gray-700 hover:text-blue-600 transition-colors">About</a>
-            <a href="#testimonials" className="text-gray-700 hover:text-blue-600 transition-colors">Reviews</a>
-            <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
+            <button onClick={() => scrollToSection('services')} className="text-gray-700 hover:text-blue-600 transition-colors">Services</button>
+            <button onClick={() => scrollToSection('about')} className="text-gray-700 hover:text-blue-600 transition-colors">About</button>
+            <button onClick={() => scrollToSection('testimonials')} className="text-gray-700 hover:text-blue-600 transition-colors">Reviews</button>
+            <button onClick={() => scrollToSection('contact')} className="text-gray-700 hover:text-blue-600 transition-colors">Contact</button>
             <Link href="/auth">
               <Button variant="outline" size="sm">
                 Management Login
@@ -120,14 +133,61 @@ export default function LandingPage() {
             </Link>
           </nav>
 
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center space-x-2">
             <Link href="/auth">
               <Button variant="outline" size="sm">
                 Login
               </Button>
             </Link>
+            <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t bg-white">
+            <div className="container mx-auto px-4 py-4 space-y-2">
+              <button
+                onClick={() => {
+                  scrollToSection('services');
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left py-2 text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                Services
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection('about');
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left py-2 text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                About
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection('testimonials');
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left py-2 text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                Reviews
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection('contact');
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left py-2 text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                Contact
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
@@ -146,11 +206,11 @@ export default function LandingPage() {
               Licensed, insured, and committed to exceptional quality.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3" onClick={() => scrollToSection('contact')}>
                 <Phone className="h-5 w-5 mr-2" />
                 Get Free Estimate
               </Button>
-              <Button size="lg" variant="outline" className="px-8 py-3">
+              <Button size="lg" variant="outline" className="px-8 py-3" onClick={() => scrollToSection('services')}>
                 View Our Work
               </Button>
             </div>
@@ -193,7 +253,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50">
+      <section id="about" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Dovalina Painting?</h2>
@@ -251,6 +311,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Contact Form Section */}
+      <ContactForm />
+
       {/* Contact Section */}
       <section id="contact" className="py-20 bg-blue-600 text-white">
         <div className="container mx-auto px-4">
@@ -278,7 +341,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3">
+            <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3" onClick={() => scrollToSection('contact')}>
               <Phone className="h-5 w-5 mr-2" />
               Get Your Free Estimate Today
             </Button>
