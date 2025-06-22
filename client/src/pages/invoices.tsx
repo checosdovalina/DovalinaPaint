@@ -342,8 +342,21 @@ const InvoiceForm = ({
       const res = await apiRequest(method, url, { ...data, items });
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
+      
+      // If this invoice was created from a quote, update the quote status to "converted"
+      if (editingInvoice?.quoteId && (!editingInvoice.id || editingInvoice.id === 0)) {
+        try {
+          await apiRequest("PATCH", `/api/quotes/${editingInvoice.quoteId}`, {
+            status: "converted"
+          });
+          queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+        } catch (error) {
+          console.error("Error updating quote status:", error);
+        }
+      }
+      
       const isNewInvoice = !editingInvoice || editingInvoice.id === 0;
       toast({
         title: `Factura ${isNewInvoice ? "Creada" : "Actualizada"}`,
