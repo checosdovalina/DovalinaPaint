@@ -1372,7 +1372,9 @@ export default function Invoices() {
             
             {Array.isArray(quotes) && quotes.length > 0 ? (
               <div className="space-y-2">
-                {quotes.map((quote: any) => {
+                {quotes
+                  .filter((quote: any) => quote.status === 'approved')
+                  .map((quote: any) => {
                   const project = Array.isArray(projects) ? projects.find((p: Project) => p.id === quote.projectId) : null;
                   const client = Array.isArray(clients) ? clients.find((c: Client) => c.id === project?.clientId) : null;
                   
