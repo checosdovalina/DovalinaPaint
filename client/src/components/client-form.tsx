@@ -98,10 +98,10 @@ export function ClientForm({ open, onClose, clientToEdit, defaultType = 'client'
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
       toast({
-        title: clientToEdit ? "Cliente actualizado" : "Cliente creado",
+        title: clientToEdit ? "Client updated" : "Client created",
         description: clientToEdit 
-          ? "El cliente ha sido actualizado exitosamente." 
-          : "El cliente ha sido creado exitosamente.",
+          ? "The client has been updated successfully." 
+          : "The client has been created successfully.",
       });
       onClose();
       form.reset();
@@ -109,7 +109,7 @@ export function ClientForm({ open, onClose, clientToEdit, defaultType = 'client'
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Ocurrió un error al procesar la solicitud.",
+        description: error.message || "An error occurred while processing the request.",
         variant: "destructive",
       });
     },
@@ -127,13 +127,13 @@ export function ClientForm({ open, onClose, clientToEdit, defaultType = 'client'
         <DialogHeader>
           <DialogTitle>
             {clientToEdit 
-              ? `Editar ${clientToEdit.type === 'prospect' ? 'Prospecto' : 'Cliente'}` 
-              : `Nuevo ${isProspect ? 'Prospecto' : 'Cliente'}`}
+              ? `Edit ${clientToEdit.type === 'prospect' ? 'Prospect' : 'Client'}` 
+              : `New ${isProspect ? 'Prospect' : 'Client'}`}
           </DialogTitle>
           <DialogDescription>
             {clientToEdit 
-              ? `Actualiza la información del ${clientToEdit.type === 'prospect' ? 'prospecto' : 'cliente'}.`
-              : `Completa la información para crear un nuevo ${isProspect ? 'prospecto' : 'cliente'}.`}
+              ? `Update the ${clientToEdit.type === 'prospect' ? 'prospect' : 'client'} information.`
+              : `Complete the information to create a new ${isProspect ? 'prospect' : 'client'}.`}
           </DialogDescription>
         </DialogHeader>
 
@@ -144,9 +144,9 @@ export function ClientForm({ open, onClose, clientToEdit, defaultType = 'client'
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre *</FormLabel>
+                  <FormLabel>Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nombre completo" {...field} />
+                    <Input placeholder="Full name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -160,7 +160,7 @@ export function ClientForm({ open, onClose, clientToEdit, defaultType = 'client'
                 <FormItem>
                   <FormLabel>Email *</FormLabel>
                   <FormControl>
-                    <Input placeholder="email@ejemplo.com" type="email" {...field} />
+                    <Input placeholder="email@example.com" type="email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -172,7 +172,7 @@ export function ClientForm({ open, onClose, clientToEdit, defaultType = 'client'
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Teléfono *</FormLabel>
+                  <FormLabel>Phone *</FormLabel>
                   <FormControl>
                     <Input placeholder="(555) 123-4567" {...field} />
                   </FormControl>
@@ -186,9 +186,9 @@ export function ClientForm({ open, onClose, clientToEdit, defaultType = 'client'
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Dirección *</FormLabel>
+                  <FormLabel>Address *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Dirección completa" {...field} />
+                    <Input placeholder="Full address" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -200,16 +200,16 @@ export function ClientForm({ open, onClose, clientToEdit, defaultType = 'client'
               name="classification"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Clasificación *</FormLabel>
+                  <FormLabel>Classification *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una clasificación" />
+                        <SelectValue placeholder="Select a classification" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="residential">Residencial</SelectItem>
-                      <SelectItem value="commercial">Comercial</SelectItem>
+                      <SelectItem value="residential">Residential</SelectItem>
+                      <SelectItem value="commercial">Commercial</SelectItem>
                       <SelectItem value="industrial">Industrial</SelectItem>
                     </SelectContent>
                   </Select>
@@ -223,10 +223,10 @@ export function ClientForm({ open, onClose, clientToEdit, defaultType = 'client'
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notas</FormLabel>
+                  <FormLabel>Notes</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Notas adicionales..." 
+                      placeholder="Additional notes..." 
                       {...field} 
                       value={field.value || ""} 
                     />
@@ -238,14 +238,14 @@ export function ClientForm({ open, onClose, clientToEdit, defaultType = 'client'
 
             <div className="flex justify-end space-x-2 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancelar
+                Cancel
               </Button>
               <Button type="submit" disabled={mutation.isPending}>
                 {mutation.isPending 
-                  ? "Guardando..." 
+                  ? "Saving..." 
                   : clientToEdit 
-                    ? "Actualizar" 
-                    : "Crear"}
+                    ? "Update" 
+                    : "Create"}
               </Button>
             </div>
           </form>

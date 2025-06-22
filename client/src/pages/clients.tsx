@@ -108,13 +108,13 @@ export default function Clients() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
       toast({
-        title: "Prospecto convertido",
-        description: "El prospecto ha sido convertido a cliente exitosamente.",
+        title: "Prospect converted",
+        description: "The prospect has been successfully converted to client.",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudo convertir el prospecto a cliente.",
+        description: "Could not convert prospect to client.",
         variant: "destructive",
       });
     }
@@ -128,13 +128,13 @@ export default function Clients() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
       toast({
-        title: "Cliente convertido",
-        description: "El cliente ha sido convertido a prospecto.",
+        title: "Client converted",
+        description: "The client has been converted to prospect.",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudo convertir el cliente a prospecto.",
+        description: "Could not convert client to prospect.",
         variant: "destructive",
       });
     }
@@ -151,13 +151,13 @@ export default function Clients() {
       await apiRequest("DELETE", `/api/clients/${clientToDelete.id}`);
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
       toast({
-        title: "Cliente eliminado",
-        description: "El cliente ha sido eliminado exitosamente.",
+        title: "Client deleted",
+        description: "The client has been deleted successfully.",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudo eliminar el cliente.",
+        description: "Could not delete the client.",
         variant: "destructive",
       });
     } finally {
@@ -262,7 +262,7 @@ export default function Clients() {
               onClick={() => setClientToView(item)}
             >
               <Eye className="h-4 w-4 mr-1" />
-              Ver
+              View
             </Button>
             <div className="flex gap-1">
               {type === 'prospect' ? (
@@ -273,7 +273,7 @@ export default function Clients() {
                   className="bg-green-50 text-green-600 hover:bg-green-100"
                 >
                   <Users className="h-4 w-4 mr-1" />
-                  A Cliente
+                  To Client
                 </Button>
               ) : (
                 <Button
@@ -283,7 +283,7 @@ export default function Clients() {
                   className="bg-orange-50 text-orange-600 hover:bg-orange-100"
                 >
                   <UserPlus className="h-4 w-4 mr-1" />
-                  A Prospecto
+                  To Prospect
                 </Button>
               )}
               <Button
@@ -316,30 +316,30 @@ export default function Clients() {
         <UserPlus className="h-12 w-12 mx-auto text-gray-400 mb-4" />
       )}
       <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        {type === 'client' ? 'No hay clientes' : 'No hay prospectos'}
+        {type === 'client' ? 'No clients found' : 'No prospects found'}
       </h3>
       <p className="text-gray-500 mb-4">
-        {type === 'client' ? 'Comienza agregando tu primer cliente.' : 'Comienza agregando tu primer prospecto.'}
+        {type === 'client' ? 'Start by adding your first client.' : 'Start by adding your first prospect.'}
       </p>
       <Button onClick={type === 'client' ? handleNewClient : handleNewProspect}>
         <Plus className="h-4 w-4 mr-2" />
-        {type === 'client' ? 'Agregar Cliente' : 'Agregar Prospecto'}
+        {type === 'client' ? 'Add Client' : 'Add Prospect'}
       </Button>
     </div>
   );
 
   return (
-    <Layout title="Clientes y Prospectos">
+    <Layout title="Clients & Prospects">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="clients" className="flex items-center space-x-2">
               <Users className="h-4 w-4" />
-              <span>Clientes ({actualClients.length})</span>
+              <span>Clients ({actualClients.length})</span>
             </TabsTrigger>
             <TabsTrigger value="prospects" className="flex items-center space-x-2">
               <UserPlus className="h-4 w-4" />
-              <span>Prospectos ({prospects.length})</span>
+              <span>Prospects ({prospects.length})</span>
             </TabsTrigger>
           </TabsList>
 
@@ -349,7 +349,7 @@ export default function Clients() {
               className="flex items-center space-x-2"
             >
               <Plus className="h-4 w-4" />
-              <span>{activeTab === 'clients' ? 'Nuevo Cliente' : 'Nuevo Prospecto'}</span>
+              <span>{activeTab === 'clients' ? 'New Client' : 'New Prospect'}</span>
             </Button>
           </div>
         </div>
@@ -359,7 +359,7 @@ export default function Clients() {
             <div className="relative w-full">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder={activeTab === 'clients' ? "Buscar clientes..." : "Buscar prospectos..."}
+                placeholder={activeTab === 'clients' ? "Search clients..." : "Search prospects..."}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-8"
@@ -370,12 +370,12 @@ export default function Clients() {
               onValueChange={setClassificationFilter}
             >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filtrar por tipo" />
+                <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los tipos</SelectItem>
-                <SelectItem value="residential">Residencial</SelectItem>
-                <SelectItem value="commercial">Comercial</SelectItem>
+                <SelectItem value="all">All types</SelectItem>
+                <SelectItem value="residential">Residential</SelectItem>
+                <SelectItem value="commercial">Commercial</SelectItem>
                 <SelectItem value="industrial">Industrial</SelectItem>
               </SelectContent>
             </Select>
@@ -441,16 +441,16 @@ export default function Clients() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+            <AlertDialogTitle>Confirm deletion?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará permanentemente el {clientToDelete?.type === 'prospect' ? 'prospecto' : 'cliente'}{" "}
-              {clientToDelete?.name} y todos sus datos asociados.
+              This action cannot be undone. This will permanently delete the {clientToDelete?.type === 'prospect' ? 'prospect' : 'client'}{" "}
+              {clientToDelete?.name} and all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm}>
-              Eliminar
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
