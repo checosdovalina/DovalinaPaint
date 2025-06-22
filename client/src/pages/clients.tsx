@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Building,
   User,
@@ -26,6 +27,8 @@ import {
   Eye,
   Grid3X3,
   List,
+  UserPlus,
+  Users,
 } from "lucide-react";
 import {
   Dialog,
@@ -64,6 +67,7 @@ export default function Clients() {
   const [searchTerm, setSearchTerm] = useState("");
   const [classificationFilter, setClassificationFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
+  const [activeTab, setActiveTab] = useState("clients");
   const { toast } = useToast();
 
   // Fetch clients
@@ -84,6 +88,51 @@ export default function Clients() {
   const handleNewClient = () => {
     setClientToEdit(null);
     setShowClientForm(true);
+  };
+
+  const handleNewProspect = () => {
+    setClientToEdit(null);
+    setShowClientForm(true);
+  };
+
+  const convertToClient = async (prospect: Client) => {
+    try {
+      await apiRequest("PATCH", `/api/clients/${prospect.id}`, {
+        ...prospect,
+        type: "client"
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Prospecto convertido",
+        description: "El prospecto ha sido convertido a cliente exitosamente.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo convertir el prospecto a cliente.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const convertToProspect = async (client: Client) => {
+    try {
+      await apiRequest("PATCH", `/api/clients/${client.id}`, {
+        ...client,
+        type: "prospect"
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Cliente convertido",
+        description: "El cliente ha sido convertido a prospecto.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo convertir el cliente a prospecto.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCloseForm = () => {
@@ -118,26 +167,35 @@ export default function Clients() {
     }
   };
 
-  // Filter and search clients
-  const filteredClients = clients?.filter(client => {
-    // Filter by classification
-    if (classificationFilter !== "all" && client.classification !== classificationFilter) {
-      return false;
-    }
-    
-    // Filter by search term
-    if (searchTerm) {
-      const searchTermLower = searchTerm.toLowerCase();
-      return (
-        client.name.toLowerCase().includes(searchTermLower) ||
-        client.email.toLowerCase().includes(searchTermLower) ||
-        client.phone.toLowerCase().includes(searchTermLower) ||
-        client.address.toLowerCase().includes(searchTermLower)
-      );
-    }
-    
-    return true;
-  });
+  // Filter clients and prospects separately
+  const actualClients = clients?.filter(client => client.type === 'client') || [];
+  const prospects = clients?.filter(client => client.type === 'prospect') || [];
+
+  // Filter and search function
+  const filterData = (data: Client[]) => {
+    return data.filter(client => {
+      // Filter by classification
+      if (classificationFilter !== "all" && client.classification !== classificationFilter) {
+        return false;
+      }
+      
+      // Filter by search term
+      if (searchTerm) {
+        const searchTermLower = searchTerm.toLowerCase();
+        return (
+          client.name.toLowerCase().includes(searchTermLower) ||
+          client.email.toLowerCase().includes(searchTermLower) ||
+          client.phone.toLowerCase().includes(searchTermLower) ||
+          client.address.toLowerCase().includes(searchTermLower)
+        );
+      }
+      
+      return true;
+    });
+  };
+
+  const filteredClients = filterData(actualClients);
+  const filteredProspects = filterData(prospects);
 
   // Helper to get classification label
   const getClassificationLabel = (classification: string) => {

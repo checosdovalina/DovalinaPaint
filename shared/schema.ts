@@ -27,6 +27,7 @@ export const clients = pgTable("clients", {
   phone: text("phone").notNull(),
   address: text("address").notNull(),
   classification: text("classification").notNull().default("residential"), // residential, commercial, industrial
+  type: text("type").notNull().default("prospect"), // prospect, client
   createdAt: timestamp("created_at").notNull().defaultNow(),
   notes: text("notes"),
 });
@@ -37,6 +38,7 @@ export const insertClientSchema = createInsertSchema(clients).pick({
   phone: true,
   address: true,
   classification: true,
+  type: true,
   notes: true,
 });
 
