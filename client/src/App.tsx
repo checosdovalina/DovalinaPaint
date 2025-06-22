@@ -7,6 +7,7 @@ import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
+import LandingPage from "@/pages/landing-page";
 import Dashboard from "@/pages/dashboard";
 import Clients from "@/pages/clients";
 import Quotes from "@/pages/quotes";
@@ -27,8 +28,9 @@ import Settings from "@/pages/settings";
 function Router() {
   return (
     <Switch>
+      <Route path="/" component={LandingPage} />
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/" component={Dashboard} />
+      <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/clients" component={Clients} />
       <ProtectedRoute path="/quotes" component={Quotes} />
       <ProtectedRoute path="/simple-quotes" component={SimpleQuotes} />

@@ -54,7 +54,7 @@ export function Sidebar({ className }: SidebarProps) {
   };
   
   const navLinks = [
-    { name: "Dashboard", path: "/", icon: <Home className="w-5 h-5" /> },
+    { name: "Dashboard", path: "/dashboard", icon: <Home className="w-5 h-5" /> },
     { name: "Clients & Prospects", path: "/clients", icon: <Users className="w-5 h-5" /> },
     { name: "Quotes", path: "/quotes", icon: <FileText className="w-5 h-5" /> },
     { name: "Simple Quotes", path: "/simple-quotes", icon: <FileText className="w-5 h-5" /> },
