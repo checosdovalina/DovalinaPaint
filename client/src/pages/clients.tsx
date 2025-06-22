@@ -95,6 +95,11 @@ export default function Clients() {
     setShowClientForm(true);
   };
 
+  const handleCloseForm = () => {
+    setShowClientForm(false);
+    setClientToEdit(null);
+  };
+
   const convertToClient = async (prospect: Client) => {
     try {
       await apiRequest("PATCH", `/api/clients/${prospect.id}`, {
@@ -135,11 +140,6 @@ export default function Clients() {
     }
   };
 
-  const handleCloseForm = () => {
-    setShowClientForm(false);
-    setClientToEdit(null);
-  };
-
   const handleDeleteClick = (client: Client) => {
     setClientToDelete(client);
   };
@@ -148,18 +148,16 @@ export default function Clients() {
     if (!clientToDelete) return;
 
     try {
-      await apiRequest("DELETE", `/api/clients/${clientToDelete.id}`, undefined);
-      
+      await apiRequest("DELETE", `/api/clients/${clientToDelete.id}`);
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
       toast({
         title: "Cliente eliminado",
-        description: "El cliente ha sido eliminado exitosamente",
+        description: "El cliente ha sido eliminado exitosamente.",
       });
-      
-      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
     } catch (error) {
       toast({
         title: "Error",
-        description: `No se pudo eliminar el cliente: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+        description: "No se pudo eliminar el cliente.",
         variant: "destructive",
       });
     } finally {
@@ -225,249 +223,239 @@ export default function Clients() {
     }
   };
 
+  const renderClientCards = (data: Client[], type: 'client' | 'prospect') => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {data.map((item) => (
+        <Card key={item.id} className="overflow-hidden">
+          <CardHeader className="pb-3">
+            <div className="flex justify-between items-start">
+              <CardTitle className="text-lg">{item.name}</CardTitle>
+              <Badge className={getClassificationColor(item.classification)}>
+                {getClassificationLabel(item.classification)}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="pb-2 space-y-2">
+            <div className="flex items-center text-sm">
+              <Mail className="h-4 w-4 mr-2 text-gray-400" />
+              <span>{item.email}</span>
+            </div>
+            <div className="flex items-center text-sm">
+              <Phone className="h-4 w-4 mr-2 text-gray-400" />
+              <span>{item.phone}</span>
+            </div>
+            <div className="flex items-start text-sm">
+              <MapPin className="h-4 w-4 mr-2 mt-1 text-gray-400" />
+              <span className="flex-1">{item.address}</span>
+            </div>
+            {item.notes && (
+              <div className="text-sm text-gray-500 mt-2 pt-2 border-t">
+                <p className="line-clamp-2">{item.notes}</p>
+              </div>
+            )}
+          </CardContent>
+          <CardFooter className="pt-2 flex justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              onClick={() => setClientToView(item)}
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              Ver
+            </Button>
+            <div className="flex gap-1">
+              {type === 'prospect' ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => convertToClient(item)}
+                  className="bg-green-50 text-green-600 hover:bg-green-100"
+                >
+                  <Users className="h-4 w-4 mr-1" />
+                  A Cliente
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => convertToProspect(item)}
+                  className="bg-orange-50 text-orange-600 hover:bg-orange-100"
+                >
+                  <UserPlus className="h-4 w-4 mr-1" />
+                  A Prospecto
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleEditClient(item)}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDeleteClick(item)}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderEmptyState = (type: 'client' | 'prospect') => (
+    <div className="text-center py-20">
+      {type === 'client' ? (
+        <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+      ) : (
+        <UserPlus className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+      )}
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        {type === 'client' ? 'No hay clientes' : 'No hay prospectos'}
+      </h3>
+      <p className="text-gray-500 mb-4">
+        {type === 'client' ? 'Comienza agregando tu primer cliente.' : 'Comienza agregando tu primer prospecto.'}
+      </p>
+      <Button onClick={type === 'client' ? handleNewClient : handleNewProspect}>
+        <Plus className="h-4 w-4 mr-2" />
+        {type === 'client' ? 'Agregar Cliente' : 'Agregar Prospecto'}
+      </Button>
+    </div>
+  );
+
   return (
     <Layout title="Clientes y Prospectos">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div className="flex items-center space-x-2 w-full max-w-md">
-          <div className="relative w-full">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Buscar clientes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8"
-            />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="clients" className="flex items-center space-x-2">
+              <Users className="h-4 w-4" />
+              <span>Clientes ({actualClients.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="prospects" className="flex items-center space-x-2">
+              <UserPlus className="h-4 w-4" />
+              <span>Prospectos ({prospects.length})</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="flex items-center space-x-2">
+            <Button 
+              onClick={activeTab === 'clients' ? handleNewClient : handleNewProspect}
+              className="flex items-center space-x-2"
+            >
+              <Plus className="h-4 w-4" />
+              <span>{activeTab === 'clients' ? 'Nuevo Cliente' : 'Nuevo Prospecto'}</span>
+            </Button>
           </div>
-          <Select
-            value={classificationFilter}
-            onValueChange={setClassificationFilter}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filtrar por tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los tipos</SelectItem>
-              <SelectItem value="residential">Residencial</SelectItem>
-              <SelectItem value="commercial">Comercial</SelectItem>
-              <SelectItem value="industrial">Industrial</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
-        
-        <div className="flex items-center gap-2">
-          {/* View mode toggle */}
-          <div className="flex items-center border rounded-lg p-1">
-            <Button
-              variant={viewMode === "cards" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("cards")}
-              className="h-8 px-3"
+
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex items-center space-x-2 w-full max-w-md">
+            <div className="relative w-full">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder={activeTab === 'clients' ? "Buscar clientes..." : "Buscar prospectos..."}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <Select
+              value={classificationFilter}
+              onValueChange={setClassificationFilter}
             >
-              <Grid3X3 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("list")}
-              className="h-8 px-3"
-            >
-              <List className="h-4 w-4" />
-            </Button>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filtrar por tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los tipos</SelectItem>
+                <SelectItem value="residential">Residencial</SelectItem>
+                <SelectItem value="commercial">Comercial</SelectItem>
+                <SelectItem value="industrial">Industrial</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
-          <Button onClick={handleNewClient}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Cliente
-          </Button>
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center py-20">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-        </div>
-      ) : filteredClients && filteredClients.length > 0 ? (
-        viewMode === "cards" ? (
-          // Cards view
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredClients.map((client) => (
-              <Card key={client.id} className="overflow-hidden">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg">{client.name}</CardTitle>
-                    <Badge className={getClassificationColor(client.classification)}>
-                      {getClassificationLabel(client.classification)}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="pb-2 space-y-2">
-                  <div className="flex items-center text-sm">
-                    <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                    <span>{client.email}</span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                    <span>{client.phone}</span>
-                  </div>
-                  <div className="flex items-start text-sm">
-                    <MapPin className="h-4 w-4 mr-2 mt-1 text-gray-400" />
-                    <span className="flex-1">{client.address}</span>
-                  </div>
-                  {client.notes && (
-                    <div className="text-sm text-gray-500 mt-2 pt-2 border-t">
-                      <p className="line-clamp-2">{client.notes}</p>
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter className="pt-2 flex justify-between">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    onClick={() => setClientToView(client)}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    Ver Detalles
-                  </Button>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => handleDeleteClick(client)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditClient(client)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Editar
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-            ))}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center border rounded-lg p-1">
+              <Button
+                variant={viewMode === "cards" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("cards")}
+                className="h-8 px-3"
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className="h-8 px-3"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-        ) : (
-          // List view
-          <div className="space-y-4">
-            {filteredClients.map((client) => (
-              <Card key={client.id} className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 flex-1">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold">{client.name}</h3>
-                          <Badge className={getClassificationColor(client.classification)}>
-                            {getClassificationLabel(client.classification)}
-                          </Badge>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
-                          <div className="flex items-center">
-                            <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                            <span>{client.email}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                            <span>{client.phone}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-2 text-gray-400" />
-                            <span className="truncate">{client.address}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2 ml-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        onClick={() => setClientToView(client)}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Ver Detalles
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditClient(client)}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Editar
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleDeleteClick(client)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )
-      ) : (
-        <div className="text-center py-20 text-gray-500">
-          {searchTerm || classificationFilter !== "all"
-            ? "No se encontraron clientes con los filtros aplicados"
-            : "No hay clientes registrados. Cree uno nuevo haciendo clic en 'Nuevo Cliente'"}
         </div>
-      )}
 
-      {/* Client Form Dialog */}
-      <Dialog open={showClientForm} onOpenChange={setShowClientForm}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>
-              {clientToEdit ? "Editar Cliente" : "Nuevo Cliente"}
-            </DialogTitle>
-            <DialogDescription>
-              {clientToEdit
-                ? "Modifique los datos del cliente según sea necesario"
-                : "Complete el formulario para registrar un nuevo cliente"}
-            </DialogDescription>
-          </DialogHeader>
-          <ClientForm
-            initialData={clientToEdit || undefined}
-            onSuccess={handleCloseForm}
-          />
-        </DialogContent>
-      </Dialog>
+        <TabsContent value="clients">
+          {isLoading ? (
+            <div className="flex justify-center py-20">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+            </div>
+          ) : filteredClients && filteredClients.length > 0 ? (
+            renderClientCards(filteredClients, 'client')
+          ) : (
+            renderEmptyState('client')
+          )}
+        </TabsContent>
 
-      {/* Delete Confirmation Dialog */}
+        <TabsContent value="prospects">
+          {isLoading ? (
+            <div className="flex justify-center py-20">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+            </div>
+          ) : filteredProspects && filteredProspects.length > 0 ? (
+            renderClientCards(filteredProspects, 'prospect')
+          ) : (
+            renderEmptyState('prospect')
+          )}
+        </TabsContent>
+      </Tabs>
+
+      <ClientForm
+        open={showClientForm}
+        onClose={handleCloseForm}
+        clientToEdit={clientToEdit}
+        defaultType={activeTab === 'prospects' ? 'prospect' : 'client'}
+      />
+
       <AlertDialog
         open={!!clientToDelete}
-        onOpenChange={(open) => !open && setClientToDelete(null)}
+        onOpenChange={() => setClientToDelete(null)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar Cliente?</AlertDialogTitle>
+            <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. El cliente será eliminado permanentemente del sistema.
+              Esta acción no se puede deshacer. Se eliminará permanentemente el {clientToDelete?.type === 'prospect' ? 'prospecto' : 'cliente'}{" "}
+              {clientToDelete?.name} y todos sus datos asociados.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              className="bg-red-600 hover:bg-red-700"
-            >
+            <AlertDialogAction onClick={handleDeleteConfirm}>
               Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Client Detail Dialog */}
       <ClientDetail
         client={clientToView}
         isOpen={!!clientToView}
