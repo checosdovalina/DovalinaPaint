@@ -91,6 +91,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/clients/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const clientData = insertClientSchema.partial().parse(req.body);
+      const updatedClient = await storage.updateClient(id, clientData);
+      
+      if (!updatedClient) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      // Create activity for client type conversion
+      if (clientData.type) {
+        const action = clientData.type === 'client' ? 'converted to client' : 'converted to prospect';
+        await storage.createActivity({
+          type: "client_updated",
+          description: `${updatedClient.name} ${action}`,
+          userId: req.user.id,
+          clientId: updatedClient.id,
+          projectId: null
+        });
+      }
+      
+      res.json(updatedClient);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid client data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.delete("/api/clients/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
