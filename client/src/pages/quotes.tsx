@@ -184,8 +184,8 @@ export default function Quotes() {
     setDateTo(undefined);
   };
 
-  // Filter quotes with advanced filters
-  const filteredQuotes = quotes?.filter(quote => {
+  // Filter quotes with advanced filters and sort by newest first
+  const filteredQuotes = quotes ? [...quotes].filter(quote => {
     // Filter by status
     if (statusFilter !== "all" && quote.status !== statusFilter) {
       return false;
@@ -223,7 +223,7 @@ export default function Quotes() {
     }
     
     return true;
-  });
+  }).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()) : undefined;
 
   // Helper to get project name
   const getProjectName = (projectId: number) => {

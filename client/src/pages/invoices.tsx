@@ -829,10 +829,10 @@ export default function Invoices() {
   const { data: projects } = useQuery({ queryKey: ["/api/projects"] });
   const { data: quotes } = useQuery({ queryKey: ["/api/quotes"] });
 
-  // Filter invoices by selected client
+  // Filter invoices by selected client and sort by newest first
   const filteredInvoices = selectedClientId 
-    ? (Array.isArray(invoices) ? invoices.filter((invoice: Invoice) => invoice.clientId === selectedClientId) : [])
-    : invoices;
+    ? (Array.isArray(invoices) ? [...invoices].filter((invoice: Invoice) => invoice.clientId === selectedClientId).sort((a: Invoice, b: Invoice) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()) : [])
+    : (Array.isArray(invoices) ? [...invoices].sort((a: Invoice, b: Invoice) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()) : []);
 
   const getStatusBadge = (status: string) => {
     const statusMap = {

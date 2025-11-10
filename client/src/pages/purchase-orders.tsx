@@ -1091,14 +1091,14 @@ export default function PurchaseOrders() {
     }
   };
 
-  // Filter purchase orders by search query
-  const filteredPurchaseOrders = searchQuery
-    ? purchaseOrders.filter(
+  // Filter purchase orders by search query and sort by newest first
+  const filteredPurchaseOrders = (searchQuery
+    ? [...purchaseOrders].filter(
         (po) =>
           po.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
           po.supplierName?.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    : purchaseOrders;
+    : [...purchaseOrders]).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
 
   // Format date
   const formatDate = (dateString: string | Date | null) => {

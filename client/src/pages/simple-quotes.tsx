@@ -51,9 +51,9 @@ export default function SimpleQuotes() {
   });
 
   // Filter only simple quotes (those with scopeOfWork)
-  const simpleQuotes = quotes.filter((quote: any) => quote.scopeOfWork) || [];
+  const simpleQuotes = [...quotes].filter((quote: any) => quote.scopeOfWork) || [];
 
-  // Apply filters to simple quotes
+  // Apply filters to simple quotes and sort by newest first
   const filteredSimpleQuotes = simpleQuotes.filter((quote: any) => {
     // Status filter
     if (statusFilter !== 'all' && quote.status !== statusFilter) {
@@ -91,7 +91,7 @@ export default function SimpleQuotes() {
     }
 
     return true;
-  });
+  }).sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
 
   // Separate quotes by project type (residential vs commercial)
   const getQuotesByType = (type: string) => {
