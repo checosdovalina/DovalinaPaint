@@ -111,19 +111,21 @@ export function Sidebar({ className }: SidebarProps) {
           className
         )}
       >
-        <div className="flex h-24 items-center justify-between border-b px-3 bg-primary">
-          <div className="flex items-center justify-center flex-1 py-2">
-            <img src={logoImg} alt="Dovalina Pro Painters" className="h-20 w-auto max-w-[200px] object-contain drop-shadow-md" />
+        <div className="flex flex-col border-b bg-primary">
+          <div className="flex items-center justify-between px-3 py-4">
+            <div className="flex items-center justify-center flex-1">
+              <img src={logoImg} alt="Dovalina Pro Painters" className="h-14 w-auto max-w-[220px] object-contain" />
+            </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="lg:hidden text-white hover:bg-white/10" 
+              onClick={closeMobileSidebar}
+            >
+              <X className="h-6 w-6" />
+              <span className="sr-only">Close menu</span>
+            </Button>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="lg:hidden text-white hover:bg-white/10" 
-            onClick={closeMobileSidebar}
-          >
-            <X className="h-6 w-6" />
-            <span className="sr-only">Close menu</span>
-          </Button>
         </div>
         
         <div className="flex-1 overflow-auto">
