@@ -83,14 +83,14 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <>
       {/* Mobile navbar toggle - optimized for iPhone 14 Pro Max */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white z-30 border-b flex items-center px-4 safe-top safe-left safe-right">
-        <Button variant="ghost" size="icon" onClick={toggleMobileSidebar} className="focus:outline-none">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-primary z-30 border-b border-primary/20 flex items-center px-4 safe-top safe-left safe-right">
+        <Button variant="ghost" size="icon" onClick={toggleMobileSidebar} className="focus:outline-none text-white hover:bg-white/10">
           <Menu className="h-6 w-6" />
           <span className="sr-only">Toggle menu</span>
         </Button>
         <div className="flex-1 flex justify-center">
           <div className="flex items-center">
-            <img src={logoImg} alt="Dovalina Pro Painters" className="h-10" />
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-12 w-auto" />
           </div>
         </div>
       </div>
@@ -111,14 +111,14 @@ export function Sidebar({ className }: SidebarProps) {
           className
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b px-4 bg-white">
-          <div className="flex items-center">
-            <img src={logoImg} alt="Dovalina Pro Painters" className="h-12" />
+        <div className="flex h-20 items-center justify-between border-b px-4 bg-primary">
+          <div className="flex items-center justify-center flex-1">
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-16 w-auto max-w-[180px] object-contain" />
           </div>
           <Button 
             variant="ghost" 
             size="icon" 
-            className="lg:hidden text-gray-600" 
+            className="lg:hidden text-white hover:bg-white/10" 
             onClick={closeMobileSidebar}
           >
             <X className="h-6 w-6" />
