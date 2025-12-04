@@ -146,9 +146,9 @@ export default function LandingPage() {
 
       {/* Header */}
       <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+        <div className="container mx-auto px-4 h-24 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <img src={logoImg} alt="Dovalina Pro Painters" className="h-14 w-auto" />
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-20 w-auto" />
           </div>
           
           <nav className="hidden lg:flex items-center space-x-8">
@@ -522,7 +522,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-10">
             <div className="md:col-span-2">
-              <img src={logoImg} alt="Dovalina Pro Painters" className="h-16 w-auto mb-6 brightness-0 invert" />
+              <img src={logoImg} alt="Dovalina Pro Painters" className="h-20 w-auto mb-6 brightness-0 invert" />
               <p className="text-gray-400 mb-6 max-w-md">
                 Professional painting services for residential and commercial properties. 
                 Licensed, insured, and committed to quality craftsmanship in the Charlotte, NC area.
