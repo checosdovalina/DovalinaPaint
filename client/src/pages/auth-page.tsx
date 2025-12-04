@@ -46,11 +46,11 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex bg-gray-50 safe-area-inset">
       {/* Left side - Company info and features */}
-      <div className="hidden lg:flex lg:flex-1 flex-col justify-center px-8 py-12">
-        <div className="max-w-md mx-auto">
-          <div className="mb-6">
-            <img src={logoImg} alt="Dovalina Pro Painters" className="h-40 mb-4" />
-            <p className="text-gray-600">Management system for efficient handling of clients, projects, personnel, and quotes.</p>
+      <div className="hidden lg:flex lg:flex-1 flex-col justify-center px-8 py-12 bg-gradient-to-br from-primary/5 to-secondary/10">
+        <div className="max-w-md mx-auto text-center">
+          <div className="mb-8">
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-48 w-auto mx-auto mb-6 drop-shadow-lg" />
+            <p className="text-gray-600 text-lg">Management system for efficient handling of clients, projects, personnel, and quotes.</p>
           </div>
           
           <div className="bg-secondary/20 p-6 rounded-lg">

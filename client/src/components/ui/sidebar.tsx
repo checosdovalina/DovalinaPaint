@@ -90,7 +90,7 @@ export function Sidebar({ className }: SidebarProps) {
         </Button>
         <div className="flex-1 flex justify-center">
           <div className="flex items-center">
-            <img src={logoImg} alt="Dovalina Pro Painters" className="h-12 w-auto" />
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-14 w-auto drop-shadow-md" />
           </div>
         </div>
       </div>
@@ -111,9 +111,9 @@ export function Sidebar({ className }: SidebarProps) {
           className
         )}
       >
-        <div className="flex h-20 items-center justify-between border-b px-4 bg-primary">
-          <div className="flex items-center justify-center flex-1">
-            <img src={logoImg} alt="Dovalina Pro Painters" className="h-16 w-auto max-w-[180px] object-contain" />
+        <div className="flex h-24 items-center justify-between border-b px-3 bg-primary">
+          <div className="flex items-center justify-center flex-1 py-2">
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-20 w-auto max-w-[200px] object-contain drop-shadow-md" />
           </div>
           <Button 
             variant="ghost" 
