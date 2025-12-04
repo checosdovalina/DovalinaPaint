@@ -1,8 +1,23 @@
 # Overview
 
-This is a business management application for **Dovalina Painting LLC**, a painting contractor company. The system handles client management, project tracking, quotes, service orders, invoicing, payments, calendar scheduling, and financial reporting. It provides a complete workflow from client acquisition through project completion and payment collection.
+This is a business management application for **Dovalina Pro Painters** (formerly Dovalina Painting LLC), a painting contractor company. The system handles client management, project tracking, quotes, service orders, invoicing, payments, calendar scheduling, and financial reporting. It provides a complete workflow from client acquisition through project completion and payment collection.
 
 The application uses a modern full-stack architecture with React/TypeScript on the frontend and Express/Node.js on the backend, with PostgreSQL (via Neon) for data persistence.
+
+# Recent Changes
+
+**December 2025 - Company Rebranding**
+- Company name changed from "Dovalina Painting LLC" to "Dovalina Pro Painters"
+- Updated brand color scheme:
+  - Primary: Navy Blue (#3d4f6f)
+  - Secondary/Accent: Gold (#c9a962)
+  - Destructive: Red (#a31621)
+- New logo assets:
+  - `PNG_2_1764824638618.png` - Horizontal logo (sidebar)
+  - `JPG_1_1764824638626.jpg` - Square icon logo (PDFs)
+  - `JPG_3_1764824638626.jpg` - Square logo (auth page)
+- Updated all PDF generation (quotes, invoices, service orders) with new company name
+- Updated all page titles, headers, and testimonials with new branding
 
 # User Preferences
 
