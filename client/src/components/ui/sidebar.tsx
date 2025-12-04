@@ -112,14 +112,14 @@ export function Sidebar({ className }: SidebarProps) {
         )}
       >
         <div className="flex flex-col border-b bg-primary">
-          <div className="flex items-center justify-between px-3 py-4">
+          <div className="flex items-center justify-between px-2 py-5">
             <div className="flex items-center justify-center flex-1">
-              <img src={logoImg} alt="Dovalina Pro Painters" className="h-14 w-auto max-w-[220px] object-contain" />
+              <img src={logoImg} alt="Dovalina Pro Painters" className="h-16 w-full max-w-[240px] object-contain" />
             </div>
             <Button 
               variant="ghost" 
               size="icon" 
-              className="lg:hidden text-white hover:bg-white/10" 
+              className="lg:hidden text-white hover:bg-white/10 flex-shrink-0" 
               onClick={closeMobileSidebar}
             >
               <X className="h-6 w-6" />

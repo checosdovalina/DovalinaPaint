@@ -146,9 +146,9 @@ export default function LandingPage() {
 
       {/* Header */}
       <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 h-24 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <img src={logoImg} alt="Dovalina Pro Painters" className="h-20 w-auto" />
+        <div className="container mx-auto px-4 h-28 flex items-center justify-between">
+          <div className="flex items-center">
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-24 w-auto" />
           </div>
           
           <nav className="hidden lg:flex items-center space-x-8">
