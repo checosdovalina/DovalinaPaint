@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileDown, Printer, Eye, Check, X, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
-import logoPath from "@assets/78c08020-ed9d-43be-8936-ddbc8089b6c3.jpeg";
+import logoPath from "@assets/JPG_1_1764824638626.jpg";
 import jsPDF from "jspdf";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -288,7 +288,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       // Company Header (next to logo)
       pdf.setFontSize(16);
       pdf.setFont("helvetica", "bold");
-      pdf.text("DOVALINA PAINTING LLC", margin + 22, yPosition + 6);
+      pdf.text("DOVALINA PRO PAINTERS", margin + 22, yPosition + 6);
       
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
@@ -587,7 +587,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor(100, 100, 100);
-      pdf.text("Thank you for choosing Dovalina Painting LLC!", margin, yPosition);
+      pdf.text("Thank you for choosing Dovalina Pro Painters!", margin, yPosition);
       yPosition += 5;
       pdf.text("This quote is valid for 30 days from the date above.", margin, yPosition);
 
@@ -701,11 +701,11 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
               <div className="flex items-start space-x-4">
                 <img 
                   src={logoPath} 
-                  alt="Dovalina Painting LLC Logo" 
+                  alt="Dovalina Pro Painters Logo" 
                   className="h-16 w-16 object-contain"
                 />
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">DOVALINA PAINTING LLC</h1>
+                  <h1 className="text-3xl font-bold text-gray-900">DOVALINA PRO PAINTERS</h1>
                   <div className="mt-2 text-sm text-gray-600 space-y-1">
                     <p>3731 Aster Drive</p>
                     <p>Charlotte, N.C. 28227</p>

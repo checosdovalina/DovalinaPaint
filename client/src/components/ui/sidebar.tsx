@@ -25,7 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
-import logoImg from "@/assets/dovalina_logo.jpeg";
+import logoImg from "@assets/PNG_2_1764824638618.png";
 
 interface SidebarProps {
   className?: string;
@@ -90,10 +90,7 @@ export function Sidebar({ className }: SidebarProps) {
         </Button>
         <div className="flex-1 flex justify-center">
           <div className="flex items-center">
-            <img src={logoImg} alt="Dovalina Painting LLC" className="h-8 mr-2" />
-            <h1 className="text-lg font-bold text-gray-900 truncate max-w-[180px]">
-              Dovalina Painting
-            </h1>
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-10" />
           </div>
         </div>
       </div>
@@ -116,10 +113,7 @@ export function Sidebar({ className }: SidebarProps) {
       >
         <div className="flex h-16 items-center justify-between border-b px-4 bg-white">
           <div className="flex items-center">
-            <img src={logoImg} alt="Dovalina Painting LLC" className="h-10 mr-2" />
-            <h1 className="text-lg font-bold text-gray-900">
-              Dovalina Painting
-            </h1>
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-12" />
           </div>
           <Button 
             variant="ghost" 

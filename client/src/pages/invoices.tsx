@@ -906,7 +906,7 @@ export default function Invoices() {
           <div>
             <h1 style="color: #2563eb; font-size: 32px; font-weight: bold; margin: 0;">INVOICE</h1>
             <div style="margin-top: 10px; color: #666;">
-              <div style="font-weight: bold; font-size: 14px;">Dovalina Painting LLC</div>
+              <div style="font-weight: bold; font-size: 14px;">Dovalina Pro Painters</div>
               <div>Professional Exterior Painting Services</div>
               <div>Phone: (555) 123-4567</div>
               <div>Email: info@dovalina-painting.com</div>
@@ -1097,7 +1097,7 @@ export default function Invoices() {
             <div style="color: #666; font-size: 11px;">
               Payment is due within 30 days of invoice date.<br>
               Late payments may incur additional charges.<br>
-              Thank you for choosing Dovalina Painting LLC!
+              Thank you for choosing Dovalina Pro Painters!
             </div>
           </div>
           <div style="text-align: right;">

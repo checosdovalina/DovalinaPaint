@@ -246,7 +246,7 @@ export default function Suppliers() {
   return (
     <Layout title="Suppliers Management">
       <Helmet>
-        <title>Suppliers | Dovalina Painting LLC</title>
+        <title>Suppliers | Dovalina Pro Painters</title>
       </Helmet>
 
       <PageHeader

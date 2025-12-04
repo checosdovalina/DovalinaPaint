@@ -393,7 +393,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
           {/* Company information header */}
           <div className="flex justify-between items-start border-b pb-4 mb-6 company-header">
             <div>
-              <h1 className="text-2xl font-bold company-name">DOVALINA PAINTING LLC</h1>
+              <h1 className="text-2xl font-bold company-name">DOVALINA PRO PAINTERS</h1>
               <p>3731 Aster Drive</p>
               <p>Charlotte, N.C. 28227</p>
               <p>704-506-9741</p>

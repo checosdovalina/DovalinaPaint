@@ -240,7 +240,7 @@ export function ServiceOrderDetail({
       });
       
       // Generate a filename for the PDF
-      const filename = `Dovalina_Painting_ServiceOrder_${serviceOrder.id}.pdf`;
+      const filename = `Dovalina_Pro_Painters_ServiceOrder_${serviceOrder.id}.pdf`;
       
       // Set margins
       const leftMargin = 15;
@@ -253,7 +253,7 @@ export function ServiceOrderDetail({
       // Company info (left side)
       pdf.setFontSize(16);
       pdf.setFont('helvetica', 'bold');
-      pdf.text("DOVALINA PAINTING LLC", leftMargin, yPos);
+      pdf.text("DOVALINA PRO PAINTERS", leftMargin, yPos);
       
       // Service order info (right side)
       const rightColStart = 160;
@@ -1006,7 +1006,7 @@ export function ServiceOrderDetail({
           {/* Company information header */}
           <div className="flex justify-between items-start border-b pb-4 mb-6 company-header">
             <div>
-              <h1 className="text-2xl font-bold company-name">DOVALINA PAINTING LLC</h1>
+              <h1 className="text-2xl font-bold company-name">DOVALINA PRO PAINTERS</h1>
               <p>3731 Aster Drive</p>
               <p>Charlotte, N.C. 28227</p>
               <p>704-506-9741</p>

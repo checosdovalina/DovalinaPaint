@@ -9,7 +9,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
-import logoImg from "@assets/78c08020-ed9d-43be-8936-ddbc8089b6c3.jpeg";
+import logoImg from "@assets/JPG_3_1764824638626.jpg";
 
 const loginSchema = z.object({
   username: z.string().min(1, { message: "Username is required" }),
@@ -49,12 +49,11 @@ export default function AuthPage() {
       <div className="hidden lg:flex lg:flex-1 flex-col justify-center px-8 py-12">
         <div className="max-w-md mx-auto">
           <div className="mb-6">
-            <img src={logoImg} alt="Dovalina Painting LLC" className="h-32 mb-4" />
-            <h1 className="text-3xl font-bold text-blue-700 mb-2">Dovalina Painting LLC</h1>
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-40 mb-4" />
             <p className="text-gray-600">Management system for efficient handling of clients, projects, personnel, and quotes.</p>
           </div>
           
-          <div className="bg-blue-50 p-6 rounded-lg">
+          <div className="bg-secondary/20 p-6 rounded-lg">
             <h2 className="text-lg font-medium text-gray-800 mb-4">Key features:</h2>
             <ul className="space-y-2">
               <li className="flex items-start">
@@ -91,8 +90,7 @@ export default function AuthPage() {
         <div className="max-w-md w-full">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <img src={logoImg} alt="Dovalina Painting LLC" className="h-20 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-blue-700">Dovalina Painting LLC</h1>
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-28 mx-auto mb-4" />
           </div>
           
           <Card className="shadow-lg border-0">

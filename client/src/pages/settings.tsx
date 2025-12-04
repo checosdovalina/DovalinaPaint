@@ -92,7 +92,7 @@ export default function SettingsPage() {
   const generalSettingsForm = useForm<GeneralSettings>({
     resolver: zodResolver(generalSettingsSchema),
     defaultValues: {
-      companyName: "Dovalina Painting LLC",
+      companyName: "Dovalina Pro Painters",
       language: "en",
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       currency: "USD",
@@ -256,7 +256,7 @@ export default function SettingsPage() {
   return (
     <Layout title="Settings">
       <Helmet>
-        <title>Settings - Dovalina Painting LLC</title>
+        <title>Settings - Dovalina Pro Painters</title>
       </Helmet>
 
       <PageHeader

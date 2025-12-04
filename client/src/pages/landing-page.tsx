@@ -85,7 +85,7 @@ export default function LandingPage() {
       name: "Sarah Johnson",
       location: "Homeowner",
       rating: 5,
-      text: "Dovalina Painting transformed our home's exterior. The attention to detail and professionalism was outstanding. Highly recommended!"
+      text: "Dovalina Pro Painters transformed our home's exterior. The attention to detail and professionalism was outstanding. Highly recommended!"
     },
     {
       name: "Mike Rodriguez",
@@ -97,7 +97,7 @@ export default function LandingPage() {
       name: "Lisa Chen",
       location: "Property Manager",
       rating: 5,
-      text: "We've used Dovalina Painting for multiple properties. Consistent quality work and reliable service every time."
+      text: "We've used Dovalina Pro Painters for multiple properties. Consistent quality work and reliable service every time."
     }
   ];
 
@@ -114,10 +114,10 @@ export default function LandingPage() {
       <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <PaintBucket className="h-8 w-8 text-blue-600" />
+            <PaintBucket className="h-8 w-8 text-primary" />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Dovalina Painting LLC</h1>
-              <p className="text-xs text-gray-600">Professional Painting Services</p>
+              <h1 className="text-xl font-bold text-gray-900">Dovalina Pro Painters</h1>
+              <p className="text-xs text-gray-600">Professional Painting & Design</p>
             </div>
           </div>
           
@@ -256,7 +256,7 @@ export default function LandingPage() {
       <section id="about" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Dovalina Painting?</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Dovalina Pro Painters?</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               We're committed to delivering exceptional results with every project.
             </p>
@@ -355,8 +355,8 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-8">
             <div className="col-span-2">
               <div className="flex items-center space-x-2 mb-4">
-                <PaintBucket className="h-6 w-6 text-blue-400" />
-                <h3 className="text-xl font-bold">Dovalina Painting LLC</h3>
+                <PaintBucket className="h-6 w-6 text-primary" />
+                <h3 className="text-xl font-bold">Dovalina Pro Painters</h3>
               </div>
               <p className="text-gray-400 mb-4">
                 Professional painting services for residential and commercial properties. 
@@ -402,7 +402,7 @@ export default function LandingPage() {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400">© 2024 Dovalina Painting LLC. All rights reserved.</p>
+            <p className="text-gray-400">© 2024 Dovalina Pro Painters. All rights reserved.</p>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <Link href="/auth" className="text-gray-400 hover:text-white transition-colors">
                 Management System
