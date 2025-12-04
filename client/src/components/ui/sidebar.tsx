@@ -25,7 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
-import logoImg from "@assets/PNG_2_1764824638618.png";
+import logoImg from "@assets/PNG_2_1764825814505.png";
 
 interface SidebarProps {
   className?: string;

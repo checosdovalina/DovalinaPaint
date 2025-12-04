@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { ContactForm } from "@/components/contact-form";
-import logoImg from "@assets/PNG_2_1764824638618.png";
+import logoImg from "@assets/PNG_2_1764825814505.png";
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
