@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Phone, 
   Mail, 
@@ -21,11 +22,38 @@ import {
   ArrowRight,
   Sparkles,
   ThumbsUp,
-  Palette
+  Palette,
+  Camera
 } from "lucide-react";
 import { Link } from "wouter";
 import { ContactForm } from "@/components/contact-form";
 import logoImg from "@assets/PNG_2_1764825814505.png";
+
+// Exterior Images
+import extBefore1 from "@assets/270C0489-F555-4B91-8A1E-D0A8CB8419E9_1765245547915.jpg";
+import extBefore2 from "@assets/IMG_6624_1765245547915.jpg";
+import extAfter1 from "@assets/IMG_6779_1765245927449.jpg";
+import extAfter2 from "@assets/IMG_9733_(1)_1765245927450.jpg";
+import extAfter3 from "@assets/IMG_7879_1765245953033.jpg";
+import extAfter4 from "@assets/IMG_9569_1765245953034.jpg";
+
+// Interior Before Images
+import intBefore1 from "@assets/IMG_7127_1765247451800.jpg";
+import intBefore2 from "@assets/IMG_7140_1765247451801.jpg";
+import intBefore3 from "@assets/IMG_7148_1765247451801.jpg";
+import intBefore4 from "@assets/IMG_7495_1765247451802.jpg";
+
+// Interior After Images
+import intAfter1 from "@assets/IMG_3585_1765247521459.jpg";
+import intAfter2 from "@assets/IMG_3587_1765247521460.jpg";
+import intAfter3 from "@assets/IMG_3603_1765247521461.jpg";
+import intAfter4 from "@assets/IMG_3602_1765247521461.jpg";
+import intAfter5 from "@assets/IMG_8797_1765247563476.jpg";
+import intAfter6 from "@assets/IMG_8798_1765247563479.jpg";
+import intAfter7 from "@assets/IMG_8804_1765247563479.jpg";
+import intAfter8 from "@assets/IMG_8800_2_1765247563480.jpg";
+import intAfter9 from "@assets/IMG_8808_2_1765247563481.jpg";
+import intAfter10 from "@assets/IMG_9854_1765247585202.png";
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -159,6 +187,12 @@ export default function LandingPage() {
               Services
             </button>
             <button 
+              onClick={() => scrollToSection('gallery')} 
+              className="text-gray-700 hover:text-primary font-medium transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-secondary hover:after:w-full after:transition-all"
+            >
+              Gallery
+            </button>
+            <button 
               onClick={() => scrollToSection('about')} 
               className="text-gray-700 hover:text-primary font-medium transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-secondary hover:after:w-full after:transition-all"
             >
@@ -217,6 +251,15 @@ export default function LandingPage() {
                 className="block w-full text-left py-3 px-4 text-gray-700 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors font-medium"
               >
                 Services
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection('gallery');
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left py-3 px-4 text-gray-700 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors font-medium"
+              >
+                Gallery
               </button>
               <button
                 onClick={() => {
@@ -393,8 +436,208 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Project Gallery Section */}
+      <section id="gallery" className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-secondary/20 text-primary border-0">
+              <Camera className="h-4 w-4 mr-2" />
+              Our Work
+            </Badge>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Project Gallery</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              See the transformations we've achieved for our clients. Quality work that speaks for itself.
+            </p>
+          </div>
+
+          <Tabs defaultValue="exterior" className="w-full">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-12">
+              <TabsTrigger value="exterior" className="text-lg py-3">
+                <Home className="h-5 w-5 mr-2" />
+                Exterior
+              </TabsTrigger>
+              <TabsTrigger value="interior" className="text-lg py-3">
+                <Brush className="h-5 w-5 mr-2" />
+                Interior
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="exterior" className="space-y-12">
+              {/* Before & After Comparison */}
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">Before & After Transformations</h3>
+                <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                  <div className="space-y-4">
+                    <div className="relative rounded-xl overflow-hidden shadow-lg group">
+                      <img src={extBefore1} alt="Exterior work in progress" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                        <span className="text-white font-semibold">Work in Progress</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="relative rounded-xl overflow-hidden shadow-lg group">
+                      <img src={extAfter1} alt="Before and after exterior transformation" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                        <span className="text-white font-semibold">Stunning Transformation</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Exterior Gallery Grid */}
+              <div>
+                <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">Completed Projects</h3>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group aspect-square">
+                    <img src={extBefore2} alt="House exterior painting" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/20 transition-colors duration-300"></div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group aspect-square">
+                    <img src={extAfter2} alt="Commercial painting - Ray's Flowers" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-white font-semibold text-sm">Commercial Project</span>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group aspect-square">
+                    <img src={extAfter3} alt="Townhouse complex painting" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-white font-semibold text-sm">Multi-Unit Complex</span>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group aspect-square">
+                    <img src={extAfter4} alt="Elegant white house exterior" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-white font-semibold text-sm">Residential Home</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="interior" className="space-y-12">
+              {/* Before & After Interior */}
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">Before & After Transformations</h3>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="relative rounded-xl overflow-hidden shadow-lg">
+                    <img src={intBefore1} alt="Before - Fireplace renovation" className="w-full h-48 object-cover" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-red-500 text-white">Before</Badge>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg">
+                    <img src={intBefore2} alt="Before - Staircase" className="w-full h-48 object-cover" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-red-500 text-white">Before</Badge>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg">
+                    <img src={intBefore3} alt="Before - Bedroom" className="w-full h-48 object-cover" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-red-500 text-white">Before</Badge>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg">
+                    <img src={intBefore4} alt="Before - Room with beams" className="w-full h-48 object-cover" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-red-500 text-white">Before</Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Interior After Gallery */}
+              <div>
+                <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">Completed Interiors</h3>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group">
+                    <img src={intAfter1} alt="Living room with wooden beams" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-green-500 text-white">After</Badge>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group">
+                    <img src={intAfter2} alt="Open floor plan with rustic beams" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-green-500 text-white">After</Badge>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group">
+                    <img src={intAfter3} alt="Elegant bathroom vanity" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-green-500 text-white">After</Badge>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group">
+                    <img src={intAfter4} alt="Upstairs hallway with custom railing" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-green-500 text-white">After</Badge>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group">
+                    <img src={intAfter5} alt="Modern living room" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-green-500 text-white">After</Badge>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group">
+                    <img src={intAfter6} alt="Elegant living space with fireplace" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-green-500 text-white">After</Badge>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group">
+                    <img src={intAfter7} alt="Modern fireplace with floating shelves" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-green-500 text-white">After</Badge>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group">
+                    <img src={intAfter8} alt="Cozy living room with fireplace" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-green-500 text-white">After</Badge>
+                    </div>
+                  </div>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg group">
+                    <img src={intAfter9} alt="Grand foyer with columns" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-green-500 text-white">After</Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Special Feature - Kids Room */}
+              <div className="max-w-2xl mx-auto">
+                <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">Custom Design Work</h3>
+                <div className="relative rounded-xl overflow-hidden shadow-2xl group">
+                  <img src={intAfter10} alt="Custom rainbow stripe kids room" className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                    <h4 className="text-white font-bold text-xl mb-2">Custom Kids Room Design</h4>
+                    <p className="text-white/80">Creative stripe design bringing personality and color to any space</p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <div className="text-center mt-12">
+            <Button 
+              size="lg" 
+              className="bg-primary hover:bg-primary/90 text-white font-semibold px-8"
+              onClick={() => scrollToSection('contact')}
+            >
+              Get a Free Quote for Your Project
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section id="about" className="py-20 bg-gray-50">
+      <section id="about" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-secondary/20 text-primary border-0">
