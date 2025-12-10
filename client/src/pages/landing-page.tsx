@@ -180,7 +180,7 @@ export default function LandingPage() {
             <img 
               src={logoImg} 
               alt="Dovalina Pro Painters" 
-              className="h-40 w-auto max-w-none object-contain object-left" 
+              className="h-[280px] w-auto max-w-none object-contain object-left" 
             />
           </div>
           
