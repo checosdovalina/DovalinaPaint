@@ -770,7 +770,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-10">
             <div className="md:col-span-2">
-              <img src={logoImg} alt="Dovalina Pro Painters" className="h-20 w-auto mb-6 brightness-0 invert" />
+              {/* Logo container with mask */}
+              <div className="h-16 w-64 overflow-hidden flex items-center mb-6">
+                <img src={logoImg} alt="Dovalina Pro Painters" className="h-[280px] w-auto max-w-none object-contain object-left brightness-0 invert" />
+              </div>
               <p className="text-gray-400 mb-6 max-w-md">
                 Professional painting services for residential and commercial properties. 
                 Licensed, insured, and committed to quality craftsmanship in the Charlotte, NC area.
