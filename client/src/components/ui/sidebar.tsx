@@ -89,8 +89,9 @@ export function Sidebar({ className }: SidebarProps) {
           <span className="sr-only">Toggle menu</span>
         </Button>
         <div className="flex-1 flex justify-center">
-          <div className="flex items-center">
-            <img src={logoImg} alt="Dovalina Pro Painters" className="h-14 w-auto drop-shadow-md" />
+          {/* Logo container with mask */}
+          <div className="h-12 w-48 overflow-hidden flex items-center">
+            <img src={logoImg} alt="Dovalina Pro Painters" className="h-[200px] w-auto max-w-none object-contain object-center drop-shadow-md" />
           </div>
         </div>
       </div>
@@ -113,8 +114,11 @@ export function Sidebar({ className }: SidebarProps) {
       >
         <div className="flex flex-col border-b bg-primary">
           <div className="flex items-center justify-between px-2 py-5">
-            <div className="flex items-center justify-center flex-1">
-              <img src={logoImg} alt="Dovalina Pro Painters" className="h-16 w-full max-w-[240px] object-contain" />
+            {/* Logo container with mask */}
+            <div className="flex-1 flex items-center justify-center">
+              <div className="h-14 w-56 overflow-hidden flex items-center">
+                <img src={logoImg} alt="Dovalina Pro Painters" className="h-[200px] w-auto max-w-none object-contain object-center" />
+              </div>
             </div>
             <Button 
               variant="ghost" 
