@@ -1,0 +1,58 @@
+root@srv1187030:/home/dovalina/app# pm2 stop dovalina
+[PM2] Applying action stopProcessId on app [dovalina](ids: [ 0 ])
+[PM2] [dovalina](0) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ dovalina           │ fork     │ 0    │ stopped   │ 0%       │ 0b       │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+root@srv1187030:/home/dovalina/app# cat > /etc/nginx/sites-available/dovalina << 'EOF'
+server {
+    listen 80;
+    server_name dovalinapropainters.com www.dovalinapropainters.com;
+
+    client_max_body_size 50M;
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 300;
+        proxy_connect_timeout 300;
+    }
+}
+EOF
+
+systemctl restart nginxenabled/defaultlina /etc/nginx/sites-enabled/
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+root@srv1187030:/home/dovalina/app# curl -I http://localhost:5000
+curl: (7) Failed to connect to localhost port 5000 after 0 ms: Could not connect to server
+root@srv1187030:/home/dovalina/app# cd /home/dovalina/app
+pm2 delete dovalina
+pm2 start dist/index.js --name "dovalina" --env-file .env
+[PM2] Applying action deleteProcessId on app [dovalina](ids: [ 0 ])
+[PM2] [dovalina](0) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+
+  error: unknown option `--env-file'
+
+root@srv1187030:/home/dovalina/app# cd /home/dovalina/app
+pm2 delete dovalina
+pm2 start dist/index.js --name "dovalina" --env-file .env
+[PM2][ERROR] Process or Namespace dovalina not found
+
+  error: unknown option `--env-file'
+
+root@srv1187030:/home/dovalina/app# pm2 restart dovalina
+Use --update-env to update environment variables
+[PM2][ERROR] Process or Namespace dovalina not found
+root@srv1187030:/home/dovalina/app# 
