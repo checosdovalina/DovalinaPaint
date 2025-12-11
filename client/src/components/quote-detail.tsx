@@ -396,7 +396,7 @@ export function QuoteDetail({ quote, project, client, onClose, open }: QuoteDeta
               <h1 className="text-2xl font-bold company-name">DOVALINA PRO PAINTERS</h1>
               <p>3731 Aster Drive</p>
               <p>Charlotte, N.C. 28227</p>
-              <p>704-506-9741</p>
+              <p>704-606-7001</p>
               <p>d-dovalina@hotmail.com</p>
             </div>
             <div className="text-right quote-info">

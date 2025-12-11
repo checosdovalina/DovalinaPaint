@@ -153,9 +153,9 @@ export default function LandingPage() {
       <div className="bg-primary text-white py-2 hidden md:block">
         <div className="container mx-auto px-4 flex justify-between items-center text-sm">
           <div className="flex items-center space-x-6">
-            <a href="tel:7045069741" className="flex items-center hover:text-secondary transition-colors">
+            <a href="tel:7046067001" className="flex items-center hover:text-secondary transition-colors">
               <Phone className="h-4 w-4 mr-2" />
-              704-506-9741
+              704-606-7001
             </a>
             <a href="mailto:d-dovalina@hotmail.com" className="flex items-center hover:text-secondary transition-colors">
               <Mail className="h-4 w-4 mr-2" />
@@ -735,8 +735,8 @@ export default function LandingPage() {
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-colors">
                 <Phone className="h-10 w-10 mb-4 text-secondary mx-auto" />
                 <h3 className="text-xl font-bold mb-2">Call Us</h3>
-                <a href="tel:7045069741" className="text-white/80 hover:text-secondary transition-colors text-lg">
-                  704-506-9741
+                <a href="tel:7046067001" className="text-white/80 hover:text-secondary transition-colors text-lg">
+                  704-606-7001
                 </a>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-colors">
@@ -802,9 +802,9 @@ export default function LandingPage() {
               <h4 className="text-lg font-bold mb-6 text-white">Contact</h4>
               <ul className="space-y-4 text-gray-400">
                 <li>
-                  <a href="tel:7045069741" className="flex items-center hover:text-secondary transition-colors">
+                  <a href="tel:7046067001" className="flex items-center hover:text-secondary transition-colors">
                     <Phone className="h-5 w-5 mr-3 text-secondary" />
-                    704-506-9741
+                    704-606-7001
                   </a>
                 </li>
                 <li>
