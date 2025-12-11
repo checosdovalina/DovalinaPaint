@@ -299,6 +299,13 @@ export class DatabaseStorage implements IStorage {
   
   async deleteProject(id: number): Promise<boolean> {
     try {
+      // Delete related records first (cascade delete)
+      await db.delete(payments).where(eq(payments.projectId, id));
+      await db.delete(purchaseOrders).where(eq(purchaseOrders.projectId, id));
+      await db.delete(invoices).where(eq(invoices.projectId, id));
+      await db.delete(serviceOrders).where(eq(serviceOrders.projectId, id));
+      await db.delete(quotes).where(eq(quotes.projectId, id));
+      // Now delete the project
       await db.delete(projects).where(eq(projects.id, id));
       return true;
     } catch (error) {
