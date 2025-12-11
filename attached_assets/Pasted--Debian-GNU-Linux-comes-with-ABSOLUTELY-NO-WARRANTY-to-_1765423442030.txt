@@ -1,0 +1,140 @@
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Thu Dec 11 01:11:20 2025 from 177.241.173.96
+-bash: warning: setlocale: LC_CTYPE: cannot change locale (UTF-8): No such file or directory
+-bash: warning: setlocale: LC_CTYPE: cannot change locale (UTF-8): No such file or directory
+root@srv1187030:~# cd /home/dovalina/app
+
+# Detener PM2
+pm2 stop dovalina
+
+# Obtener cambios
+git pull origin main
+
+# Instalar dependencias nuevas
+npm install
+
+# Reconstruir
+npm run build
+
+# Iniciar
+pm2 start ecosystem.config.cjs
+
+# Ver logs
+pm2 logs dovalina --lines 20
+[PM2] Applying action stopProcessId on app [dovalina](ids: [ 0 ])
+[PM2] [dovalina](0) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ dovalina           │ fork     │ 0    │ stopped   │ 0%       │ 0b       │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+fatal: detected dubious ownership in repository at '/home/dovalina/app'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /home/dovalina/app
+
+up to date, audited 571 packages in 2s
+
+70 packages are looking for funding
+  run `npm fund` for details
+
+15 vulnerabilities (3 low, 7 moderate, 4 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.14 building for production...
+Browserslist: browsers data (caniuse-lite) is 14 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 3978 modules transformed.
+../dist/public/index.html                                                                   0.84 kB │ gzip:   0.46 kB
+../dist/public/assets/IMG_8808_2_1765247563481-D8dLZqYg.jpg                               136.38 kB
+../dist/public/assets/IMG_8804_1765247563479-DqPG6WsQ.jpg                                 139.97 kB
+../dist/public/assets/IMG_8798_1765247563479-etYFn9GW.jpg                                 153.18 kB
+../dist/public/assets/IMG_8800_2_1765247563480-CQxFeLgZ.jpg                               156.98 kB
+../dist/public/assets/PNG_2_1764825814505-sk48FW-G.png                                    157.81 kB
+../dist/public/assets/IMG_3602_1765247521461-BDEPHwcb.jpg                                 168.10 kB
+../dist/public/assets/IMG_3603_1765247521461-B5bd1EnM.jpg                                 168.39 kB
+../dist/public/assets/IMG_8797_1765247563476-BaEIay11.jpg                                 168.43 kB
+../dist/public/assets/JPG_1_1764824638626-B_jHUlQL.jpg                                    172.43 kB
+../dist/public/assets/IMG_3587_1765247521460-mrQVrOIh.jpg                                 173.96 kB
+../dist/public/assets/JPG_3_1764824638626-BGzYhnix.jpg                                    201.63 kB
+../dist/public/assets/IMG_3585_1765247521459-D5KbSz6F.jpg                                 217.57 kB
+../dist/public/assets/IMG_6779_1765245927449-BcrPY0yU.jpg                                 318.36 kB
+../dist/public/assets/IMG_7127_1765247451800-BXGFGL2h.jpg                               1,536.32 kB
+../dist/public/assets/IMG_7148_1765247451801-_XnMqRmo.jpg                               1,725.58 kB
+../dist/public/assets/IMG_7140_1765247451801-Br6v0JY0.jpg                               2,441.40 kB
+../dist/public/assets/IMG_9733_(1)_1765245927450-9eX_X2Cm.jpg                           2,524.38 kB
+../dist/public/assets/IMG_7495_1765247451802-QZAKeCrL.jpg                               2,544.09 kB
+../dist/public/assets/270C0489-F555-4B91-8A1E-D0A8CB8419E9_1765245547915-DfG8kG0W.jpg   2,586.49 kB
+../dist/public/assets/IMG_6624_1765245547915-CRp2s5rj.jpg                               3,034.15 kB
+../dist/public/assets/IMG_7879_1765245953033-ok2fHQBt.jpg                               6,117.69 kB
+../dist/public/assets/IMG_9854_1765247585202-D0_2nHj2.png                              10,944.83 kB
+../dist/public/assets/IMG_9569_1765245953034-BLu5aDna.jpg                              23,790.21 kB
+../dist/public/assets/index-DNKnsZGO.css                                                   79.06 kB │ gzip:  13.48 kB
+../dist/public/assets/purify.es-CF4_YkFU.js                                                21.86 kB │ gzip:   8.62 kB
+../dist/public/assets/index.es-qOjX6pWW.js                                                149.53 kB │ gzip:  51.12 kB
+../dist/public/assets/index-DBlDNOER.js                                                 2,711.92 kB │ gzip: 745.71 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 13.62s
+
+  dist/index.js  133.7kb
+
+⚡ Done in 12ms
+[PM2] Applying action restartProcessId on app [dovalina](ids: [ 0 ])
+[PM2] [dovalina](0) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ dovalina           │ fork     │ 0    │ online    │ 0%       │ 12.9mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[TAILING] Tailing last 20 lines for [dovalina] process (change the value with --lines option)
+/root/.pm2/logs/dovalina-out.log last 20 lines:
+0|dovalina | 2:21:03 AM [express] serving on port 5000
+0|dovalina | 2:22:35 AM [express] GET /api/user 401 in 2ms
+0|dovalina | 2:24:08 AM [express] POST /api/login 401 in 33ms :: {"message":"Invalid credentials"}
+0|dovalina | 2:24:12 AM [express] GET /api/user 401 in 1ms
+0|dovalina | 2:24:18 AM [express] POST /api/login 401 in 3ms :: {"message":"Invalid credentials"}
+0|dovalina | 2:26:33 AM [express] POST /api/login 401 in 3ms :: {"message":"Invalid credentials"}
+0|dovalina | 2:28:29 AM [express] POST /api/login 401 in 3ms :: {"message":"Invalid credentials"}
+0|dovalina | 2:28:37 AM [express] POST /api/login 401 in 4ms :: {"message":"Invalid credentials"}
+
+/root/.pm2/logs/dovalina-error.log last 20 lines:
+0|dovalina |     _sender: null,
+0|dovalina |     _socket: null,
+0|dovalina |     _bufferedAmount: 0,
+0|dovalina |     _isServer: false,
+0|dovalina |     _redirects: 0,
+0|dovalina |     _autoPong: true,
+0|dovalina |     _url: 'wss://localhost/v2',
+0|dovalina |     _req: null,
+0|dovalina |     [Symbol(shapeMode)]: false,
+0|dovalina |     [Symbol(kCapture)]: false
+0|dovalina |   },
+0|dovalina |   [Symbol(kType)]: 'error',
+0|dovalina |   [Symbol(kError)]: AggregateError [ECONNREFUSED]: 
+0|dovalina |       at internalConnectMultiple (node:net:1122:18)
+0|dovalina |       at afterConnectMultiple (node:net:1689:7) {
+0|dovalina |     code: 'ECONNREFUSED',
+0|dovalina |     [errors]: [ [Error], [Error] ]
+0|dovalina |   },
+0|dovalina |   [Symbol(kMessage)]: ''
+0|dovalina | }
+
+0|dovalina  | 3:22:01 AM [express] serving on port 5000
+
