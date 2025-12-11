@@ -606,7 +606,7 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-start">
                   <MapPin className="h-5 w-5 mr-3 mt-0.5 text-secondary flex-shrink-0" />
-                  <span>3731 Aster Drive<br />Charlotte, NC 28227</span>
+                  <span>Charlotte & Surrounding Areas</span>
                 </li>
                 <li className="flex items-center">
                   <Clock className="h-5 w-5 mr-3 text-secondary" />
