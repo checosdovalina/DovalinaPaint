@@ -57,7 +57,7 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Dashboard", path: "/dashboard", icon: <Home className="w-5 h-5" /> },
     { name: "Clients & Prospects", path: "/dashboard/clients", icon: <Users className="w-5 h-5" /> },
     // { name: "Quotes", path: "/dashboard/quotes", icon: <FileText className="w-5 h-5" /> },
-    // { name: "Simple Quotes", path: "/dashboard/simple-quotes", icon: <FileText className="w-5 h-5" /> },
+    { name: "Simple Quotes", path: "/dashboard/simple-quotes", icon: <FileText className="w-5 h-5" /> },
     { name: "Service Orders", path: "/dashboard/service-orders", icon: <Clipboard className="w-5 h-5" /> },
     { name: "Project Management", path: "/dashboard/projects", icon: <Network className="w-5 h-5" /> },
     { name: "Calendar", path: "/dashboard/calendar", icon: <Calendar className="w-5 h-5" /> },
