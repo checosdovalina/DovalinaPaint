@@ -301,7 +301,7 @@ export function ServiceOrderDetail({
       
       // Email
       yPos += 5;
-      pdf.text("d-dovalina@hotmail.com", leftMargin, yPos);
+      pdf.text("contact@dovalinapropainters.com", leftMargin, yPos);
       
       // Add horizontal line separator
       yPos += 10;
@@ -1010,7 +1010,7 @@ export function ServiceOrderDetail({
               <p>3731 Aster Drive</p>
               <p>Charlotte, N.C. 28227</p>
               <p>704-606-7001</p>
-              <p>d-dovalina@hotmail.com</p>
+              <p>contact@dovalinapropainters.com</p>
             </div>
             <div className="text-right service-order-info">
               <h2 className="text-xl font-semibold">Service Order #{serviceOrder.id}</h2>

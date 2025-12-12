@@ -599,9 +599,9 @@ export default function LandingPage() {
                   </a>
                 </li>
                 <li>
-                  <a href="mailto:d-dovalina@hotmail.com" className="flex items-center hover:text-secondary transition-colors">
+                  <a href="mailto:contact@dovalinapropainters.com" className="flex items-center hover:text-secondary transition-colors">
                     <Mail className="h-5 w-5 mr-3 text-secondary" />
-                    d-dovalina@hotmail.com
+                    contact@dovalinapropainters.com
                   </a>
                 </li>
                 <li className="flex items-start">

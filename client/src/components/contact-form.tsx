@@ -70,7 +70,7 @@ export function ContactForm() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">Phone</p>
-                      <p className="text-gray-600">(555) 123-4567</p>
+                      <p className="text-gray-600">704-606-7001</p>
                     </div>
                   </div>
                   
@@ -80,7 +80,7 @@ export function ContactForm() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">Email</p>
-                      <p className="text-gray-600">info@dovalinapainting.com</p>
+                      <p className="text-gray-600">contact@dovalinapropainters.com</p>
                     </div>
                   </div>
                 </div>
