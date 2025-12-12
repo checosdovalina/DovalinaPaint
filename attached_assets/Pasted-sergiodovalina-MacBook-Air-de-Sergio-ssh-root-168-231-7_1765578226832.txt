@@ -1,0 +1,77 @@
+sergiodovalina@MacBook-Air-de-Sergio ~ % ssh root@168.231.74.168
+root@168.231.74.168's password: 
+Linux srv1187030 6.12.57+deb13-cloud-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.57-1 (2025-11-05) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Thu Dec 11 03:21:25 2025 from 177.241.173.96
+-bash: warning: setlocale: LC_CTYPE: cannot change locale (UTF-8): No such file or directory
+-bash: warning: setlocale: LC_CTYPE: cannot change locale (UTF-8): No such file or directory
+root@srv1187030:~# cd /home/dovalina/app
+root@srv1187030:/home/dovalina/app# # Instalar certbot
+sudo apt update
+sudo apt install certbot python3-certbot-nginx -y
+
+# Abrir puerto 443 en firewall
+sudo ufw allow 443
+
+# Obtener certificado SSL
+sudo certbot --nginx -d dovalinapropainters.com -d www.dovalinapropainters.com
+Get:1 file:/etc/apt/mirrors/debian.list Mirrorlist [30 B]
+Get:2 file:/etc/apt/mirrors/debian-security.list Mirrorlist [39 B]
+Hit:3 https://deb.debian.org/debian trixie InRelease
+Get:4 https://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+Get:5 https://deb.debian.org/debian trixie-backports InRelease [54.0 kB]
+Get:6 https://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+Get:7 https://deb.debian.org/debian trixie-backports/main Sources.diff/Index [63.3 kB]
+Get:8 https://deb.debian.org/debian trixie-backports/main amd64 Packages.diff/Index [63.3 kB]
+Hit:11 https://deb.nodesource.com/node_20.x nodistro InRelease
+Get:12 https://deb.debian.org/debian trixie-backports/main Sources T-2025-12-12-2006.24-F-2025-12-12-0207.27.pdiff [2,273 B]
+Get:12 https://deb.debian.org/debian trixie-backports/main Sources T-2025-12-12-2006.24-F-2025-12-12-0207.27.pdiff [2,273 B]
+Get:13 https://deb.debian.org/debian trixie-backports/main amd64 Packages T-2025-12-12-2006.24-F-2025-12-12-0207.27.pdiff [793 B]
+Get:13 https://deb.debian.org/debian trixie-backports/main amd64 Packages T-2025-12-12-2006.24-F-2025-12-12-0207.27.pdiff [793 B]
+Get:9 https://deb.debian.org/debian-security trixie-security/main Sources [112 kB]
+Get:10 https://deb.debian.org/debian-security trixie-security/main amd64 Packages [82.1 kB]
+Fetched 468 kB in 0s (1,093 kB/s)
+All packages are up to date.    
+Warning: https://deb.nodesource.com/node_20.x/dists/nodistro/InRelease: Policy will reject signature within a year, see --audit for details
+certbot is already the newest version (4.0.0-2).
+python3-certbot-nginx is already the newest version (4.0.0-2).
+Summary:
+  Upgrading: 0, Installing: 0, Removing: 0, Not Upgrading: 0
+sudo: ufw: command not found
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Enter email address or hit Enter to skip.
+ (Enter 'c' to cancel): 
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Please read the Terms of Service at:
+https://letsencrypt.org/documents/LE-SA-v1.6-August-18-2025.pdf
+You must agree in order to register with the ACME server. Do you agree?
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+(Y)es/(N)o: y
+Account registered.
+Requesting a certificate for dovalinapropainters.com and www.dovalinapropainters.com
+
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/dovalinapropainters.com/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/dovalinapropainters.com/privkey.pem
+This certificate expires on 2026-03-12.
+These files will be updated when the certificate renews.
+Certbot has set up a scheduled task to automatically renew this certificate in the background.
+
+Deploying certificate
+Successfully deployed certificate for dovalinapropainters.com to /etc/nginx/sites-enabled/dovalina
+Successfully deployed certificate for www.dovalinapropainters.com to /etc/nginx/sites-enabled/dovalina
+Congratulations! You have successfully enabled HTTPS on https://dovalinapropainters.com and https://www.dovalinapropainters.com
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+If you like Certbot, please consider supporting our work by:
+ * Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+ * Donating to EFF:                    https://eff.org/donate-le
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+root@srv1187030:/home/dovalina/app# 
