@@ -28,9 +28,11 @@ import {
   Clock,
   Users,
   Palette,
-  Shield
+  Shield,
+  Trash2
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,6 +40,15 @@ import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Schema for Google Calendar settings
 const googleCalendarSchema = z.object({
@@ -69,8 +80,10 @@ type GeneralSettings = z.infer<typeof generalSettingsSchema>;
 
 export default function SettingsPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connected' | 'error'>('disconnected');
+  const [showResetConfirmation, setShowResetConfirmation] = useState(false);
 
   // Google Calendar form
   const googleCalendarForm = useForm<GoogleCalendarSettings>({
@@ -210,6 +223,30 @@ export default function SettingsPage() {
     },
   });
 
+  // Reset database mutation
+  const resetDatabaseMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/admin/reset-database", {});
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      setShowResetConfirmation(false);
+      toast({
+        title: "Database Reset Successful",
+        description: data.message,
+      });
+      // Optionally refresh data after reset
+      queryClient.invalidateQueries();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Reset Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const onGoogleCalendarSubmit = (data: GoogleCalendarSettings) => {
     setIsConnecting(true);
     connectGoogleCalendarMutation.mutate(data);
@@ -266,7 +303,7 @@ export default function SettingsPage() {
 
       <div className="space-y-6">
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className={`grid w-full ${user?.role === "superadmin" ? "grid-cols-5" : "grid-cols-4"}`}>
             <TabsTrigger value="general" className="flex items-center gap-2">
               <SettingsIcon className="w-4 h-4" />
               General
@@ -283,6 +320,12 @@ export default function SettingsPage() {
               <Shield className="w-4 h-4" />
               Security
             </TabsTrigger>
+            {user?.role === "superadmin" && (
+              <TabsTrigger value="admin" className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Administration
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* General Settings Tab */}
@@ -792,7 +835,74 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Administration Tab (only for superadmin) */}
+          {user?.role === "superadmin" && (
+            <TabsContent value="admin" className="space-y-6">
+              <Card className="border-red-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-red-600">
+                    <Trash2 className="w-5 h-5" />
+                    Database Management
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Dangerous operations that affect the entire system. Use with caution.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <h4 className="font-medium text-red-900 mb-2">Reset Database</h4>
+                    <p className="text-sm text-red-800 mb-4">
+                      This will delete all data (clients, projects, quotes, invoices, etc.) from the database. 
+                      User accounts will be preserved. This action cannot be undone.
+                    </p>
+                    <Button 
+                      variant="destructive"
+                      onClick={() => setShowResetConfirmation(true)}
+                      disabled={resetDatabaseMutation.isPending}
+                      className="w-full md:w-auto"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      {resetDatabaseMutation.isPending ? "Resetting..." : "Reset Database"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
+
+        {/* Reset Confirmation Dialog */}
+        <AlertDialog open={showResetConfirmation} onOpenChange={setShowResetConfirmation}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-red-600">Confirm Database Reset</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2 mt-4">
+                <p>Are you absolutely sure you want to reset the database?</p>
+                <p className="font-medium text-red-600">
+                  This will permanently delete:
+                </p>
+                <ul className="text-sm list-disc list-inside text-red-600 space-y-1">
+                  <li>All clients and prospects</li>
+                  <li>All projects and quotes</li>
+                  <li>All invoices and payments</li>
+                  <li>All service orders and activities</li>
+                  <li>All other business data</li>
+                </ul>
+                <p className="font-medium text-green-600 mt-2">User accounts will be preserved.</p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="flex gap-4 justify-end mt-4">
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => resetDatabaseMutation.mutate()}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Reset Database
+              </AlertDialogAction>
+            </div>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );
