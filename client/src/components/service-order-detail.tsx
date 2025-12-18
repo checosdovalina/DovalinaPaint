@@ -288,7 +288,7 @@ export function ServiceOrderDetail({
       
       // Phone
       yPos += 5;
-      pdf.text("704-606-7001", leftMargin, yPos);
+      pdf.text("704-506-9741", leftMargin, yPos);
       
       // Due date
       pdf.text(`Due Date: ${serviceOrder.dueDate 
@@ -1009,7 +1009,7 @@ export function ServiceOrderDetail({
               <h1 className="text-2xl font-bold company-name">DOVALINA PRO PAINTERS</h1>
               <p>3731 Aster Drive</p>
               <p>Charlotte, N.C. 28227</p>
-              <p>704-606-7001</p>
+              <p>704-506-9741</p>
               <p>contact@dovalinapropainters.com</p>
             </div>
             <div className="text-right service-order-info">

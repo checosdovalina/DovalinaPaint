@@ -294,7 +294,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       pdf.setFont("helvetica", "normal");
       pdf.text("3731 Aster Drive", margin + 22, yPosition + 11);
       pdf.text("Charlotte, N.C. 28227", margin + 22, yPosition + 15);
-      pdf.text("704-606-7001", margin + 22, yPosition + 19);
+      pdf.text("704-506-9741", margin + 22, yPosition + 19);
       pdf.text("contact@dovalinapropainters.com", margin + 22, yPosition + 23);
 
       // Quote number and details (right aligned)
@@ -709,7 +709,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
                   <div className="mt-2 text-sm text-gray-600 space-y-1">
                     <p>3731 Aster Drive</p>
                     <p>Charlotte, N.C. 28227</p>
-                    <p>704-606-7001</p>
+                    <p>704-506-9741</p>
                     <p>contact@dovalinapropainters.com</p>
                   </div>
                 </div>

@@ -138,10 +138,10 @@ export default function LandingPage() {
       {/* Top Header Bar */}
       <div className="bg-white border-b py-3 hidden md:block">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <a href="tel:7046067001" className="flex items-center text-primary font-semibold hover:text-secondary transition-colors" data-testid="link-phone-header">
+          <a href="tel:7045069741" className="flex items-center text-primary font-semibold hover:text-secondary transition-colors" data-testid="link-phone-header">
             <Phone className="h-5 w-5 mr-2" />
             <span className="text-sm">CALL / TEXT</span>
-            <span className="ml-2 text-lg">704-606-7001</span>
+            <span className="ml-2 text-lg">704-506-9741</span>
           </a>
           
           <div className="h-20 flex items-center justify-center">
@@ -229,7 +229,7 @@ export default function LandingPage() {
               />
             </div>
             <div className="flex items-center space-x-2">
-              <a href="tel:7046067001">
+              <a href="tel:7045069741">
                 <Button size="sm" className="bg-secondary text-primary hover:bg-secondary/90" data-testid="mobile-phone">
                   <Phone className="h-4 w-4" />
                 </Button>
@@ -294,14 +294,14 @@ export default function LandingPage() {
             <p className="text-white/90 text-lg md:text-xl mb-8">
               Proudly Serving Charlotte, Matthews, Mint Hill, Ballantyne, NC, and the Surrounding North Carolina Suburbs
             </p>
-            <a href="tel:7046067001">
+            <a href="tel:7045069741">
               <Button 
                 size="lg" 
                 className="bg-secondary hover:bg-secondary/90 text-primary font-bold px-8 py-6 text-lg shadow-lg"
                 data-testid="hero-call-button"
               >
                 <Phone className="h-5 w-5 mr-2" />
-                Call Now! 704-606-7001
+                Call Now! 704-506-9741
               </Button>
             </a>
           </div>
@@ -542,7 +542,7 @@ export default function LandingPage() {
               </p>
               <p className="text-white/90 mb-8">
                 We serve the Greater Charlotte Area and the surrounding suburbs. Call us today at{" "}
-                <a href="tel:7046067001" className="text-secondary font-bold hover:underline">704-606-7001</a>
+                <a href="tel:7045069741" className="text-secondary font-bold hover:underline">704-506-9741</a>
                 {" "}or schedule online!
               </p>
               
@@ -593,9 +593,9 @@ export default function LandingPage() {
               <h4 className="text-lg font-bold mb-6 text-white uppercase">Contact Information</h4>
               <ul className="space-y-4 text-gray-400">
                 <li>
-                  <a href="tel:7046067001" className="flex items-center hover:text-secondary transition-colors">
+                  <a href="tel:7045069741" className="flex items-center hover:text-secondary transition-colors">
                     <Phone className="h-5 w-5 mr-3 text-secondary" />
-                    704-606-7001
+                    704-506-9741
                   </a>
                 </li>
                 <li>
