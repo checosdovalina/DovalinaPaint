@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
 import { google } from 'googleapis';
-import { insertClientSchema, insertProjectSchema, insertQuoteSchema, insertServiceOrderSchema, insertStaffSchema, insertActivitySchema, insertSubcontractorSchema, insertInvoiceSchema, insertSupplierSchema, insertPaymentSchema, insertPurchaseOrderSchema, insertPurchaseOrderItemSchema, insertSettingsSchema } from "@shared/schema";
+import { insertClientSchema, insertProjectSchema, insertQuoteSchema, insertServiceOrderSchema, insertStaffSchema, insertActivitySchema, insertSubcontractorSchema, insertInvoiceSchema, insertSupplierSchema, insertPaymentSchema, insertPurchaseOrderSchema, insertPurchaseOrderItemSchema, insertSettingsSchema, insertLeadSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -2461,6 +2461,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "General settings saved successfully",
         settings: generalSettings 
       });
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  // Lead routes (public - no auth required for creating leads from contact form)
+  app.post("/api/leads", async (req, res) => {
+    try {
+      const leadData = insertLeadSchema.parse(req.body);
+      const lead = await storage.createLead(leadData);
+      res.status(201).json(lead);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid lead data", errors: error.errors });
+      }
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  // Protected lead routes (for management dashboard)
+  app.get("/api/leads", isAuthenticated, async (req, res) => {
+    try {
+      const leads = await storage.getLeads();
+      res.json(leads);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.get("/api/leads/:id", isAuthenticated, async (req, res) => {
+    try {
+      const lead = await storage.getLead(parseInt(req.params.id));
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      res.json(lead);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.put("/api/leads/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const leadData = insertLeadSchema.partial().parse(req.body);
+      const updatedLead = await storage.updateLead(id, leadData);
+      
+      if (!updatedLead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      res.json(updatedLead);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid lead data", errors: error.errors });
+      }
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.delete("/api/leads/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteLead(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      res.json({ message: "Lead deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
     }
