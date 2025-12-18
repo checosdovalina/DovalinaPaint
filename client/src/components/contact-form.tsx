@@ -21,21 +21,48 @@ export function ContactForm() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          serviceType: formData.service || null,
+          message: formData.message || null,
+          source: "website_contact_form",
+          status: "new",
+        }),
+      });
 
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for your interest. We'll contact you within 24 hours.",
-    });
+      if (!response.ok) {
+        throw new Error("Failed to submit form");
+      }
 
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      service: "",
-      message: ""
-    });
-    setIsSubmitting(false);
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for your interest. We'll contact you within 24 hours.",
+      });
+
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        service: "",
+        message: ""
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "There was a problem sending your message. Please try again or call us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
