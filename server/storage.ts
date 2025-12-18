@@ -130,6 +130,9 @@ export interface IStorage {
   updateLead(id: number, lead: Partial<InsertLead>): Promise<Lead | undefined>;
   deleteLead(id: number): Promise<boolean>;
   
+  // Admin methods
+  resetDatabase(): Promise<{ success: boolean; message: string }>;
+  
   // Session store
   sessionStore: any;
 }
@@ -1344,6 +1347,36 @@ export class DatabaseStorage implements IStorage {
       return false;
     }
   }
+
+  async resetDatabase(): Promise<{ success: boolean; message: string }> {
+    try {
+      // Delete all data from all tables EXCEPT users
+      await db.delete(leads);
+      await db.delete(activities);
+      await db.delete(purchaseOrderItems);
+      await db.delete(purchaseOrders);
+      await db.delete(payments);
+      await db.delete(invoices);
+      await db.delete(serviceOrders);
+      await db.delete(quotes);
+      await db.delete(projects);
+      await db.delete(staff);
+      await db.delete(subcontractors);
+      await db.delete(clients);
+      await db.delete(settings);
+      
+      return { 
+        success: true, 
+        message: "Base de datos reseteada exitosamente. Todos los usuarios se han preservado." 
+      };
+    } catch (error) {
+      console.error("Error resetting database:", error);
+      return { 
+        success: false, 
+        message: `Error al resetear la base de datos: ${error.message}` 
+      };
+    }
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -1487,6 +1520,11 @@ export class MemStorage implements IStorage {
   async createLead(lead: InsertLead): Promise<Lead> { throw new Error("Not implemented"); }
   async updateLead(id: number, lead: Partial<InsertLead>): Promise<Lead | undefined> { return undefined; }
   async deleteLead(id: number): Promise<boolean> { return false; }
+  
+  // Admin methods
+  async resetDatabase(): Promise<{ success: boolean; message: string }> {
+    return { success: false, message: "Not implemented" };
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -2536,6 +2536,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin routes
+  app.post("/api/admin/reset-database", isAuthenticated, async (req, res) => {
+    try {
+      // Only superadmin can reset database
+      if (req.user.role !== "superadmin") {
+        return res.status(403).json({ message: "Only superadmin can perform this action" });
+      }
+
+      const result = await storage.resetDatabase();
+      
+      if (result.success) {
+        res.json({ 
+          message: result.message,
+          success: true
+        });
+      } else {
+        res.status(500).json({ 
+          message: result.message,
+          success: false
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ 
+        message: (error as Error).message,
+        success: false
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
