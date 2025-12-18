@@ -829,6 +829,32 @@ export const insertSettingsSchema = createInsertSchema(settings).omit({
 export type Setting = typeof settings.$inferSelect;
 export type InsertSetting = z.infer<typeof insertSettingsSchema>;
 
+// Leads schema (contact form submissions from landing page)
+export const leads = pgTable("leads", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  service: text("service"),
+  message: text("message"),
+  status: text("status").notNull().default("new"), // new, contacted, converted, archived
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  notes: text("notes"),
+});
+
+export const insertLeadSchema = createInsertSchema(leads).pick({
+  name: true,
+  email: true,
+  phone: true,
+  service: true,
+  message: true,
+  status: true,
+  notes: true,
+});
+
+export type Lead = typeof leads.$inferSelect;
+export type InsertLead = z.infer<typeof insertLeadSchema>;
+
 // Session schema (para manejar las sesiones de connect-pg-simple)
 export const session = pgTable("session", {
   sid: varchar("sid").primaryKey(),
