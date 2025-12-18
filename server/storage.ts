@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice, suppliers, Supplier, InsertSupplier, payments, Payment, InsertPayment, purchaseOrders, PurchaseOrder, InsertPurchaseOrder, purchaseOrderItems, PurchaseOrderItem, InsertPurchaseOrderItem, extendedInsertPurchaseOrderItemSchema, settings, Setting, InsertSetting } from "@shared/schema";
+import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice, suppliers, Supplier, InsertSupplier, payments, Payment, InsertPayment, purchaseOrders, PurchaseOrder, InsertPurchaseOrder, purchaseOrderItems, PurchaseOrderItem, InsertPurchaseOrderItem, extendedInsertPurchaseOrderItemSchema, settings, Setting, InsertSetting, leads, Lead, InsertLead } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { db } from "./db";
@@ -121,6 +121,14 @@ export interface IStorage {
   createSetting(setting: InsertSetting): Promise<Setting>;
   updateSetting(key: string, value: any): Promise<Setting | undefined>;
   deleteSetting(key: string): Promise<boolean>;
+  
+  // Lead methods
+  getLeads(): Promise<Lead[]>;
+  getLead(id: number): Promise<Lead | undefined>;
+  getLeadsByStatus(status: string): Promise<Lead[]>;
+  createLead(lead: InsertLead): Promise<Lead>;
+  updateLead(id: number, lead: Partial<InsertLead>): Promise<Lead | undefined>;
+  deleteLead(id: number): Promise<boolean>;
   
   // Session store
   sessionStore: any;
@@ -1277,6 +1285,65 @@ export class DatabaseStorage implements IStorage {
       return false;
     }
   }
+
+  // Lead methods
+  async getLeads(): Promise<Lead[]> {
+    try {
+      return await db.select().from(leads).orderBy(desc(leads.createdAt));
+    } catch (error) {
+      console.error("Error fetching leads:", error);
+      return [];
+    }
+  }
+
+  async getLead(id: number): Promise<Lead | undefined> {
+    try {
+      const [lead] = await db.select().from(leads).where(eq(leads.id, id));
+      return lead || undefined;
+    } catch (error) {
+      console.error("Error fetching lead:", error);
+      return undefined;
+    }
+  }
+
+  async getLeadsByStatus(status: string): Promise<Lead[]> {
+    try {
+      return await db.select().from(leads).where(eq(leads.status, status)).orderBy(desc(leads.createdAt));
+    } catch (error) {
+      console.error("Error fetching leads by status:", error);
+      return [];
+    }
+  }
+
+  async createLead(lead: InsertLead): Promise<Lead> {
+    try {
+      const [newLead] = await db.insert(leads).values(lead).returning();
+      return newLead;
+    } catch (error) {
+      console.error("Error creating lead:", error);
+      throw error;
+    }
+  }
+
+  async updateLead(id: number, lead: Partial<InsertLead>): Promise<Lead | undefined> {
+    try {
+      const [updatedLead] = await db.update(leads).set(lead).where(eq(leads.id, id)).returning();
+      return updatedLead || undefined;
+    } catch (error) {
+      console.error("Error updating lead:", error);
+      return undefined;
+    }
+  }
+
+  async deleteLead(id: number): Promise<boolean> {
+    try {
+      await db.delete(leads).where(eq(leads.id, id));
+      return true;
+    } catch (error) {
+      console.error("Error deleting lead:", error);
+      return false;
+    }
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -1405,6 +1472,21 @@ export class MemStorage implements IStorage {
   async createPurchaseOrderItem(item: InsertPurchaseOrderItem): Promise<PurchaseOrderItem> { throw new Error("Not implemented"); }
   async updatePurchaseOrderItem(id: number, item: Partial<InsertPurchaseOrderItem>): Promise<PurchaseOrderItem | undefined> { return undefined; }
   async deletePurchaseOrderItem(id: number): Promise<boolean> { return false; }
+  
+  // Settings methods
+  async getSettings(): Promise<Setting[]> { return []; }
+  async getSetting(key: string): Promise<Setting | undefined> { return undefined; }
+  async createSetting(setting: InsertSetting): Promise<Setting> { throw new Error("Not implemented"); }
+  async updateSetting(key: string, value: any): Promise<Setting | undefined> { return undefined; }
+  async deleteSetting(key: string): Promise<boolean> { return false; }
+  
+  // Lead methods
+  async getLeads(): Promise<Lead[]> { return []; }
+  async getLead(id: number): Promise<Lead | undefined> { return undefined; }
+  async getLeadsByStatus(status: string): Promise<Lead[]> { return []; }
+  async createLead(lead: InsertLead): Promise<Lead> { throw new Error("Not implemented"); }
+  async updateLead(id: number, lead: Partial<InsertLead>): Promise<Lead | undefined> { return undefined; }
+  async deleteLead(id: number): Promise<boolean> { return false; }
 }
 
 export const storage = new DatabaseStorage();
