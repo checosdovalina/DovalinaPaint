@@ -1351,17 +1351,19 @@ export class DatabaseStorage implements IStorage {
   async resetDatabase(): Promise<{ success: boolean; message: string }> {
     try {
       // Delete all data from all tables EXCEPT users
+      // Order matters due to foreign key constraints - delete child tables first
+      await db.delete(purchaseOrderItems);  // References purchaseOrders
+      await db.delete(payments);             // References projects
+      await db.delete(invoices);             // References projects
+      await db.delete(serviceOrders);        // References projects
+      await db.delete(quotes);               // References projects
+      await db.delete(purchaseOrders);       // References projects
+      await db.delete(activities);           // References projects and clients
+      await db.delete(projects);             // References clients
       await db.delete(leads);
-      await db.delete(activities);
-      await db.delete(purchaseOrderItems);
-      await db.delete(purchaseOrders);
-      await db.delete(payments);
-      await db.delete(invoices);
-      await db.delete(serviceOrders);
-      await db.delete(quotes);
-      await db.delete(projects);
       await db.delete(staff);
       await db.delete(subcontractors);
+      await db.delete(suppliers);
       await db.delete(clients);
       await db.delete(settings);
       
@@ -1371,9 +1373,10 @@ export class DatabaseStorage implements IStorage {
       };
     } catch (error) {
       console.error("Error resetting database:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       return { 
         success: false, 
-        message: `Error al resetear la base de datos: ${error.message}` 
+        message: `Error al resetear la base de datos: ${errorMessage}` 
       };
     }
   }
