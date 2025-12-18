@@ -31,9 +31,8 @@ export function ContactForm() {
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
-          serviceType: formData.service || null,
+          service: formData.service || null,
           message: formData.message || null,
-          source: "website_contact_form",
           status: "new",
         }),
       });

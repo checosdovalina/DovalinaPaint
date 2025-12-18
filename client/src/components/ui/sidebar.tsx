@@ -20,7 +20,8 @@ import {
   DollarSign,
   TrendingUp,
   PackageOpen,
-  ShoppingBag
+  ShoppingBag,
+  MessageSquarePlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -55,6 +56,7 @@ export function Sidebar({ className }: SidebarProps) {
   
   const navLinks = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="w-5 h-5" /> },
+    { name: "Leads", path: "/dashboard/leads", icon: <MessageSquarePlus className="w-5 h-5" /> },
     { name: "Clients & Prospects", path: "/dashboard/clients", icon: <Users className="w-5 h-5" /> },
     // { name: "Quotes", path: "/dashboard/quotes", icon: <FileText className="w-5 h-5" /> },
     { name: "Simple Quotes", path: "/dashboard/simple-quotes", icon: <FileText className="w-5 h-5" /> },

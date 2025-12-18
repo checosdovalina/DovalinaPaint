@@ -24,6 +24,7 @@ import Suppliers from "@/pages/suppliers";
 import PurchaseOrders from "@/pages/purchase-orders";
 import SimpleQuotes from "@/pages/simple-quotes";
 import Settings from "@/pages/settings";
+import Leads from "@/pages/leads";
 
 function Router() {
   return (
@@ -47,6 +48,7 @@ function Router() {
       <ProtectedRoute path="/dashboard/financial-reports" component={FinancialReports} />
       <ProtectedRoute path="/dashboard/reports" component={Reports} />
       <ProtectedRoute path="/dashboard/settings" component={Settings} />
+      <ProtectedRoute path="/dashboard/leads" component={Leads} />
       <Route component={NotFound} />
     </Switch>
   );
