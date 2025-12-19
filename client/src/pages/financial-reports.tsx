@@ -200,7 +200,7 @@ export default function FinancialReportsPage() {
   return (
     <Layout title="Financial Reports">
       <Helmet>
-        <title>Financial Reports | Dovalina Pro Painters</title>
+        <title>Financial Reports | Dovalina Pro Painters LLC</title>
       </Helmet>
       
       <div className="container mx-auto py-6 space-y-6">

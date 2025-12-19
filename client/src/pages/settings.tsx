@@ -293,7 +293,7 @@ export default function SettingsPage() {
   return (
     <Layout title="Settings">
       <Helmet>
-        <title>Settings - Dovalina Pro Painters</title>
+        <title>Settings - Dovalina Pro Painters LLC</title>
       </Helmet>
 
       <PageHeader

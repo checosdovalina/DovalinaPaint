@@ -67,7 +67,7 @@ export default function PaymentsPage() {
   return (
     <Layout title="Payment Management">
       <Helmet>
-        <title>Payments | Dovalina Pro Painters</title>
+        <title>Payments | Dovalina Pro Painters LLC</title>
       </Helmet>
 
       <div className="container mx-auto py-6 space-y-6">
